@@ -40,6 +40,7 @@ const buildSeatLayout = () => {
   return seatRows;
 };
 
+// Para impresión B/N: asientos ocupados = relleno negro + texto blanco, libres = borde sólido únicamente
 export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
@@ -47,35 +48,46 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
   const seatMap = buildSeatLayout();
 
   return (
-    <div className="flex flex-col items-center bg-white p-2 print:bg-white print:p-0 rounded-xl w-fit max-w-full">
-      <span className="block text-center text-[14px] print:text-xs font-bold mb-1">Croquis bus</span>
-      <div className="bg-gray-50 border border-gray-400 rounded-2xl shadow px-1 py-1 print:shadow-none print:border flex flex-col min-w-[210px] max-w-full">
+    <div className="flex flex-col items-center bg-white p-1 print:bg-white print:p-0 rounded-xl w-fit max-w-full">
+      <span className="block text-center text-[12px] print:text-[10px] font-bold mb-0.5">
+        Croquis bus
+      </span>
+      <div className="bg-white border border-black rounded-lg px-1 py-1 print:shadow-none print:border flex flex-col"
+        style={{ minWidth: 180, maxWidth: "100%" }}
+      >
         <div
-          className="flex flex-col gap-[1.6px] print:gap-[0.9px]"
+          className="flex flex-col gap-[1px] print:gap-[1px]"
           style={{
-            width: "195px",
-            minWidth: "195px",
+            width: "164px",
+            minWidth: "164px",
             maxWidth: "100%",
-            background: "#f8fafc"
+            background: "#fff"
           }}
         >
           {seatMap.map((row, rowIdx) => (
-            <div key={rowIdx} className="flex flex-row gap-[1.6px] print:gap-[0.9px]">
+            <div key={rowIdx} className="flex flex-row gap-[1px] print:gap-[1px]">
               {row.every(s => s === null) ? (
-                <div className="h-4 w-full" aria-label="Pasillo / puerta trasera" />
+                <div className="h-3 w-full" aria-label="Pasillo / puerta trasera" />
               ) : (
                 row.map((seat, colIdx) =>
                   seat === null ? (
-                    <div key={colIdx} className="w-4 print:w-3" />
+                    <div key={colIdx} className="w-3 print:w-2" />
                   ) : (
                     <div
                       key={seat}
                       className={cn(
-                        "w-7 h-7 print:w-5 print:h-5 rounded-[6px] flex items-center justify-center font-semibold border text-[11px] print:text-[9px]",
+                        "w-5 h-5 print:w-4 print:h-4 rounded-[2px] flex items-center justify-center font-bold border border-black text-[10px] print:text-[8px] box-content",
                         getPassengerBySeat(seat)
-                          ? "bg-red-400/90 text-white border-red-500 shadow"
-                          : "bg-green-50 text-red-500"
+                          ? "bg-black text-white border-2 border-black"
+                          : "bg-white text-black border-2 border-black"
                       )}
+                      style={{
+                        // Para B/N, si ocupado le ponemos una trama visual extra
+                        background:
+                          getPassengerBySeat(seat)
+                            ? "repeating-linear-gradient(-45deg, #222 0 2px, #fff 2px 4px)"
+                            : "none"
+                      }}
                     >
                       {seat}
                     </div>
@@ -85,11 +97,21 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
             </div>
           ))}
         </div>
-        <div className="mt-1 flex flex-row justify-center gap-2 w-full print:text-[8px]">
-          <div className="w-3 h-3 bg-green-50 border border-green-500 rounded-sm" />
-          <span className="text-[9px]">Libre</span>
-          <div className="mx-1 w-3 h-3 bg-red-400 border border-red-500 rounded-sm" />
-          <span className="text-[9px]">Ocup.</span>
+        <div className="mt-0.5 flex flex-row justify-center gap-2 w-full print:text-[8px]">
+          <div
+            className="w-3 h-3 border border-black rounded-sm inline-block"
+            style={{
+              background: "none"
+            }}
+          />
+          <span className="text-[8px]">Libre</span>
+          <div
+            className="mx-1 w-3 h-3 border border-black rounded-sm inline-block"
+            style={{
+              background: "repeating-linear-gradient(-45deg, #222 0 2px, #fff 2px 4px)"
+            }}
+          />
+          <span className="text-[8px]">Ocup.</span>
         </div>
       </div>
     </div>
