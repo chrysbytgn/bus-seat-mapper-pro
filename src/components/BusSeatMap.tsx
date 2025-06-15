@@ -18,52 +18,48 @@ interface BusSeatMapProps {
 /**
  * Croquis de bus 55 plazas, todas las filas con la misma cantidad de columnas (=6),
  * para alinear verticalmente los asientos de izquierda a derecha:
- * Índices de columnas de todas las filas: [0, 1, 2, 3, 4, 5]
- * 
- * - Fila 0: Conductor(0), guía(1), null(2), null(3), null(4), Puerta Delantera(5)
- * - Fila 1: 1(0), 2(1), null(2), 3(3), 4(4), null(5)
- * - Filas 2-5: normales, [5,6,null,7,8,null], etc.
- * - Fila 6: 21(0), 22(1), null(2), null(3), null(4), PT(5)
- * - Filas 7-13: normales, [23,24,null,25,26,null], etc.
- * - Fila 14: null(0), 51(1), 52(2), 53(3), 54(4), 55(5)
+ *
+ * Columnas: [0, 1, 2, 3, 4, 5]
+ *
+ * - Filas 0 - 13: estructura idéntica de columna para mantener alineación vertical.
  */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
-  // Fila 0
+  // Fila 0: Conductor, espacio, pasillo, pasillo, espacio, puerta delantera (PD)
   seatRows.push([
-    "C",   // 0: conductor
-    null,  // 1: guía (espacio libre)
-    null,  // 2
-    null,  // 3
-    null,  // 4
-    "PD",  // 5: Puerta Delantera
+    "C",     // 0: Conductor
+    null,    // 1: Espacio para acompañante/guía
+    null,    // 2: Pasillo
+    null,    // 3: Pasillo
+    null,    // 4: Espacio
+    "PD",    // 5: Puerta Delantera
   ]);
-  // Fila 1
+  // Fila 1: 1 2 null 3 4 null
   seatRows.push([1, 2, null, 3, 4, null]);
-  // Filas 2-5
+  // Filas 2-5 (5-20): [izq, izq, pasillo, der, der, null]
   let currentSeat = 5;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
       currentSeat,        // 0
       currentSeat + 1,    // 1
-      null,               // 2: pasillo
+      null,               // 2: Pasillo
       currentSeat + 2,    // 3
       currentSeat + 3,    // 4
-      null                // 5: lateral
+      null,               // 5
     ]);
     currentSeat += 4;
   }
-  // Fila 6: 21 (0), 22 (1), null (2,3,4), PT (5)
+  // Fila 6: 21, 22, null, null, null, PT (puerta trasera)
   seatRows.push([
-    21,   // Está alineado con los otros asientos columna 0
-    22,   // Alineado con 2,6,10,14,18, etc.
-    null, // Pasillo central
-    null,
-    null,
-    "PT"
+    21,   // Debe alinearse con la columna 0 (debajo del 17, 13, etc)
+    22,   // Debe alinearse con la columna 1 (debajo del 18, 14, etc)
+    null, // Pasillo (columna 2)
+    null, // Pasillo (columna 3)
+    null, // Espacio (columna 4)
+    "PT", // Puerta Trasera (columna 5)
   ]);
+  // Filas 7-13 (23-50): estructura estándar
   currentSeat = 23;
-  // Filas 7-13: (23-50)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
       currentSeat,
@@ -71,18 +67,25 @@ const buildSeatLayout = () => {
       null,
       currentSeat + 2,
       currentSeat + 3,
-      null
+      null,
     ]);
     currentSeat += 4;
   }
-  // Fila final: null (0), 51 (1), 52 (2), 53 (3), 54 (4), 55 (5)
+  // Fila final (debe alinear perfectamente asientos detrás de las mismas columnas: 47,48,49,50, para 51-55)
+  // Los asientos 47,48,49,50 están en columnas 0,1,3,4 (columna 2 es pasillo)
+  // - null (col 0): sin asiento detrás de 47 (deja espacio)
+  // - 51 (col 1): detrás de 48
+  // - 52 (col 2): detrás del pasillo
+  // - 53 (col 3): detrás de 49
+  // - 54 (col 4): detrás de 50
+  // - 55 (col 5): alineado a la derecha junto a la puerta (tras 50)
   seatRows.push([
-    null, // Para que 51 quede detrás de 47 (columna 1)
-    51,   // Detrás de 47 (columna 1)
-    52,   // Detrás de 48 (columna 2)
-    53,   // Detrás de 49 (columna 3)
-    54,   // Detrás de 50 (columna 4)
-    55    // Detrás de 50/lateral derecho (columna 5, igual que el resto de filas)
+    null,   // col 0: detrás del 47 no hay asiento (espacio)
+    51,     // col 1: detrás de 48
+    52,     // col 2: detrás del pasillo (pero para ocupar espacio y que los demás asientos se alineen)
+    53,     // col 3: detrás de 49
+    54,     // col 4: detrás de 50
+    55      // col 5: extremo derecho, detrás del espacio derecho
   ]);
   return seatRows;
 };
