@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -25,7 +26,8 @@ export default function ExcursionSelector() {
   const [showAssocOptions, setShowAssocOptions] = useState(false);
 
   if (showAssocOptions) {
-    return <AssociationOptions />;
+    // Pasamos un callback para volver al listado principal
+    return <AssociationOptions onBack={() => setShowAssocOptions(false)} />;
   }
 
   const goToExcursion = (id: string) => {
@@ -91,3 +93,4 @@ export default function ExcursionSelector() {
     </div>
   );
 }
+
