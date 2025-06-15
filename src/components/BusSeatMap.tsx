@@ -20,12 +20,15 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
+  // Creamos el seatMap, pero modificando el orden para subir la fila de 21/22 una arriba (es decir, adelantar una fila).
   const seatMap: (number | null)[][] = [];
   let currentSeat = 1;
 
+  // Agregamos el croquis como antes, pero almacenando las filas en un arreglo temporal.
+  const seatRows: (number | null)[][] = [];
+
   for (let row = 0; row < 13; row++) {
     const seatsInRow: (number | null)[] = [];
-    // Izquierda
     for (let col = 0; col < 2; col++) {
       if (currentSeat <= 50) {
         seatsInRow.push(currentSeat++);
@@ -33,9 +36,7 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
         seatsInRow.push(null);
       }
     }
-    // Pasillo como null
     seatsInRow.push(null);
-    // Derecha
     for (let col = 0; col < 2; col++) {
       if (currentSeat <= 50) {
         seatsInRow.push(currentSeat++);
@@ -43,17 +44,29 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
         seatsInRow.push(null);
       }
     }
-    seatMap.push(seatsInRow);
+    seatRows.push(seatsInRow);
 
-    // Insertar SOLO detrás del 19/20 (que en el asiento count sería después de row==4, index 4 porque empieza en 0)
-    // Verificamos si los asientos de la fila actual incluyen 19 y 20
-    if (row === 4) { // Fila con 17,18,null,19,20
-      seatMap.push([null, null, null, null, null]); // Fila vacía como espacio/pasillo
+    if (row === 4) {
+      seatRows.push([null, null, null, null, null]); // Fila vacía como espacio/pasillo
     }
   }
 
-  // Fila final de 5 asientos juntos (51-55)
-  seatMap.push([51, 52, 53, 54, 55]);
+  // --- Cambiamos la fila de asientos 21-22 una posición arriba ---
+  // Ubicamos dónde están los asientos 21/22 (en la fila 6, considerando fila vacía después de la 5 e índice inicia en 0)
+  // Buscamos la fila que contiene el 21.
+  let idx21 = seatRows.findIndex((row) => row.includes(21));
+  if (idx21 > 0) {
+    // Intercambiamos esa fila con la anterior (para subirla una posición)
+    const tmp = seatRows[idx21 - 1];
+    seatRows[idx21 - 1] = seatRows[idx21];
+    seatRows[idx21] = tmp;
+  }
+
+  // Añadimos la fila final de 5 asientos juntos (51-55)
+  seatRows.push([51, 52, 53, 54, 55]);
+
+  // seatMap ahora es seatRows
+  const seatMap = seatRows;
 
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
 
@@ -142,3 +155,4 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
     </div>
   );
 }
+

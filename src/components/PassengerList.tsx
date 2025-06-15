@@ -1,4 +1,3 @@
-
 import { Passenger } from "./BusSeatMap";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -111,26 +110,26 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
         ref={printRef}
         className="hidden print:flex print:flex-row print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0"
       >
-        {/* Croquis lado izquierdo (miniatura compacta) */}
-        <div className="print:w-[25%] print:p-2 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
+        {/* Croquis lado izquierdo (miniatura mucho más pequeña para imprimir) */}
+        <div className="print:w-[15%] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
           <div
             id="croquis-bus-seatmap-print"
-            className="w-[110px] h-[140px] print:w-[110px] print:h-[140px] print:mx-auto print:my-2 print:scale-[0.85] print:overflow-hidden flex flex-col items-center"
+            className="w-[60px] h-[80px] print:w-[60px] print:h-[80px] print:mx-auto print:my-2 print:scale-[0.55] print:overflow-hidden flex flex-col items-center"
           >
-            <span className="block text-center text-lg print:text-xl font-bold">Croquis Bus</span>
+            <span className="block text-center text-[13px] print:text-xs font-bold mb-0">Croquis Bus</span>
             <div className="w-full h-full bg-gray-200 border-2 border-gray-400 rounded-xl flex flex-col items-center justify-center">
-              <Bus size={36} className="text-primary print:text-black" />
-              <span className="mt-1 text-xs font-medium print:text-lg text-gray-700">[croquis]</span>
+              <Bus size={18} className="text-primary print:text-black" />
+              <span className="mt-0.5 text-[9px] font-medium print:text-xs text-gray-700">[croquis]</span>
             </div>
           </div>
         </div>
         {/* Lista lado derecho */}
-        <div className="print:w-[75%] print:p-6 flex flex-col justify-start items-start">
+        <div className="print:w-[85%] print:p-5 flex flex-col justify-start items-start print:overflow-hidden">
           <div>
             <h2 className="text-4xl font-bold mb-2 print:text-5xl">{excursionTitle}</h2>
             <div className="text-2xl font-semibold mb-3 print:text-3xl">
-              {fecha && <span>Fecha: {fecha}{'  '}</span>}
-              {hora && <span>Hora: {hora}{'  '}</span>}
+              {fecha && <span>Fecha: {fecha}{"  "}</span>}
+              {hora && <span>Hora: {hora}{"  "}</span>}
               {lugar && <span>Salida: {lugar}</span>}
             </div>
           </div>
@@ -151,22 +150,20 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           }
           .print\\:hidden { display: none !important; }
           .print\\:flex { display: flex !important; }
-          .print\\:w-1\\/4, .print\\:w-25\\% { width: 25% !important; }
-          .print\\:w-3\\/4, .print\\:w-75\\% { width: 75% !important; }
-          .print\\:w-[25\\%] { width: 25% !important; }
-          .print\\:w-[75\\%] { width: 75% !important; }
-          .print\\:p-2 { padding: 0.6rem !important; }
-          .print\\:p-6 { padding: 2rem !important; }
+          .print\\:w-[15\\%] { width: 15% !important; }
+          .print\\:w-[85\\%] { width: 85% !important; }
+          .print\\:p-1 { padding: 0.25rem !important; }
+          .print\\:p-5 { padding: 1.5rem !important; }
           .print\\:border-r { border-right: 2px solid #ccc !important; }
           .print\\:items-stretch { align-items: stretch !important; }
           .print\\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
-          .print\\:scale-[0.85] { transform: scale(0.85); }
+          .print\\:scale-[0.55] { transform: scale(0.55); }
           .print\\:text-5xl { font-size: 3rem !important; }
           .print\\:text-4xl { font-size: 2.2rem !important; }
           .print\\:text-3xl { font-size: 1.5rem !important; }
           table, th, td {
-            font-size: 1.55em !important;
-            padding: 0.30em !important;
+            font-size: 1.6em !important;
+            padding: 0.35em !important;
             color: #111 !important;
           }
           th {
