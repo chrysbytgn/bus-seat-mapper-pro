@@ -38,16 +38,6 @@ export default function AssociationOptions() {
   return (
     <div className="flex min-h-screen justify-center items-center bg-background">
       <div className="bg-white border rounded-xl shadow px-7 py-8 w-full max-w-md relative">
-        {/* Botón volver atrás */}
-        <Button
-          variant="outline"
-          className="absolute top-4 left-4"
-          size="sm"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="mr-1" />
-          Volver atrás
-        </Button>
         <h2 className="text-2xl font-bold mb-5 text-center mt-2">Opciones de Asociación</h2>
         <form className="flex flex-col gap-4" onSubmit={handleSave}>
           <div>
@@ -73,6 +63,15 @@ export default function AssociationOptions() {
           </div>
           <div className="flex gap-2 justify-end mt-2">
             <Button type="submit">Guardar</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="mr-1" />
+              Volver atrás
+            </Button>
           </div>
         </form>
       </div>
