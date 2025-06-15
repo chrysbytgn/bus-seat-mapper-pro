@@ -46,16 +46,27 @@ const Index = () => {
       .then(data => {
         if (data) {
           let parsedStops: string[] = [];
-          if (Array.isArray(data.stops)) {
-            parsedStops = data.stops as string[];
-          } else if (typeof data.stops === "string") {
+          const stopsRaw = data.stops;
+
+          if (Array.isArray(stopsRaw)) {
+            // Correctly an array
+            parsedStops = stopsRaw.filter((v): v is string => typeof v === "string");
+          } else if (typeof stopsRaw === "string") {
             try {
-              const asParsed = JSON.parse(data.stops);
-              if (Array.isArray(asParsed)) parsedStops = asParsed;
-            } catch {}
-          } else if (data.stops && typeof data.stops === "object" && Array.isArray((data.stops as any))) {
-            parsedStops = data.stops as string[];
-          } // else leave as []
+              const asParsed = JSON.parse(stopsRaw);
+              if (Array.isArray(asParsed)) {
+                parsedStops = asParsed.filter((v: unknown): v is string => typeof v === "string");
+              } else if (asParsed && typeof asParsed === "object") {
+                // If object, get values as array of string
+                parsedStops = Object.values(asParsed).filter((v): v is string => typeof v === "string");
+              }
+            } catch {
+              // invalid JSON, ignore
+            }
+          } else if (stopsRaw && typeof stopsRaw === "object") {
+            // It's an object like {0: 'a', 1: 'b'}
+            parsedStops = Object.values(stopsRaw).filter((v): v is string => typeof v === "string");
+          }
           setExcursionInfo({
             id: Number(data.id),
             name: data.name,
