@@ -5,11 +5,28 @@ import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
 import { PassengerList } from "@/components/PassengerList";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
+const EXCURSIONS_KEY = "excursions";
 
 const Index = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [passengers, setPassengers] = useState<Passenger[]>([]);
+  const [excursionName, setExcursionName] = useState<string>("Excursión");
+
+  // Cargar nombre de la excursión
+  useEffect(() => {
+    if (!id) return;
+    const excursions = window.localStorage.getItem(EXCURSIONS_KEY);
+    if (excursions) {
+      try {
+        const arr = JSON.parse(excursions);
+        const found = arr.find((e: any) => e.id === id);
+        if (found && found.name) setExcursionName(found.name);
+      } catch (e) {
+        setExcursionName("Excursión");
+      }
+    }
+  }, [id]);
 
   // Load passengers by excursion id
   useEffect(() => {
@@ -49,6 +66,7 @@ const Index = () => {
           <BusSeatMap
             passengers={passengers}
             onSeatClick={handleAddOrEditPassenger}
+            excursionName={excursionName}
           />
         </section>
         <aside className="flex-1 min-w-[340px]">
