@@ -1,3 +1,4 @@
+
 import { Passenger } from "./BusSeatMap";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -64,6 +65,14 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
   const hora = excursionInfo?.time || "";
   const lugar = excursionInfo?.place || "";
 
+  // Datos de la asociación para mostrar en la impresión
+  const asociacion = {
+    nombre: "Asociación Cultural BusTour",
+    telefono: "123 456 789",
+    direccion: "Calle Mayor 123, Ciudad, País",
+    logo: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=120&q=80", // puedes cambiar esta url por la real
+  };
+
   return (
     <>
       {/* Vista normal */}
@@ -109,23 +118,45 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
       {/* IMPRESIÓN */}
       <div
         ref={printRef}
-        className="hidden print:flex print:flex-row print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0"
+        className="hidden print:flex print:flex-col print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0"
       >
-        {/* Croquis lado izquierdo en proporción más angosta */}
-        <div className="print:w-[30%] print:max-w-[28mm] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
-          <BusSeatMapPrint passengers={passengers} />
-        </div>
-        {/* Lista lado derecho (más ancho para tabla) */}
-        <div className="print:w-[70%] print:min-w-[140mm] print:p-4 flex flex-col justify-start items-start print:overflow-hidden">
-          <div>
-            <h2 className="text-3xl font-bold mb-1 print:text-4xl">{excursionTitle}</h2>
-            <div className="text-lg font-semibold mb-2 print:text-2xl">
-              {fecha && <span>Fecha: {fecha}{"  "}</span>}
-              {hora && <span>Hora: {hora}{"  "}</span>}
-              {lugar && <span>Salida: {lugar}</span>}
-            </div>
+        {/* Cabecera Asociación (solo impresión) */}
+        <div className="print:flex items-center gap-4 print:gap-5 pb-2 border-b border-gray-300 print:px-4 print:pt-3 print:pb-2 print:w-full">
+          <img
+            src={asociacion.logo}
+            alt="Logo Asociación"
+            className="h-14 w-14 object-cover rounded-full border border-gray-300 mr-3"
+            style={{ minWidth: 56 }}
+          />
+          <div className="flex flex-col">
+            <span className="text-2xl print:text-2xl font-bold text-primary mb-1">
+              {asociacion.nombre}
+            </span>
+            <span className="text-base print:text-base text-gray-800">
+              {asociacion.direccion}
+            </span>
+            <span className="text-base print:text-base text-gray-800">
+              Tel: {asociacion.telefono}
+            </span>
           </div>
-          <PasajerosTableImprimir passengers={passengers} />
+        </div>
+        <div className="print:flex print:flex-row print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0">
+          {/* Croquis lado izquierdo en proporción más angosta */}
+          <div className="print:w-[30%] print:max-w-[28mm] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
+            <BusSeatMapPrint passengers={passengers} />
+          </div>
+          {/* Lista lado derecho (más ancho para tabla) */}
+          <div className="print:w-[70%] print:min-w-[140mm] print:p-4 flex flex-col justify-start items-start print:overflow-hidden">
+            <div>
+              <h2 className="text-3xl font-bold mb-1 print:text-4xl">{excursionTitle}</h2>
+              <div className="text-lg font-semibold mb-2 print:text-2xl">
+                {fecha && <span>Fecha: {fecha}{"  "}</span>}
+                {hora && <span>Hora: {hora}{"  "}</span>}
+                {lugar && <span>Salida: {lugar}</span>}
+              </div>
+            </div>
+            <PasajerosTableImprimir passengers={passengers} />
+          </div>
         </div>
       </div>
       {/* Estilos para impresión ajustados a vertical */}
@@ -163,6 +194,15 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           }
           th {
             font-weight: bold;
+          }
+          /* Nueva cabecera para impresión */
+          .print\\:cabecera-asociacion {
+            display: flex !important;
+            align-items: center !important;
+            gap: 20px !important;
+            margin-bottom: 8px !important;
+            border-bottom: 1.5px solid #ccc !important;
+            padding-bottom: 8px !important;
           }
           @page {
             size: A4 portrait;
