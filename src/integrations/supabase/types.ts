@@ -9,7 +9,112 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      associations: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          logo: string | null
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          logo?: string | null
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          logo?: string | null
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      excursions: {
+        Row: {
+          association_id: string
+          created_at: string
+          date: string | null
+          id: number
+          name: string
+          place: string | null
+          price: string | null
+          stops: Json | null
+          time: string | null
+        }
+        Insert: {
+          association_id: string
+          created_at?: string
+          date?: string | null
+          id: number
+          name: string
+          place?: string | null
+          price?: string | null
+          stops?: Json | null
+          time?: string | null
+        }
+        Update: {
+          association_id?: string
+          created_at?: string
+          date?: string | null
+          id?: number
+          name?: string
+          place?: string | null
+          price?: string | null
+          stops?: Json | null
+          time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "excursions_association_id_fkey"
+            columns: ["association_id"]
+            isOneToOne: false
+            referencedRelation: "associations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      passengers: {
+        Row: {
+          created_at: string
+          excursion_id: number
+          id: number
+          name: string
+          seat: number
+          surname: string
+        }
+        Insert: {
+          created_at?: string
+          excursion_id: number
+          id?: number
+          name: string
+          seat: number
+          surname: string
+        }
+        Update: {
+          created_at?: string
+          excursion_id?: number
+          id?: number
+          name?: string
+          seat?: number
+          surname?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passengers_excursion_id_fkey"
+            columns: ["excursion_id"]
+            isOneToOne: false
+            referencedRelation: "excursions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -8,6 +8,13 @@ import { ArrowLeft, Save, Edit2 } from "lucide-react";
 import { SeatReceiptsModal } from "@/components/SeatReceiptsModal";
 import { ExcursionPrintReport } from "@/components/ExcursionPrintReport";
 import { EditExcursionDialog } from "@/components/EditExcursionDialog";
+import {
+  fetchAssociation,
+  fetchExcursionById,
+  fetchPassengers,
+  upsertPassenger,
+  clearPassengers,
+} from "@/utils/supabasePassengers";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
@@ -18,8 +25,9 @@ export type ExcursionData = {
   date?: string;
   time?: string;
   place?: string;
-  stops?: string[]; // Añadido ya para paradas
-  price?: string;   // Añadido para precio
+  stops?: string[];
+  price?: string;
+  association_id?: string;
 };
 
 const Index = () => {
@@ -30,59 +38,52 @@ const Index = () => {
   const [showReceiptsModal, setShowReceiptsModal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  // Carga datos de la excursión
+  // NUEVO: cargar datos desde Supabase
   useEffect(() => {
     if (!id) return;
-    const excursions = window.localStorage.getItem(EXCURSIONS_KEY);
-    if (excursions) {
-      try {
-        const arr = JSON.parse(excursions);
-        const found = arr.find((e: any) => e.id === id);
-        if (found) {
+    fetchExcursionById(id)
+      .then(data => {
+        if (data) {
           setExcursionInfo({
-            id: found.id,
-            name: found.name,
-            date: found.date,
-            time: found.time,
-            place: found.place,
-            stops: found.stops || [],
-            price: found.price || "", // soportar precio en excursión vieja/nueva
+            id: data.id,
+            name: data.name,
+            date: data.date,
+            time: data.time,
+            place: data.place,
+            stops: data.stops || [],
+            price: data.price || "",
+            association_id: data.association_id,
           });
         }
-      } catch (e) {
-        setExcursionInfo(null);
-      }
-    }
+      })
+      .catch(() => setExcursionInfo(null));
   }, [id]);
 
-  // Load passengers by excursion id
   useEffect(() => {
-    if (!id) {
-      navigate("/");
-      return;
-    }
-    const saved = window.localStorage.getItem(PASSENGERS_KEY_PREFIX + id);
-    setPassengers(saved ? JSON.parse(saved) : []);
-  }, [id, navigate]);
+    if (!id) return;
+    fetchPassengers(id)
+      .then((data) => setPassengers(data))
+      .catch(() => setPassengers([]));
+  }, [id]);
 
-  // Save passengers on update
-  useEffect(() => {
-    if (id) {
-      window.localStorage.setItem(PASSENGERS_KEY_PREFIX + id, JSON.stringify(passengers));
+  const handleAddOrEditPassenger = async (seat: number, name: string, surname: string) => {
+    if (!id) return;
+    try {
+      await upsertPassenger(Number(id), { seat, name, surname });
+      // Refrescar
+      fetchPassengers(id).then(setPassengers);
+    } catch {
+      toast({
+        title: "Error",
+        description: "No se pudo guardar el pasajero.",
+        variant: "destructive"
+      });
     }
-  }, [passengers, id]);
-
-  const handleAddOrEditPassenger = (seat: number, name: string, surname: string) => {
-    setPassengers(prev => {
-      const exists = prev.some(p => p.seat === seat);
-      if (exists) {
-        return prev.map(p => p.seat === seat ? { seat, name, surname } : p);
-      }
-      return [...prev, { seat, name, surname }];
-    });
   };
 
-  const handleClearSeats = () => {
+  const handleClearSeats = async () => {
+    if (!id) return;
+    await clearPassengers(Number(id));
     setPassengers([]);
   };
 
@@ -100,24 +101,28 @@ const Index = () => {
   };
 
   // NUEVO: guardar cambios en excursión tras editar
-  const handleEditExcursion = (data: ExcursionData) => {
-    // Actualizar excursión en localStorage
-    const excursions = window.localStorage.getItem(EXCURSIONS_KEY);
-    let arr: ExcursionData[] = [];
-    if (excursions) {
-      try {
-        arr = JSON.parse(excursions);
-      } catch {}
+  const handleEditExcursion = async (data: ExcursionData) => {
+    if (!excursionInfo?.association_id || !id) return;
+    try {
+      await upsertExcursion({
+        ...data,
+        id,
+        association_id: excursionInfo.association_id,
+      });
+      setExcursionInfo((prev) => prev ? { ...prev, ...data } : prev);
+      setEditDialogOpen(false);
+      toast({
+        title: "Excursión modificada",
+        description: "La información de la excursión se ha actualizado.",
+        duration: 2200,
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la excursión.",
+        variant: "destructive"
+      });
     }
-    arr = arr.map((e) => (e.id === id ? { ...e, ...data } : e));
-    window.localStorage.setItem(EXCURSIONS_KEY, JSON.stringify(arr));
-    setExcursionInfo((prev) => prev ? { ...prev, ...data } : prev);
-    setEditDialogOpen(false);
-    toast({
-      title: "Excursión modificada",
-      description: "La información de la excursión se ha actualizado.",
-      duration: 2200,
-    });
   };
 
   return (
