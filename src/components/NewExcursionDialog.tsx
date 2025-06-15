@@ -1,4 +1,5 @@
 
+import * as React from "react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -112,12 +113,15 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
               </div>
             </PopoverContent>
           </Popover>
-          <Input
-            placeholder="Lugar de salida"
-            value={place}
-            onChange={e => setPlace(e.target.value)}
-            icon={MapPin}
-          />
+          <div className="relative flex items-center">
+            <MapPin size={20} className="absolute left-3 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Lugar de salida"
+              value={place}
+              onChange={e => setPlace(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
         <DialogFooter className="pt-4">
           <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
@@ -136,3 +140,4 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
     </Dialog>
   );
 }
+
