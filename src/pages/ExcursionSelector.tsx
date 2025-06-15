@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { NewExcursionDialog, NewExcursionData } from "@/components/NewExcursionDialog";
+import AssociationOptions from "@/components/AssociationOptions";
 
 interface Excursion {
   id: string;
@@ -22,6 +22,11 @@ export default function ExcursionSelector() {
     return data ? JSON.parse(data) : [];
   });
   const [showNew, setShowNew] = useState(false);
+  const [showAssocOptions, setShowAssocOptions] = useState(false);
+
+  if (showAssocOptions) {
+    return <AssociationOptions />;
+  }
 
   const goToExcursion = (id: string) => {
     navigate(`/excursion/${id}`);
@@ -43,18 +48,18 @@ export default function ExcursionSelector() {
             <Plus size={48} className="text-primary mb-2" />
             <span className="text-xl font-semibold text-primary">Nueva excursión</span>
           </button>
-          {/* Acceso directo a recibos */}
+          {/* Acceso directo a opciones de Asociación */}
           <button
-            className="flex flex-col items-center justify-center rounded-2xl border-2 border-primary bg-white text-primary text-2xl lg:text-3xl font-bold shadow-md py-10 px-4 hover:scale-105 transition-all focus:outline-none focus:ring-4 focus:ring-primary/40"
-            onClick={() => navigate("/recibos")}
+            className="flex flex-col items-center justify-center rounded-2xl border-2 border-green-600 bg-white text-green-700 text-2xl font-bold shadow-md py-10 px-4 hover:scale-105 transition-all"
+            onClick={() => setShowAssocOptions(true)}
           >
-            <span>Recibos</span>
+            <span>Opciones</span>
           </button>
           {/* Lista de excursiones existentes */}
           {excursions.map(exc => (
             <button
               key={exc.id}
-              className="flex items-center justify-center rounded-2xl border-2 border-primary bg-primary text-white text-2xl lg:text-3xl font-bold shadow-md py-10 px-4 hover:scale-105 transition-all focus:outline-none focus:ring-4 focus:ring-primary/40"
+              className="flex items-center justify-center rounded-2xl border-2 border-primary bg-primary text-white text-2xl lg:text-3xl font-bold shadow-md py-10 px-4 hover:scale-105 transition-all"
               onClick={() => goToExcursion(exc.id)}
             >
               {exc.name}

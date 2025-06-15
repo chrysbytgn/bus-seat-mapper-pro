@@ -1,14 +1,11 @@
-
 import React from "react";
 import { Passenger } from "./BusSeatMap";
 import { cn } from "@/lib/utils";
 
-// Layout que corresponde a la imagen proporcionada
-// Fila especial de guía y volante
+// Layout de asiento modificado para reflejar proporción y posiciones según la imagen
 const SEAT_LAYOUT = [
-  // Fila 1: volante y plaza guía
-  [null, "guia", null, null, null], // "guia" = plaza guía (asiento 0), la puerta es decorativa al lado
-  // Fila 2-13: filas normales
+  [null, "guia", null, null, null],                 // Fila 1: conductor/guía
+  [null, null, null, null, null],                   // Espacio delantero (puede ser maletero o puerta delantera)
   [1, 2, null, 3, 4],
   [5, 6, null, 7, 8],
   [9, 10, null, 11, 12],
@@ -22,12 +19,11 @@ const SEAT_LAYOUT = [
   [41, 42, null, 43, 44],
   [45, 46, null, 47, 48],
   [49, 50, null, 51, 52],
-  // Fila última: los 5 asientos atrás
-  [53, 54, 55, null, null]
+  [53, 54, 55, null, null],
 ];
 
 // Ayuda: asientos verticales para detectar la puerta (como en el layout)
-const PUERTA_ROWS = [1, 9]; // justo al lado de "guia" y entre 28/29
+const PUERTA_ROWS = [2, 9];
 
 export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
   const getPassengerBySeat = (seat: number) =>
@@ -36,20 +32,17 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
   // Render helpers
   function renderSeat(seat: number | "guia" | null, rowIdx: number, colIdx: number) {
     if (seat === null) {
-      // Espacio vacío o pasillo
-      // Dibujo puerta cuando corresponde
+      // Espacios vacíos, maletero o corredores
       if (
         (rowIdx === 0 && colIdx === 4) ||
         (rowIdx === SEAT_LAYOUT.length - 1 && colIdx === 2)
       ) {
         // No se dibuja nada: estos son solo espacios fuera
-        return <div key={"empty" + colIdx} className="w-[22px] h-[20px]" />;
+        return <div key={"empty" + colIdx + "-" + rowIdx} className="w-[22px] h-[20px]" />;
       }
-      // Dibujo la puerta si es en la posición que corresponde
-      // Puerta al lado del guía, y entre 28/29
       if (PUERTA_ROWS.includes(rowIdx) && colIdx === 4) {
         return (
-          <div key={"puerta-"+rowIdx} className="flex flex-col items-center justify-center w-[24px] h-[34px] print:h-[30px]">
+          <div key={"puerta-" + rowIdx} className="flex flex-col items-center justify-center w-[24px] h-[34px] print:h-[30px]">
             <div
               className="w-[18px] h-[30px] print:h-[26px] border-l-4 border-gray-300 rounded-r-lg relative flex items-center justify-center"
               style={{ borderColor: "#555", marginLeft: "-2px" }}
@@ -64,8 +57,8 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
           </div>
         );
       }
-      // Espacio normal
-      return <div key={"space" + colIdx} className="w-[22px] h-[20px]" />;
+      // Espacio normal vacío
+      return <div key={"space" + colIdx + "-" + rowIdx} className="w-[22px] h-[20px]" />;
     }
     if (seat === "guia") {
       return (
@@ -114,7 +107,7 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
         >
           <span className="mx-auto">{String(seat).padStart(2, "0")}</span>
         </div>
-        {/* Nombre mini (sólo para impresión, opcional) */}
+        {/* Nombre mini (solo impresión, opcional)*/}
         {/* <span className="text-[6px] font-normal truncate w-full text-center">{passenger ? `${passenger.name} ${passenger.surname}` : ""}</span> */}
       </div>
     );

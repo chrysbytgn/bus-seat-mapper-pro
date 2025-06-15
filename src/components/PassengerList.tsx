@@ -6,11 +6,13 @@ import { toast } from "sonner";
 import { Bus } from "lucide-react";
 import type { ExcursionData } from "@/pages/Index";
 import { BusSeatMapPrint } from "./BusSeatMapPrint";
+import { getAssociationConfig } from "@/utils/associationConfig";
 
-type PrintExcursionData = ExcursionData | null;
+// Ayuda: asientos del 1 al 55
+const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
 
 /**
- * Helper: crea una tabla de pasajeros con asientos ordenados y letras grandes para imprimir.
+ * Helper: crea una tabla de 55 asientos y nombres
  */
 function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
   return (
@@ -23,21 +25,16 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
         </tr>
       </thead>
       <tbody>
-        {passengers.length === 0 ? (
-          <tr>
-            <td colSpan={3} className="py-4 text-center text-gray-400 print:text-black text-lg print:text-xl">Ningún pasajero ingresado</td>
-          </tr>
-        ) : (
-          passengers
-            .sort((a, b) => a.seat - b.seat)
-            .map((p) => (
-              <tr key={p.seat}>
-                <td className="px-3 py-2 font-bold text-2xl print:text-lg">{p.seat}</td>
-                <td className="px-3 py-2 text-xl print:text-lg">{p.name}</td>
-                <td className="px-3 py-2 text-xl print:text-lg">{p.surname}</td>
-              </tr>
-            ))
-        )}
+        {ALL_SEATS.map(seatNum => {
+          const p = passengers.find(pass => pass.seat === seatNum);
+          return (
+            <tr key={seatNum}>
+              <td className="px-3 py-2 font-bold text-2xl print:text-lg">{seatNum}</td>
+              <td className="px-3 py-2 text-xl print:text-lg">{p ? p.name : <span className="italic text-gray-400 print:text-gray-700">(vacío)</span>}</td>
+              <td className="px-3 py-2 text-xl print:text-lg">{p ? p.surname : ""}</td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
@@ -46,7 +43,7 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
 interface PassengerListProps {
   passengers: Passenger[];
   onClear: () => void;
-  excursionInfo?: PrintExcursionData;
+  excursionInfo?: ExcursionData | null;
 }
 
 export function PassengerList({ passengers, excursionInfo }: PassengerListProps) {
@@ -58,20 +55,13 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
   };
 
   // Preparar datos de cabecera
+  const association = getAssociationConfig();
   const excursionTitle = excursionInfo?.name || "Excursión";
   const fecha = excursionInfo?.date
     ? new Date(excursionInfo.date).toLocaleDateString()
     : "";
   const hora = excursionInfo?.time || "";
   const lugar = excursionInfo?.place || "";
-
-  // Datos de la asociación para mostrar en la impresión
-  const asociacion = {
-    nombre: "Asociación Cultural BusTour",
-    telefono: "123 456 789",
-    direccion: "Calle Mayor 123, Ciudad, País",
-    logo: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=120&q=80", // puedes cambiar esta url por la real
-  };
 
   return (
     <>
@@ -122,21 +112,23 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
       >
         {/* Cabecera Asociación (solo impresión) */}
         <div className="print:flex items-center gap-4 print:gap-5 pb-2 border-b border-gray-300 print:px-4 print:pt-3 print:pb-2 print:w-full">
-          <img
-            src={asociacion.logo}
-            alt="Logo Asociación"
-            className="h-14 w-14 object-cover rounded-full border border-gray-300 mr-3"
-            style={{ minWidth: 56 }}
-          />
+          {association.logo && (
+            <img
+              src={association.logo}
+              alt="Logo Asociación"
+              className="h-14 w-14 object-cover rounded-full border border-gray-300 mr-3"
+              style={{ minWidth: 56 }}
+            />
+          )}
           <div className="flex flex-col">
             <span className="text-2xl print:text-2xl font-bold text-primary mb-1">
-              {asociacion.nombre}
+              {association.name || "Asociación"}
             </span>
             <span className="text-base print:text-base text-gray-800">
-              {asociacion.direccion}
+              {association.address}
             </span>
             <span className="text-base print:text-base text-gray-800">
-              Tel: {asociacion.telefono}
+              Tel: {association.phone}
             </span>
           </div>
         </div>
@@ -187,15 +179,6 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           .print\\:text-4xl { font-size: 2.2rem !important; }
           .print\\:text-2xl { font-size: 1.3rem !important; }
           .print\\:text-lg { font-size: 1.06rem !important; }
-          table, th, td {
-            font-size: 1.06em !important;
-            padding: 0.25em !important;
-            color: #111 !important;
-          }
-          th {
-            font-weight: bold;
-          }
-          /* Nueva cabecera para impresión */
           .print\\:cabecera-asociacion {
             display: flex !important;
             align-items: center !important;
@@ -204,9 +187,9 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
             border-bottom: 1.5px solid #ccc !important;
             padding-bottom: 8px !important;
           }
-          @page {
-            size: A4 portrait;
-            margin: 0.7cm 0.5cm;
+          /* Ocultar botones en impresión */
+          .print\\:hidden-imprimir, .print\\:hidden-imprimir * {
+            display: none !important;
           }
         }
         `}
@@ -214,3 +197,5 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
     </>
   );
 }
+
+// El archivo está creciendo demasiado, considera pedir una refactorización al finalizar otros cambios.
