@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
@@ -9,13 +10,21 @@ import { ArrowLeft, Save } from "lucide-react";
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
 
+export type ExcursionData = {
+  id: string;
+  name: string;
+  date?: string;
+  time?: string;
+  place?: string;
+};
+
 const Index = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [passengers, setPassengers] = useState<Passenger[]>([]);
-  const [excursionName, setExcursionName] = useState<string>("Excursión");
+  const [excursionInfo, setExcursionInfo] = useState<ExcursionData | null>(null);
 
-  // Cargar nombre de la excursión
+  // Carga datos de la excursión
   useEffect(() => {
     if (!id) return;
     const excursions = window.localStorage.getItem(EXCURSIONS_KEY);
@@ -23,9 +32,17 @@ const Index = () => {
       try {
         const arr = JSON.parse(excursions);
         const found = arr.find((e: any) => e.id === id);
-        if (found && found.name) setExcursionName(found.name);
+        if (found) {
+          setExcursionInfo({
+            id: found.id,
+            name: found.name,
+            date: found.date,
+            time: found.time,
+            place: found.place,
+          });
+        }
       } catch (e) {
-        setExcursionName("Excursión");
+        setExcursionInfo(null);
       }
     }
   }, [id]);
@@ -61,37 +78,23 @@ const Index = () => {
     setPassengers([]);
   };
 
-  // --- NUEVO: funciones para los botones
-  const handleManualSave = () => {
-    if (id) {
-      window.localStorage.setItem(PASSENGERS_KEY_PREFIX + id, JSON.stringify(passengers));
-      toast({
-        title: "Cambios guardados",
-        description: "Los cambios se han guardado correctamente."
-      });
-    }
-  };
-
-  const handleBack = () => {
-    navigate("/");
-  };
+  // Quitamos botones de guardar y volver atrás según indicación
 
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">
-      {/* BARRA FIJA DE BOTONES */}
-      {/* Main content */}
       <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12">
         <section className="flex-1 min-w-[380px]">
           <BusSeatMap
             passengers={passengers}
             onSeatClick={handleAddOrEditPassenger}
-            excursionName={excursionName}
+            excursionName={excursionInfo?.name || "Excursión"}
           />
         </section>
         <aside className="flex-1 min-w-[340px]">
           <PassengerList
             passengers={passengers}
             onClear={handleClearSeats}
+            excursionInfo={excursionInfo}
           />
         </aside>
       </main>
