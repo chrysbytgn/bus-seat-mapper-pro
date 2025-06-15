@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
+// @ts-ignore
 import autoTable from "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 
@@ -113,12 +114,24 @@ export default function ReceiptPDFPreview({
       });
 
       // Marca de agua PAGADO
-      doc.saveGraphicsState();
-      doc.setTextColor(150, 150, 150);
-      doc.setFontSize(46);
-      doc.setGState(new doc.GState({ opacity: 0.3 }));
-      doc.text("PAGADO", 105, 125 + 145 * i, { align: "center", angle: 0 });
-      doc.restoreGraphicsState();
+      // For ts: GState may not always be available; fallback if not.
+      // @ts-ignore
+      if (typeof doc.saveGraphicsState === "function" && typeof doc.setGState === "function") {
+        // @ts-ignore
+        doc.saveGraphicsState();
+        doc.setTextColor(150, 150, 150);
+        doc.setFontSize(46);
+        // @ts-ignore
+        doc.setGState(new doc.GState({ opacity: 0.3 }));
+        doc.text("PAGADO", 105, 125 + 145 * i, { align: "center", angle: 0 });
+        // @ts-ignore
+        doc.restoreGraphicsState();
+      } else {
+        // Marca de agua simple si no existe GState
+        doc.setTextColor(150, 150, 150);
+        doc.setFontSize(46);
+        doc.text("PAGADO", 105, 125 + 145 * i, { align: "center", angle: 0 });
+      }
     }
 
     if (preview) {
@@ -179,3 +192,4 @@ function formateaFecha(fecha: string) {
 function capitalizeF(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
