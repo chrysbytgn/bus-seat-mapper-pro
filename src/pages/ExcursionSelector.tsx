@@ -43,6 +43,13 @@ export default function ExcursionSelector() {
             <Plus size={48} className="text-primary mb-2" />
             <span className="text-xl font-semibold text-primary">Nueva excursión</span>
           </button>
+          {/* Acceso directo a recibos */}
+          <button
+            className="flex flex-col items-center justify-center rounded-2xl border-2 border-primary bg-white text-primary text-2xl lg:text-3xl font-bold shadow-md py-10 px-4 hover:scale-105 transition-all focus:outline-none focus:ring-4 focus:ring-primary/40"
+            onClick={() => navigate("/recibos")}
+          >
+            <span>Recibos</span>
+          </button>
           {/* Lista de excursiones existentes */}
           {excursions.map(exc => (
             <button
