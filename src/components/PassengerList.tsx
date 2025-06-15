@@ -1,3 +1,4 @@
+
 import { Passenger } from "./BusSeatMap";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -12,27 +13,27 @@ type PrintExcursionData = ExcursionData | null;
  */
 function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
   return (
-    <table className="w-full text-xl print:text-2xl">
+    <table className="w-full text-xl print:text-lg">
       <thead>
         <tr>
-          <th className="text-left px-3 py-2 print:px-6 print:py-3">#</th>
-          <th className="text-left px-3 py-2 print:px-6 print:py-3">Nombre</th>
-          <th className="text-left px-3 py-2 print:px-6 print:py-3">Apellido</th>
+          <th className="text-left px-3 py-2 print:px-4 print:py-2">#</th>
+          <th className="text-left px-3 py-2 print:px-4 print:py-2">Nombre</th>
+          <th className="text-left px-3 py-2 print:px-4 print:py-2">Apellido</th>
         </tr>
       </thead>
       <tbody>
         {passengers.length === 0 ? (
           <tr>
-            <td colSpan={3} className="py-4 text-center text-gray-400 print:text-black text-lg print:text-2xl">Ningún pasajero ingresado</td>
+            <td colSpan={3} className="py-4 text-center text-gray-400 print:text-black text-lg print:text-xl">Ningún pasajero ingresado</td>
           </tr>
         ) : (
           passengers
             .sort((a, b) => a.seat - b.seat)
             .map((p) => (
               <tr key={p.seat}>
-                <td className="px-3 py-2 font-bold text-3xl print:text-4xl">{p.seat}</td>
-                <td className="px-3 py-2 text-2xl print:text-3xl">{p.name}</td>
-                <td className="px-3 py-2 text-2xl print:text-3xl">{p.surname}</td>
+                <td className="px-3 py-2 font-bold text-2xl print:text-lg">{p.seat}</td>
+                <td className="px-3 py-2 text-xl print:text-lg">{p.name}</td>
+                <td className="px-3 py-2 text-xl print:text-lg">{p.surname}</td>
               </tr>
             ))
         )}
@@ -110,24 +111,24 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
         ref={printRef}
         className="hidden print:flex print:flex-row print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0"
       >
-        {/* Croquis lado izquierdo (miniatura mucho más pequeña para imprimir) */}
-        <div className="print:w-[15%] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
+        {/* Croquis lado izquierdo en proporción más angosta */}
+        <div className="print:w-[30%] print:max-w-[28mm] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
           <div
             id="croquis-bus-seatmap-print"
-            className="w-[60px] h-[80px] print:w-[60px] print:h-[80px] print:mx-auto print:my-2 print:scale-[0.55] print:overflow-hidden flex flex-col items-center"
+            className="w-[65px] h-[120px] print:w-[52px] print:h-[107mm] print:mx-auto print:my-2 print:scale-[0.7] print:overflow-hidden flex flex-col items-center"
           >
-            <span className="block text-center text-[13px] print:text-xs font-bold mb-0">Croquis Bus</span>
+            <span className="block text-center text-[12px] print:text-xs font-bold mb-0">Croquis bus</span>
             <div className="w-full h-full bg-gray-200 border-2 border-gray-400 rounded-xl flex flex-col items-center justify-center">
-              <Bus size={18} className="text-primary print:text-black" />
+              <Bus size={22} className="text-primary print:text-black" />
               <span className="mt-0.5 text-[9px] font-medium print:text-xs text-gray-700">[croquis]</span>
             </div>
           </div>
         </div>
-        {/* Lista lado derecho */}
-        <div className="print:w-[85%] print:p-5 flex flex-col justify-start items-start print:overflow-hidden">
+        {/* Lista lado derecho (más ancho para tabla) */}
+        <div className="print:w-[70%] print:min-w-[140mm] print:p-4 flex flex-col justify-start items-start print:overflow-hidden">
           <div>
-            <h2 className="text-4xl font-bold mb-2 print:text-5xl">{excursionTitle}</h2>
-            <div className="text-2xl font-semibold mb-3 print:text-3xl">
+            <h2 className="text-3xl font-bold mb-1 print:text-4xl">{excursionTitle}</h2>
+            <div className="text-lg font-semibold mb-2 print:text-2xl">
               {fecha && <span>Fecha: {fecha}{"  "}</span>}
               {hora && <span>Hora: {hora}{"  "}</span>}
               {lugar && <span>Salida: {lugar}</span>}
@@ -136,7 +137,7 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           <PasajerosTableImprimir passengers={passengers} />
         </div>
       </div>
-      {/* Estilos para impresión ajustados */}
+      {/* Estilos para impresión ajustados a vertical */}
       <style>
         {`
         @media print {
@@ -144,34 +145,37 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
             background: white !important;
             margin: 0 !important;
             padding: 0 !important;
-            width: 100vw !important;
-            min-width: 0 !important;
+            width: 210mm !important;
+            min-width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
             overflow: hidden !important;
           }
           .print\\:hidden { display: none !important; }
           .print\\:flex { display: flex !important; }
-          .print\\:w-[15\\%] { width: 15% !important; }
-          .print\\:w-[85\\%] { width: 85% !important; }
+          .print\\:w-\\[30\\%\\] { width: 30% !important; }
+          .print\\:max-w-\\[28mm\\] { max-width: 28mm !important; }
+          .print\\:w-\\[70\\%\\] { width: 70% !important; }
+          .print\\:min-w-\\[140mm\\] { min-width: 140mm !important; }
           .print\\:p-1 { padding: 0.25rem !important; }
-          .print\\:p-5 { padding: 1.5rem !important; }
+          .print\\:p-4 { padding: 1rem !important; }
           .print\\:border-r { border-right: 2px solid #ccc !important; }
-          .print\\:items-stretch { align-items: stretch !important; }
           .print\\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
-          .print\\:scale-[0.55] { transform: scale(0.55); }
-          .print\\:text-5xl { font-size: 3rem !important; }
+          .print\\:scale-\\[0\\.7\\] { transform: scale(0.7); }
           .print\\:text-4xl { font-size: 2.2rem !important; }
-          .print\\:text-3xl { font-size: 1.5rem !important; }
+          .print\\:text-2xl { font-size: 1.3rem !important; }
+          .print\\:text-lg { font-size: 1.06rem !important; }
           table, th, td {
-            font-size: 1.6em !important;
-            padding: 0.35em !important;
+            font-size: 1.06em !important;
+            padding: 0.25em !important;
             color: #111 !important;
           }
           th {
             font-weight: bold;
           }
           @page {
-            size: A4 landscape;
-            margin: 0.5cm;
+            size: A4 portrait;
+            margin: 0.7cm 0.5cm;
           }
         }
         `}
