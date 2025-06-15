@@ -15,23 +15,29 @@ interface BusSeatMapProps {
   excursionName?: string;
 }
 
-// Layout fiel según indicaciones: conductor, guía, puerta frontal derecha, asientos tras conductor, puerta trasera sin sillas delante, última fila alineada
+/**
+ * Build bus seat layout:
+ * - Row 0: Driver (far left), then space for guide, then nulls, then front door (PD, far right)
+ * - Row 1: seat 1 (behind driver), seat 2, null, seat 3, seat 4, null
+ * - Rows 2-5: standard 4-seat rows (seats 5-20)
+ * - Row 6: seat 21, nulls, rear door (PT, far right) (seat 22 is NOT in front of rear door)
+ * - Rows 7-13: seats 23-50, regular rows
+ * - Row 14: final row, 5 seats centered so that seat 51 aligns behind 47, null-padding left
+ */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
-
-  // Fila superior (conductor, guía, puerta derecha)
+  // Row 0: Driver (left), guide (null), null, null, null, front door (PD)
   seatRows.push([
-    "C",   // Conductor
-    null,  // Vacío (guía)
-    "PD",  // Puerta delantera
+    "C",   // Driver
+    null,  // Guide seat (free space)
+    null, null, null,
+    "PD"   // Front door (aligned vertically with rear door)
   ]);
-
-  // Fila 2: asientos 1 y 2 detrás del conductor (izq), asientos 3 y 4 derecha a la altura del conductor y guía
+  // Row 1: seat 1 (behind driver), seat 2, null (aisle), seat 3, seat 4, null
   seatRows.push([
     1, 2, null, 3, 4, null
   ]);
-
-  // Siguientes filas: 2+2 asientos con pasillo (5-20)
+  // Rows 2-5: 2+2 seats, aisle in center, seats 5-20
   let currentSeat = 5;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
@@ -39,28 +45,26 @@ const buildSeatLayout = () => {
     ]);
     currentSeat += 4;
   }
-  // Hasta aquí hemos puesto hasta asiento 20
-
-  // Fila especial: puerta trasera a la derecha, fila solo con asientos 21 (izq) y 22 (centro-izq), espacio vacío, puerta trasera derecha
+  // Row 6: seat 21 (left, aligned vertically with previous rows' left seats),
+  // rest nulls, then rear door ("PT") at far right, seat 22 is not present in this row
   seatRows.push([
-    21, 22, null, null, null, "PT" // nada delante de la puerta trasera
+    21, null, null, null, null, "PT"
   ]);
   currentSeat = 23;
-
-  // Siguientes filas regulares hasta asiento 50 (7 filas más de 4 asientos cada una, pasillo central)
+  // Rows 7-13: 2+2 seats, aisle center, seats 23-50 (7 rows)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
       currentSeat, currentSeat + 1, null, currentSeat + 2, currentSeat + 3, null
     ]);
     currentSeat += 4;
   }
-
-  // Última fila: cinco asientos alineados y centrados, con el central delante, a continuación de las filas normales (51-55)
-  // Deben quedar "vacíos" (null) para que estén bien alineados
+  // Final row 14: center the five seats so that seat 51 is behind 47
+  // Look up which "col" seat 47 is in: our row structure is [seat, seat, null, seat, seat, null]
+  // seat 47 is first of last group: 47, 48, null, 49, 50, null (row 13)
+  // So 47 in index 0, last row should be: null, 51, 52, 53, 54, 55 (51 directly behind 47)
   seatRows.push([
-    null, 51, 52, 53, 54, 55
+    null, 51, 52, 53, 54, 55 // keep as much left as possible so 51 is exactly behind 47 (which is in col 0)
   ]);
-
   return seatRows;
 };
 
@@ -108,17 +112,13 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
                       </div>
                     );
                   }
-                  // Puertas
+                  // Puerta delantera/trasera
                   if (cell === "PD" || cell === "PT") {
                     return (
                       <div
                         key={cell}
                         className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-400 bg-white"
-                        title={
-                          cell === "PD"
-                            ? "Puerta delantera"
-                            : "Puerta trasera"
-                        }
+                        title={cell === "PD" ? "Puerta delantera" : "Puerta trasera"}
                       >
                         <span className="block w-full border-b-2 border-dashed border-gray-700" style={{ height: 14 }} />
                       </div>
@@ -188,4 +188,3 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
     </div>
   );
 }
-
