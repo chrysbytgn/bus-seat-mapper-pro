@@ -15,36 +15,39 @@ interface BusSeatMapProps {
   excursionName?: string;
 }
 
-// Layout fiel: asiento 1 detrás del conductor, 2 y 3 a la derecha, puertas laterales derechas
+// Layout fiel según indicaciones: conductor, guía, puerta frontal derecha, asientos tras conductor, puerta trasera sin sillas delante, última fila alineada
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
 
-  // Fila 0: Conductor (izq), pasillo, asiento 1, asiento 2, asiento 3, puerta delantera (derecha)
+  // Fila superior (conductor, guía, puerta derecha)
   seatRows.push([
-    "C",   // Conductor (izq)
-    null,  // pasillo
-    1,     // tras conductor
-    2,
-    3,
-    "PD",  // Puerta delantera (esquina derecha)
+    "C",   // Conductor
+    null,  // Vacío (guía)
+    "PD",  // Puerta delantera
   ]);
 
-  // Filas normales siguientes (asientos 4-19, filas de 2+2 con pasillo al centro)
-  let currentSeat = 4;
+  // Fila 2: asientos 1 y 2 detrás del conductor (izq), asientos 3 y 4 derecha a la altura del conductor y guía
+  seatRows.push([
+    1, 2, null, 3, 4, null
+  ]);
+
+  // Siguientes filas: 2+2 asientos con pasillo (5-20)
+  let currentSeat = 5;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
       currentSeat, currentSeat + 1, null, currentSeat + 2, currentSeat + 3, null
     ]);
     currentSeat += 4;
   }
+  // Hasta aquí hemos puesto hasta asiento 20
 
-  // Fila especial con puerta trasera (asientos 20-23): 2 izquierda, 1 derecha, puerta trasera lateral derecha
+  // Fila especial: puerta trasera a la derecha, fila solo con asientos 21 (izq) y 22 (centro-izq), espacio vacío, puerta trasera derecha
   seatRows.push([
-    20, 21, null, 22, null, "PT"
+    21, 22, null, null, null, "PT" // nada delante de la puerta trasera
   ]);
   currentSeat = 23;
 
-  // Filas regulares hasta el asiento 50 (7 filas más)
+  // Siguientes filas regulares hasta asiento 50 (7 filas más de 4 asientos cada una, pasillo central)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
       currentSeat, currentSeat + 1, null, currentSeat + 2, currentSeat + 3, null
@@ -52,13 +55,11 @@ const buildSeatLayout = () => {
     currentSeat += 4;
   }
 
-  // La última fila puede tener nulls si nos pasamos de 50
-  seatRows[seatRows.length - 1] = seatRows[seatRows.length - 1].map(
-    (s) => (typeof s === "number" && s > 50 ? null : s)
-  );
-
-  // Fila final: 5 asientos juntos (51-55)
-  seatRows.push([null, null, 51, 52, 53, 54, 55]);
+  // Última fila: cinco asientos alineados y centrados, con el central delante, a continuación de las filas normales (51-55)
+  // Deben quedar "vacíos" (null) para que estén bien alineados
+  seatRows.push([
+    null, 51, 52, 53, 54, 55
+  ]);
 
   return seatRows;
 };
@@ -77,7 +78,7 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
 
   return (
     <div>
-      {/* Mostrar el nombre de la excursión */}
+      {/* Mostrar nombre excursión */}
       <div className="flex items-center gap-2 mb-4">
         <div className="rounded-full bg-primary p-2">
           <span role="img" aria-label="Bus">🚌</span>
@@ -107,19 +108,23 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
                       </div>
                     );
                   }
-                  // Puerta delantera/trasera
+                  // Puertas
                   if (cell === "PD" || cell === "PT") {
                     return (
                       <div
                         key={cell}
                         className="w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-400 bg-white"
-                        title={cell === "PD" ? "Puerta delantera" : "Puerta trasera"}
+                        title={
+                          cell === "PD"
+                            ? "Puerta delantera"
+                            : "Puerta trasera"
+                        }
                       >
                         <span className="block w-full border-b-2 border-dashed border-gray-700" style={{ height: 14 }} />
                       </div>
                     );
                   }
-                  // Pasillo
+                  // Pasillo/espacio vacío
                   if (cell === null) {
                     return <div key={"pasillo-" + colIdx + "-" + rowIdx} className="w-6 h-10 sm:w-8 sm:h-10" />;
                   }
@@ -183,3 +188,4 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
     </div>
   );
 }
+
