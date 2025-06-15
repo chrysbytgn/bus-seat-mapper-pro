@@ -19,10 +19,9 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
-  // Corrección: eliminamos la declaración duplicada de seatMap (quedándonos solo con seatRows)
+  // Creamos la estructura de filas de asientos (seatRows) como antes.
   let currentSeat = 1;
 
-  // Agregamos el croquis como antes, pero almacenando las filas en un arreglo temporal.
   const seatRows: (number | null)[][] = [];
 
   for (let row = 0; row < 13; row++) {
@@ -49,13 +48,14 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
     }
   }
 
-  // --- Cambiamos la fila de asientos 21-22 una posición arriba ---
-  let idx21 = seatRows.findIndex((row) => row.includes(21));
+  // Adelantar SOLO el asiento 21 (lado izquierdo, columna 0) una fila arriba
+  // Localizamos la fila y columna donde está el asiento 21
+  let idx21 = seatRows.findIndex((row) => row[0] === 21);
   if (idx21 > 0) {
-    // Intercambiamos esa fila con la anterior (para subirla una posición)
-    const tmp = seatRows[idx21 - 1];
-    seatRows[idx21 - 1] = seatRows[idx21];
-    seatRows[idx21] = tmp;
+    // Intercambiamos únicamente el asiento 21 (columna 0) con la celda de arriba
+    const temp = seatRows[idx21 - 1][0];
+    seatRows[idx21 - 1][0] = 21;
+    seatRows[idx21][0] = temp;
   }
 
   // Añadimos la fila final de 5 asientos juntos (51-55)
