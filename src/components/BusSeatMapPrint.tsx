@@ -38,17 +38,17 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
         (rowIdx === SEAT_LAYOUT.length - 1 && colIdx === 2)
       ) {
         // No se dibuja nada: estos son solo espacios fuera
-        return <div key={"empty" + colIdx + "-" + rowIdx} className="w-[22px] h-[20px]" />;
+        return <div key={"empty" + colIdx + "-" + rowIdx} className="w-[32px] h-[28px]" />;
       }
       if (PUERTA_ROWS.includes(rowIdx) && colIdx === 4) {
         return (
-          <div key={"puerta-" + rowIdx} className="flex flex-col items-center justify-center w-[24px] h-[34px] print:h-[30px]">
+          <div key={"puerta-" + rowIdx} className="flex flex-col items-center justify-center w-[32px] h-[38px] print:h-[32px]">
             <div
-              className="w-[18px] h-[30px] print:h-[26px] border-l-4 border-gray-300 rounded-r-lg relative flex items-center justify-center"
+              className="w-[22px] h-[34px] print:h-[26px] border-l-4 border-gray-300 rounded-r-lg relative flex items-center justify-center"
               style={{ borderColor: "#555", marginLeft: "-2px" }}
             >
               <span
-                className="absolute left-[2px] top-1.5 text-[9px] font-semibold text-gray-700 rotate-90 select-none"
+                className="absolute left-[2px] top-1.5 text-[10px] font-semibold text-gray-700 rotate-90 select-none"
                 style={{ letterSpacing: "1.5px" }}
               >
                 PUERTA
@@ -58,13 +58,13 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
         );
       }
       // Espacio normal vacío
-      return <div key={"space" + colIdx + "-" + rowIdx} className="w-[22px] h-[20px]" />;
+      return <div key={"space" + colIdx + "-" + rowIdx} className="w-[32px] h-[28px]" />;
     }
     if (seat === "guia") {
       return (
         <div
           key="guia"
-          className="relative flex flex-col items-center w-[35px] h-[48px]"
+          className="relative flex flex-col items-center w-[38px] h-[52px] justify-end"
         >
           {/* volante */}
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -78,7 +78,7 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
             </div>
           </div>
           {/* asiento guía */}
-          <div className="w-[30px] h-[22px] bg-white border-2 border-gray-400 rounded-md mt-8 flex items-center justify-center print:text-[10px] text-[11px] font-bold italic text-gray-600">
+          <div className="w-[33px] h-[25px] bg-white border-2 border-gray-400 rounded-md mt-8 flex items-center justify-center print:text-[10px] text-[11px] font-bold italic text-gray-600">
             Guía
           </div>
         </div>
@@ -90,43 +90,51 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
       <div
         key={seat}
         className={cn(
-          "relative w-[22px] h-[20px] flex flex-col items-center",
+          "relative w-[32px] h-[28px] flex flex-col items-center justify-center",
         )}
       >
         <div
           className={cn(
-            "w-full h-full rounded-[4px] border-2 border-gray-400/80 flex items-center justify-center text-xs font-semibold",
+            "w-full h-full rounded-[5px] border-2 border-gray-400/80 flex items-center justify-center text-xs font-semibold",
             passenger
               ? "bg-red-400/90 text-white border-red-500 shadow"
               : "bg-green-50 text-red-500"
           )}
           style={{
-            fontSize: 11,
-            lineHeight: "12px"
+            fontSize: 12,
+            lineHeight: "15px"
           }}
         >
           <span className="mx-auto">{String(seat).padStart(2, "0")}</span>
         </div>
-        {/* Nombre mini (solo impresión, opcional)*/}
-        {/* <span className="text-[6px] font-normal truncate w-full text-center">{passenger ? `${passenger.name} ${passenger.surname}` : ""}</span> */}
       </div>
     );
   }
 
   return (
-    <div className="print:mx-auto flex flex-col items-center bg-white p-2 print:bg-white print:p-0 rounded-xl w-fit">
+    <div className="print:mx-auto flex flex-col items-center bg-white p-2 print:bg-white print:p-0 rounded-xl w-fit max-w-full">
       <span className="block text-center text-[16px] print:text-xs font-bold mb-1">Croquis bus</span>
-      <div className="bg-gray-50 border border-gray-400 rounded-2xl shadow px-2 py-2 print:border print:shadow-none flex flex-col">
+      <div className="bg-gray-50 border border-gray-400 rounded-2xl shadow px-3 py-3 print:border print:shadow-none flex flex-col min-w-[275px] max-w-full">
         {/* Despliegue filas */}
-        <div className="flex flex-col gap-[4px] items-center">
+        <div className="flex flex-col gap-[2px] items-center min-w-[250px]">
           {SEAT_LAYOUT.map((row, rowIdx) => (
-            <div key={rowIdx} className="flex flex-row gap-[9px] items-center justify-center">
+            <div
+              key={rowIdx}
+              className={cn(
+                "flex flex-row items-center justify-center",
+                "gap-[6px]"
+              )}
+              style={{
+                minHeight: "30px",
+                minWidth: "246px"
+              }}
+            >
               {row.map((seat, colIdx) => renderSeat(seat, rowIdx, colIdx))}
             </div>
           ))}
         </div>
         {/* Leyenda */}
-        <div className="mt-2 flex flex-row justify-center gap-2 w-full">
+        <div className="mt-3 flex flex-row justify-center gap-2 w-full">
           <div className="w-3 h-3 bg-green-50 border border-green-500 rounded-sm" />
           <span className="text-[9px]">Libre</span>
           <div className="mx-1 w-3 h-3 bg-red-400 border border-red-500 rounded-sm" />
