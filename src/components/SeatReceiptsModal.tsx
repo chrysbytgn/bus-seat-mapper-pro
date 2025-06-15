@@ -49,108 +49,130 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
     const lastSeq = Number(localStorage.getItem("receipt_seq") || "1");
     let actualSeq = lastSeq;
 
+    // Configuración de layout 2 columnas x 2 filas = 4 por página
+    const recibosPorHoja = 4;
+    const colWidth = 100;  // A4 width: 210mm, margen aprox. 5mm a cada lado
+    const rowHeight = 145; // Un poco menos de la mitad de A4 height: 297mm
+
+    passengers; // dummy to avoid TS warning if not used elsewhere
+
     seatRange.forEach((seatNum, idx) => {
+      // En qué posición de la hoja va este recibo
+      const posInPage = idx % recibosPorHoja;
+      const pageIndex = Math.floor(idx / recibosPorHoja);
+
+      // Si es el 1º de la hoja después de la primera, añadir página
+      if (posInPage === 0 && idx !== 0) doc.addPage();
+
+      // Cálculo de posición X, Y
+      const col = posInPage % 2;
+      const row = Math.floor(posInPage / 2);
+
+      // Margen superior/izquierdo
+      const left = 7 + col * colWidth;
+      const top = 10 + row * (rowHeight - 5);
+
       const p = getPassenger(seatNum);
       for (let i = 0; i < 2; i++) {
+        // i=0 original, i=1 copia (la copia debajo de la original, pequeña separación vertical)
+        const yBase = top + i * 62; // Separadas vertical por 62mm, caben 2
         const etiqueta = i === 0 ? "ORIGINAL" : "COPIA";
-        const yBase = 10 + 145 * i;
 
         // Borde recibo
         doc.setDrawColor(180);
-        doc.rect(18, yBase, 170, 130, "S");
+        doc.rect(left + 8, yBase, 83, 58, "S");
 
         // Mácula (lado izquierdo, zona de control)
-        doc.setFillColor(60, 70, 125); // tono azul/gris
-        doc.rect(10, yBase, 8, 130, "F");
+        doc.setFillColor(60, 70, 125);
+        doc.rect(left, yBase, 8, 58, "F");
 
         // Línea discontinua vertical para corte
         doc.setLineDashPattern([2.2, 2.2], 0);
         doc.setDrawColor(100);
-        doc.line(18, yBase, 18, yBase + 130);
-
+        doc.line(left + 8, yBase, left + 8, yBase + 58);
         doc.setLineDashPattern([], 0);
 
         // LOGO
         if (logoDataURL) {
-          doc.addImage(logoDataURL, "PNG", 22, yBase+3, 16, 16);
+          doc.addImage(logoDataURL, "PNG", left + 10, yBase + 3, 11, 11);
         }
-        doc.setFontSize(16);
+        doc.setFontSize(9.5);
         doc.setTextColor(33,33,33);
-        doc.text("Excursiones ABC", 42, yBase+11);
-        doc.setFontSize(9);
-        doc.text("Av. Principal 123, Ciudad", 42, yBase+16);
-        doc.text("Tel: 555-123-4567    info@excursionesabc.com", 42, yBase+20);
+        doc.text("Excursiones ABC", left + 23, yBase + 9);
+        doc.setFontSize(6.5);
+        doc.text("Av. Principal 123, Ciudad", left + 23, yBase + 13);
+        doc.text("Tel: 555-123-4567    info@excursionesabc.com", left + 23, yBase + 16.5);
 
         // Recibo N° y fecha
-        doc.setFontSize(12);
+        doc.setFontSize(7);
         doc.setTextColor(0,0,180);
-        doc.text(`Recibo N°: ${siguienteNumeroRecibo(actualSeq+idx)}`, 155, yBase+11);
+        doc.text(`Recibo N°: ${siguienteNumeroRecibo(actualSeq+idx)}`, left + 80, yBase + 9);
         doc.setTextColor(100,100,100);
-        doc.text(`Fecha emisión: ${fechaEmision}`, 155, yBase+16);
+        doc.text(`Fecha emisión: ${fechaEmision}`, left + 80, yBase + 13);
 
         // Etiqueta ORIGINAL/COPIA
-        doc.setFontSize(10);
+        doc.setFontSize(6.5);
         doc.setTextColor(80,80,80);
-        doc.text(`(${etiqueta})`, 178, yBase+24, { align: "right", maxWidth: 22 });
+        doc.text(`(${etiqueta})`, left + 88, yBase + 15.5, { align: "right", maxWidth: 15 });
 
         // Línea horizontal
         doc.setDrawColor(210);
-        doc.line(22, yBase + 27, 188, yBase + 27);
+        doc.line(left + 10, yBase + 18.5, left + 89, yBase + 18.5);
 
         // Detalles asiento y excursión
-        doc.setFontSize(11);
+        doc.setFontSize(7.5);
         doc.setTextColor(40,40,40);
-        doc.text(`Asiento: ${seatNum}`, 24, yBase + 34);
-        doc.text(`Excursión: ${excursionInfo?.name || ""}`, 24, yBase+40);
-        if (excursionInfo?.date) doc.text(`Fecha exc.: ${formatFecha(excursionInfo.date)}`, 24, yBase+46);
-        if (excursionInfo?.place) doc.text(`Salida: ${excursionInfo.place}`, 24, yBase+52);
+        doc.text(`Asiento: ${seatNum}`, left + 11, yBase + 23);
+        doc.text(`Excursión: ${excursionInfo?.name || ""}`, left + 11, yBase + 27);
+        if (excursionInfo?.date) doc.text(`Fecha exc.: ${formatFecha(excursionInfo.date)}`, left + 11, yBase + 31);
+        if (excursionInfo?.place) doc.text(`Salida: ${excursionInfo.place}`, left + 11, yBase + 35);
 
         // Línea para anotar nombre manualmente
         doc.setDrawColor(150,150,170);
-        doc.setLineDashPattern([1,1], 1.5);
-        doc.line(60, yBase+63, 180, yBase+63);
+        doc.setLineDashPattern([1,1], 1.2);
+        doc.line(left + 35, yBase + 42, left + 86, yBase + 42);
         doc.setLineDashPattern([],0);
-        doc.setFontSize(11);
+        doc.setFontSize(7.5);
         doc.setTextColor(50,50,50);
-        doc.text("Nombre del viajero (escribir a mano):", 24, yBase+61);
+        doc.text("Nombre del viajero (escribir a mano):", left + 11, yBase + 40);
 
         // Si hay pasajero, lo muestra a la derecha como referencia pequeña
         if(p){
-          doc.setFontSize(9);
+          doc.setFontSize(6.2);
           doc.setTextColor(80,80,80);
-          doc.text(`Registrado: ${p.name} ${p.surname}`, 120, yBase+34);
+          doc.text(`Registrado: ${p.name} ${p.surname}`, left + 38, yBase + 23);
         }
 
-        // Tabla de monto y pago
-        autoTable(doc, {
-          theme: "striped",
-          styles: { cellPadding: 2, fontSize: 12, halign: "center" },
-          margin: { left: 55 },
-          startY: yBase+75,
-          head: [["MONTO (€)", "Forma de pago"]],
-          body: [[String(""), ""]],
-          tableWidth: 75,
-        });
+        // Tabla de monto y pago (simulada a mano)
+        doc.setFontSize(7.2);
+        doc.setTextColor(0,0,0);
+        doc.setDrawColor(180);
+        // Encabezado
+        doc.rect(left + 35, yBase + 44, 37, 7, "S");
+        doc.text("MONTO (€)", left + 37, yBase + 49);
+        doc.line(left + 55, yBase + 44, left + 55, yBase + 51);
+        doc.text("Forma de pago", left + 57, yBase + 49);
+        // Celdas vacías
+        doc.rect(left + 35, yBase + 51, 37, 6, "S");
 
-        // Marca de agua PAGADO
+        // Marca de agua PAGADO (más pequeña)
         // @ts-ignore
         if (typeof doc.saveGraphicsState === "function" && typeof doc.setGState === "function") {
           // @ts-ignore
           doc.saveGraphicsState();
           doc.setTextColor(120, 120, 120);
-          doc.setFontSize(38);
+          doc.setFontSize(17);
           // @ts-ignore
-          doc.setGState(new doc.GState({ opacity: 0.25 }));
-          doc.text("PAGADO", 103, yBase+105, { align: "center", angle: 0 });
+          doc.setGState(new doc.GState({ opacity: 0.23 }));
+          doc.text("PAGADO", left + 49, yBase + 58, { align: "center", angle: 0 });
           // @ts-ignore
           doc.restoreGraphicsState();
         } else {
           doc.setTextColor(180, 180, 180);
-          doc.setFontSize(38);
-          doc.text("PAGADO", 103, yBase+105, { align: "center", angle: 0 });
+          doc.setFontSize(17);
+          doc.text("PAGADO", left + 49, yBase + 58, { align: "center", angle: 0 });
         }
       }
-      if (idx !== seatRange.length - 1) doc.addPage();
     });
 
     localStorage.setItem("receipt_seq", String(lastSeq + seatRange.length));
