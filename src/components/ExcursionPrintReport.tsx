@@ -5,17 +5,17 @@ import { BusSeatMapPrint } from "./BusSeatMapPrint";
 import { getAssociationConfig } from "@/utils/associationConfig";
 import type { ExcursionData } from "@/pages/Index";
 
-// Constante para la lista completa de asientos
 const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
 
 function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
+  // Tamaños para que quepa en la hoja
   return (
-    <table className="w-full text-xl print:text-base border-separate border-spacing-y-[2px]">
+    <table className="w-full text-base print:text-xs border-separate border-spacing-y-[0.5px]">
       <thead>
         <tr>
-          <th className="text-left px-2 py-1 print:px-2 print:py-1">#</th>
-          <th className="text-left px-2 py-1 print:px-2 print:py-1">Nombre</th>
-          <th className="text-left px-2 py-1 print:px-2 print:py-1">Apellido</th>
+          <th className="text-left px-1.5 py-0.5">#</th>
+          <th className="text-left px-1.5 py-0.5">Nombre</th>
+          <th className="text-left px-1.5 py-0.5">Apellido</th>
         </tr>
       </thead>
       <tbody>
@@ -23,9 +23,9 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
           const p = passengers.find(pass => pass.seat === seatNum);
           return (
             <tr key={seatNum}>
-              <td className="px-2 py-1 font-bold text-lg print:text-base">{seatNum}</td>
-              <td className="px-2 py-1 print:text-base">{p ? p.name : <span className="italic text-gray-400 print:text-gray-700">(vacío)</span>}</td>
-              <td className="px-2 py-1 print:text-base">{p ? p.surname : ""}</td>
+              <td className="px-1.5 py-0.5 font-bold">{seatNum}</td>
+              <td className="px-1.5 py-0.5">{p ? p.name : <span className="italic text-gray-400 print:text-gray-700">(vacío)</span>}</td>
+              <td className="px-1.5 py-0.5">{p ? p.surname : ""}</td>
             </tr>
           );
         })}
@@ -41,7 +41,6 @@ export function ExcursionPrintReport({
   passengers: Passenger[];
   excursionInfo?: ExcursionData | null;
 }) {
-  // Configuración de la asociación
   const association = getAssociationConfig();
   const excursionTitle = excursionInfo?.name || "Excursión";
   const fecha = excursionInfo?.date
@@ -61,8 +60,8 @@ export function ExcursionPrintReport({
           <img
             src={association.logo}
             alt="Logo Asociación"
-            className="h-16 w-16 object-cover rounded-full border border-gray-300 mr-3"
-            style={{ minWidth: 64 }}
+            className="h-14 w-14 object-cover rounded-full border border-gray-300 mr-3"
+            style={{ minWidth: 56 }}
           />
         )}
         <div className="flex flex-col">
@@ -79,36 +78,37 @@ export function ExcursionPrintReport({
           )}
         </div>
       </div>
-      {/* INFORMACIÓN DE EXCURSIÓN */}
-      <div className="flex flex-row justify-between print:gap-4 gap-4 print:px-5">
+      {/* INFORMACIÓN Y LAYOUT NUEVO */}
+      <div className="flex flex-row print:flex-nowrap print:gap-5 gap-5 print:px-5 w-full min-h-[150px] print:min-h-[135px]">
+        {/* Croquis bus arriba izquierda */}
+        <div className="flex flex-col items-center print:w-[210px] print:pl-2 flex-shrink-0">
+          <BusSeatMapPrint passengers={passengers} />
+        </div>
+        {/* Info + tabla lista a la derecha */}
         <div className="flex flex-col flex-1">
-          <span className="text-2xl font-bold print:text-2xl mb-1">{excursionTitle}</span>
-          <div className="text-lg font-semibold print:text-lg mb-1">
-            {fecha && <span>Fecha: {fecha}{"  "}</span>}
-            {hora && <span>Hora: {hora}{"  "}</span>}
+          <span className="text-lg font-bold print:text-lg mb-1">{excursionTitle}</span>
+          <div className="text-base font-semibold print:text-base mb-1">
+            {fecha && <span>Fecha: {fecha}{" "}</span>}
+            {hora && <span>Hora: {hora}{" "}</span>}
           </div>
-          <div className="text-lg font-semibold print:text-lg mb-1">
+          <div className="text-base font-semibold print:text-base mb-1">
             {lugar && <span>Salida: {lugar}</span>}
           </div>
           {paradas.length > 0 && (
-            <div className="print:mt-2 mt-2">
-              <span className="block font-semibold text-md mb-1">Paradas adicionales:</span>
-              <ul className="list-disc ml-5 text-base print:text-base">
+            <div className="print:mt-1 mt-1">
+              <span className="block font-semibold text-[15px] print:text-xs mb-1">Paradas adicionales:</span>
+              <ul className="list-disc ml-5 text-[14px] print:text-xs mb-1">
                 {paradas.map((stop, idx) =>
                   <li key={idx}>{stop}</li>
                 )}
               </ul>
             </div>
           )}
+          {/* Tabla lista pasajeros */}
+          <div className="w-full print:pr-2 pt-1 max-w-[600px] overflow-x-auto">
+            <PasajerosTableImprimir passengers={passengers} />
+          </div>
         </div>
-        {/* Croquis bus */}
-        <div className="flex flex-col items-center print:w-[31%] print:max-w-[28mm] print:pl-2 print:border-l print:border-gray-300">
-         <BusSeatMapPrint passengers={passengers} />
-        </div>
-      </div>
-      {/* LISTA PASAJEROS */}
-      <div className="print:px-5 pt-3">
-        <PasajerosTableImprimir passengers={passengers} />
       </div>
     </div>
   );

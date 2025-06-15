@@ -4,9 +4,10 @@ import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
 import { PassengerList } from "@/components/PassengerList";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Edit2 } from "lucide-react";
 import { SeatReceiptsModal } from "@/components/SeatReceiptsModal";
 import { ExcursionPrintReport } from "@/components/ExcursionPrintReport";
+import { EditExcursionDialog } from "@/components/EditExcursionDialog";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
@@ -27,6 +28,7 @@ const Index = () => {
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [excursionInfo, setExcursionInfo] = useState<ExcursionData | null>(null);
   const [showReceiptsModal, setShowReceiptsModal] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // Carga datos de la excursión
   useEffect(() => {
@@ -97,6 +99,27 @@ const Index = () => {
     });
   };
 
+  // NUEVO: guardar cambios en excursión tras editar
+  const handleEditExcursion = (data: ExcursionData) => {
+    // Actualizar excursión en localStorage
+    const excursions = window.localStorage.getItem(EXCURSIONS_KEY);
+    let arr: ExcursionData[] = [];
+    if (excursions) {
+      try {
+        arr = JSON.parse(excursions);
+      } catch {}
+    }
+    arr = arr.map((e) => (e.id === id ? { ...e, ...data } : e));
+    window.localStorage.setItem(EXCURSIONS_KEY, JSON.stringify(arr));
+    setExcursionInfo((prev) => prev ? { ...prev, ...data } : prev);
+    setEditDialogOpen(false);
+    toast({
+      title: "Excursión modificada",
+      description: "La información de la excursión se ha actualizado.",
+      duration: 2200,
+    });
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">
       {/* Fila de botones arriba */}
@@ -118,6 +141,14 @@ const Index = () => {
             title={passengers.length === 0 ? "Debes agregar pasajeros para generar recibos" : undefined}
           >
             Generar recibos
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setEditDialogOpen(true)}
+            title="Editar información de la excursión"
+          >
+            <Edit2 className="mr-1" /> Editar excursión
           </Button>
         </div>
       </div>
@@ -147,6 +178,12 @@ const Index = () => {
         onClose={() => setShowReceiptsModal(false)}
         passengers={passengers}
         excursionInfo={excursionInfo}
+      />
+      <EditExcursionDialog
+        open={editDialogOpen}
+        excursion={excursionInfo}
+        onCancel={() => setEditDialogOpen(false)}
+        onSave={handleEditExcursion}
       />
     </div>
   );
