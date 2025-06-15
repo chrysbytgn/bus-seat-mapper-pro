@@ -16,28 +16,28 @@ interface BusSeatMapProps {
 }
 
 /**
- * Build bus seat layout:
- * - Row 0: Driver (far left), then space for guide, then nulls, then front door (PD, far right)
- * - Row 1: seat 1 (behind driver), seat 2, null, seat 3, seat 4, null
- * - Rows 2-5: standard 4-seat rows (seats 5-20)
- * - Row 6: seat 21, nulls, rear door (PT, far right) (seat 22 is NOT in front of rear door)
- * - Rows 7-13: seats 23-50, regular rows
- * - Row 14: final row, 5 seats centered so that seat 51 aligns behind 47, null-padding left
+ * Build bus seat layout remodelado:
+ * - Fila 0: Conductor (izquierda), guía, null, null, null, puerta delantera (PD) (derecha)
+ * - Fila 1: asientos 1 y 2 detrás del conductor, pasillo, asientos 3 y 4 derecha, espacio final
+ * - Filas 2-5: 4 asientos, pasillo al centro, (5-20)
+ * - Fila 6: asiento 21, asiento 22, null, null, null, puerta trasera (PT)
+ * - Filas 7-13: 4 asientos, pasillo al centro, (23-50)
+ * - Fila 14: null, 51, 52, 53, 54, 55 (alinear 51 detrás de 47, 55 detrás de 50)
  */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
-  // Row 0: Driver (left), guide (null), null, null, null, front door (PD)
+  // Fila 0: Conductor, guía (espacio), null, null, null, puerta delantera
   seatRows.push([
-    "C",   // Driver
-    null,  // Guide seat (free space)
+    "C",   // Conductor
+    null,  // Asiento guía (espacio libre)
     null, null, null,
-    "PD"   // Front door (aligned vertically with rear door)
+    "PD"   // Puerta delantera (alineada con trasera)
   ]);
-  // Row 1: seat 1 (behind driver), seat 2, null (aisle), seat 3, seat 4, null
+  // Fila 1: 1 y 2 (izq), null, 3 y 4 (derecha), null
   seatRows.push([
     1, 2, null, 3, 4, null
   ]);
-  // Rows 2-5: 2+2 seats, aisle in center, seats 5-20
+  // Filas 2 a 5: 2+2 asientos con pasillo central (5-20)
   let currentSeat = 5;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
@@ -45,25 +45,28 @@ const buildSeatLayout = () => {
     ]);
     currentSeat += 4;
   }
-  // Row 6: seat 21 (left, aligned vertically with previous rows' left seats),
-  // rest nulls, then rear door ("PT") at far right, seat 22 is not present in this row
+  // Fila 6: asiento 21, 22, nulls, puerta trasera
   seatRows.push([
-    21, null, null, null, null, "PT"
+    21, 22, null, null, null, "PT"
   ]);
   currentSeat = 23;
-  // Rows 7-13: 2+2 seats, aisle center, seats 23-50 (7 rows)
+  // Filas 7-13: normales (23-50)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
       currentSeat, currentSeat + 1, null, currentSeat + 2, currentSeat + 3, null
     ]);
     currentSeat += 4;
   }
-  // Final row 14: center the five seats so that seat 51 is behind 47
-  // Look up which "col" seat 47 is in: our row structure is [seat, seat, null, seat, seat, null]
-  // seat 47 is first of last group: 47, 48, null, 49, 50, null (row 13)
-  // So 47 in index 0, last row should be: null, 51, 52, 53, 54, 55 (51 directly behind 47)
+  // Fila final: null, 51 (detrás del 47), 52, 53, 54, 55 (detrás del 50)
+  // El asiento 47 está en la primera columna de la penúltima fila, el 50 en la última de la derecha
+  // null en la izquierda para alinear 51 exactamente detrás de 47 y 55 detrás de 50
   seatRows.push([
-    null, 51, 52, 53, 54, 55 // keep as much left as possible so 51 is exactly behind 47 (which is in col 0)
+    null,   // para que 51 quede detrás de 47
+    51,
+    52,
+    53,
+    54,
+    55    // detrás de 50 a la derecha
   ]);
   return seatRows;
 };
