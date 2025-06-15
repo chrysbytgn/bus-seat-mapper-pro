@@ -39,9 +39,11 @@ const Index = () => {
   const [excursionInfo, setExcursionInfo] = useState<ExcursionData | null>(null);
   const [showReceiptsModal, setShowReceiptsModal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [loadingExcursion, setLoadingExcursion] = useState(true);
 
   useEffect(() => {
     if (!id) return;
+    setLoadingExcursion(true);
     fetchExcursionById(Number(id)) // always pass number
       .then(data => {
         if (data) {
@@ -77,9 +79,12 @@ const Index = () => {
             price: data.price || "",
             association_id: data.association_id,
           });
+        } else {
+          setExcursionInfo(null);
         }
       })
-      .catch(() => setExcursionInfo(null));
+      .catch(() => setExcursionInfo(null))
+      .finally(() => setLoadingExcursion(false));
   }, [id]);
 
   useEffect(() => {
@@ -87,19 +92,34 @@ const Index = () => {
     fetchPassengers(Number(id)) // pass number type
       .then((data) => setPassengers(data))
       .catch(() => setPassengers([]));
-  }, [id]);
+  }, [id, excursionInfo?.id]); // actualizar si cambia excursion id
 
   const handleAddOrEditPassenger = async (seat: number, name: string, surname: string) => {
-    if (!id) return;
+    if (!id || !excursionInfo?.id) {
+      toast({
+        title: "Excursión no encontrada",
+        description: "No se pudo guardar el pasajero porque la excursión aún no está disponible.",
+        variant: "destructive"
+      });
+      return;
+    }
     try {
       await upsertPassenger(Number(id), { seat, name, surname });
       fetchPassengers(Number(id)).then(setPassengers);
-    } catch {
-      toast({
-        title: "Error",
-        description: "No se pudo guardar el pasajero.",
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      if (error && typeof error.message === "string" && error.message.includes("foreign key constraint")) {
+        toast({
+          title: "Error de integridad",
+          description: "No se pudo guardar el pasajero, la excursión no existe o fue eliminada.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo guardar el pasajero.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -154,7 +174,7 @@ const Index = () => {
           Volver atrás
         </Button>
         <div className="flex gap-2">
-          <Button variant="default" size="sm" onClick={handleSave}>
+          <Button variant="default" size="sm" onClick={handleSave} disabled={loadingExcursion || !excursionInfo?.id}>
             <Save className="mr-1" />
             Guardar
           </Button>
@@ -162,8 +182,16 @@ const Index = () => {
             size="sm"
             variant="secondary"
             onClick={() => setShowReceiptsModal(true)}
-            disabled={passengers.length === 0}
-            title={passengers.length === 0 ? "Debes agregar pasajeros para generar recibos" : undefined}
+            disabled={loadingExcursion || !excursionInfo?.id || passengers.length === 0}
+            title={
+              loadingExcursion
+                ? "Cargando excursión..."
+                : !excursionInfo?.id
+                ? "La excursión aún no está disponible"
+                : passengers.length === 0
+                ? "Debes agregar pasajeros para generar recibos"
+                : undefined
+            }
           >
             Generar recibos
           </Button>
@@ -172,6 +200,7 @@ const Index = () => {
             variant="outline"
             onClick={() => setEditDialogOpen(true)}
             title="Editar información de la excursión"
+            disabled={loadingExcursion || !excursionInfo?.id}
           >
             <Edit2 className="mr-1" /> Editar excursión
           </Button>
@@ -180,18 +209,31 @@ const Index = () => {
       {/* CONTENIDO NORMAL */}
       <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12 print:hidden">
         <section className="flex-1 min-w-[380px]">
-          <BusSeatMap
-            passengers={passengers}
-            onSeatClick={handleAddOrEditPassenger}
-            excursionName={excursionInfo?.name || "Excursión"}
-          />
+          {/* Bloqueo visual si no carga excursión */}
+          {!excursionInfo || loadingExcursion ? (
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+              Cargando excursión...
+            </div>
+          ) : (
+            <BusSeatMap
+              passengers={passengers}
+              onSeatClick={handleAddOrEditPassenger}
+              excursionName={excursionInfo?.name || "Excursión"}
+            />
+          )}
         </section>
         <aside className="flex-1 min-w-[340px]">
-          <PassengerList
-            passengers={passengers}
-            onClear={handleClearSeats}
-            excursionInfo={excursionInfo}
-          />
+          {!excursionInfo || loadingExcursion ? (
+            <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+              Información no disponible.
+            </div>
+          ) : (
+            <PassengerList
+              passengers={passengers}
+              onClear={handleClearSeats}
+              excursionInfo={excursionInfo}
+            />
+          )}
         </aside>
       </main>
       {/* INFORME PARA IMPRIMIR */}
@@ -215,3 +257,4 @@ const Index = () => {
 };
 
 export default Index;
+
