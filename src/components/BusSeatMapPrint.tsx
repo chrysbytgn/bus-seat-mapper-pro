@@ -1,56 +1,41 @@
-
 import React from "react";
 import { Passenger } from "./BusSeatMap";
 import { cn } from "@/lib/utils";
 
-// Nueva lógica para crear el layout correcto del autobús de 55 plazas
-// Conductor arriba a la izquierda, puerta delantera, puerta trasera después de la fila 10, última fila de 5
+// Genera el layout exacto de un autobús de 55 plazas como en el estándar
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
 
-  // Fila delantera: conductor + puerta delantera + 2 asientos (1, 2)
+  // Fila 0: Conductor, Puerta Delantera, Asiento 1, Asiento 2
   seatRows.push([
-    "C",       // Conductor
-    "PD",      // Puerta Del.
+    "C",   // Conductor
+    "PD",  // Puerta delantera
     1,
-    2
+    2,
   ]);
 
+  // Filas 1-9: asientos del 3 al 38 (2+pasillo+2), 9 filas
   let currentSeat = 3;
-  // Filas intermedias: filas 2 a 10 (8 filas más), cada una: 2+pasillo+2
   for (let i = 0; i < 9; i++) {
     seatRows.push([
       currentSeat,
       currentSeat + 1,
-      null,      // Pasillo
+      null, // pasillo
       currentSeat + 2,
       currentSeat + 3,
     ]);
     currentSeat += 4;
   }
 
-  // Puerta trasera tras la fila de asientos 19-20 (es decir, tras la fila 10, asientos 19 y 20)
-  // Fila actual contiene asientos 19, 20, 21, 22 (currentSeat = 39 tras esto)
-  seatRows.push([
-    currentSeat,
-    currentSeat + 1,
-    null,
-    currentSeat + 2,
-    currentSeat + 3,
-  ]);
-  currentSeat += 4;
+  // Fila puerta trasera (tras asientos 19,20): fila vacía y puerta centrada
+  // La última fila de arriba termina en asiento 38, pero la puerta va después de la fila con asientos 19-20
+  // Esto ya está cubierto correctamente porque currentSeat después de la décima fila será 39
+  seatRows.splice(6, 0, [
+    null, null, "PT", null, null,
+  ]); // Insertamos justo después de la fila con asientos 19-22
 
-  // Fila de puerta trasera (puerta trasera ocupa el pasillo central)
-  seatRows.push([
-    null,
-    null,
-    "PT", // Puerta Tras.
-    null,
-    null,
-  ]);
-
-  // Filas siguientes hasta asiento 50 (del 23 al 50)
-  for (let i = 0; i < 7; i++) {
+  // Siguiente: continuar con 7 filas normales (del asiento actual hasta el asiento 50)
+  while (currentSeat <= 50) {
     seatRows.push([
       currentSeat,
       currentSeat + 1,
@@ -60,12 +45,12 @@ const buildSeatLayout = () => {
     ]);
     currentSeat += 4;
   }
-  // Si nos pasamos de 50, rellenar nulls
-  if (currentSeat > 51) {
-    seatRows[seatRows.length-1] = seatRows[seatRows.length-1].map(s => (typeof s === 'number' && s > 50) ? null : s);
-  }
+  // En la última fila de este bucle, puede que sobren celdas porque se pasa de 50
+  seatRows[seatRows.length - 1] = seatRows[seatRows.length - 1].map(
+    (s) => (typeof s === "number" && s > 50 ? null : s)
+  );
 
-  // Última fila: 5 asientos juntos (51-55)
+  // Fila final: 5 asientos juntos (51-55)
   seatRows.push([51, 52, 53, 54, 55]);
 
   return seatRows;
