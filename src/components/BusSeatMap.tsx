@@ -24,11 +24,6 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
   let currentSeat = 1;
 
   for (let row = 0; row < 13; row++) {
-    // Después de la fila que tiene los asientos 19 y 20 (fila 4, index 4), insertar fila vacía representando la puerta trasera.
-    if (row === 5) {
-      // Fila vacía: solo pasillo, usando null
-      seatMap.push([null, null, null, null, null]);
-    }
     const seatsInRow: (number | null)[] = [];
     // Izquierda
     for (let col = 0; col < 2; col++) {
@@ -49,13 +44,13 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
       }
     }
     seatMap.push(seatsInRow);
-  }
 
-  // Para la fila especial de asientos 49 y 50 (alineados), queremos asegurarnos de que su columna coincide:
-  // Encontrar en qué fila caen 49 y 50:
-  // Como hay una fila de pasillo agregada después de la 5, y sumando, los asientos 49 y 50 estarán en la última fila antes de pasar a la de 5.
-  // Pero el seatMap ya tiene los asientos hasta 50. Solo queremos asegurarnos visualmente que la última fila de asiento normal (con 49 y 50)
-  // no queda desalineada si faltan asientos. Por lo tanto, todo ok.
+    // Insertar SOLO detrás del 19/20 (que en el asiento count sería después de row==4, index 4 porque empieza en 0)
+    // Verificamos si los asientos de la fila actual incluyen 19 y 20
+    if (row === 4) { // Fila con 17,18,null,19,20
+      seatMap.push([null, null, null, null, null]); // Fila vacía como espacio/pasillo
+    }
+  }
 
   // Fila final de 5 asientos juntos (51-55)
   seatMap.push([51, 52, 53, 54, 55]);
@@ -104,7 +99,7 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
                     )
                   )
                 ) : row.every((s) => s === null) ? (
-                  // Fila de pasillo - sólo espacio debajo de 19 y 20
+                  // Única fila de pasillo debajo de los asientos 19/20
                   <div className="h-10 w-[260px] sm:w-[340px]" aria-label="Pasillo / puerta trasera" />
                 ) : (
                   row.map((seat, colIdx) =>
