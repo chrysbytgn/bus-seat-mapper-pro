@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Save } from "lucide-react";
 import { SeatReceiptsModal } from "@/components/SeatReceiptsModal";
+import { ExcursionPrintReport } from "@/components/ExcursionPrintReport";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
@@ -95,7 +96,7 @@ const Index = () => {
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">
       {/* Fila de botones arriba */}
-      <div className="flex justify-between items-center max-w-5xl mx-auto w-full px-4 pt-8 gap-3">
+      <div className="flex justify-between items-center max-w-5xl mx-auto w-full px-4 pt-8 gap-3 print:hidden">
         <Button variant="outline" size="sm" onClick={handleBack}>
           <ArrowLeft className="mr-1" />
           Volver atrás
@@ -116,7 +117,8 @@ const Index = () => {
           </Button>
         </div>
       </div>
-      <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12">
+      {/* CONTENIDO NORMAL */}
+      <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12 print:hidden">
         <section className="flex-1 min-w-[380px]">
           <BusSeatMap
             passengers={passengers}
@@ -132,6 +134,10 @@ const Index = () => {
           />
         </aside>
       </main>
+      {/* INFORME PARA IMPRIMIR */}
+      <div className="hidden print:block print:w-full">
+        <ExcursionPrintReport passengers={passengers} excursionInfo={excursionInfo} />
+      </div>
       <SeatReceiptsModal
         open={showReceiptsModal}
         onClose={() => setShowReceiptsModal(false)}

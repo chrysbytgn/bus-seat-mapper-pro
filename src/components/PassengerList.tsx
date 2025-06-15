@@ -1,4 +1,3 @@
-
 import { Passenger } from "./BusSeatMap";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -7,6 +6,7 @@ import { Bus } from "lucide-react";
 import type { ExcursionData } from "@/pages/Index";
 import { BusSeatMapPrint } from "./BusSeatMapPrint";
 import { getAssociationConfig } from "@/utils/associationConfig";
+import { ExcursionPrintReport } from "./ExcursionPrintReport";
 
 // Ayuda: asientos del 1 al 55
 const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
@@ -105,97 +105,15 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           </Button>
         </div>
       </div>
-      {/* IMPRESIÓN */}
-      <div
-        ref={printRef}
-        className="hidden print:flex print:flex-col print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0"
-      >
-        {/* Cabecera Asociación (solo impresión) */}
-        <div className="print:flex items-center gap-4 print:gap-5 pb-2 border-b border-gray-300 print:px-4 print:pt-3 print:pb-2 print:w-full">
-          {association.logo && (
-            <img
-              src={association.logo}
-              alt="Logo Asociación"
-              className="h-14 w-14 object-cover rounded-full border border-gray-300 mr-3"
-              style={{ minWidth: 56 }}
-            />
-          )}
-          <div className="flex flex-col">
-            <span className="text-2xl print:text-2xl font-bold text-primary mb-1">
-              {association.name || "Asociación"}
-            </span>
-            <span className="text-base print:text-base text-gray-800">
-              {association.address}
-            </span>
-            <span className="text-base print:text-base text-gray-800">
-              Tel: {association.phone}
-            </span>
-          </div>
-        </div>
-        <div className="print:flex print:flex-row print:w-full print:h-full print:items-stretch print:justify-between print:p-0 print:m-0">
-          {/* Croquis lado izquierdo en proporción más angosta */}
-          <div className="print:w-[30%] print:max-w-[28mm] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
-            <BusSeatMapPrint passengers={passengers} />
-          </div>
-          {/* Lista lado derecho (más ancho para tabla) */}
-          <div className="print:w-[70%] print:min-w-[140mm] print:p-4 flex flex-col justify-start items-start print:overflow-hidden">
-            <div>
-              <h2 className="text-3xl font-bold mb-1 print:text-4xl">{excursionTitle}</h2>
-              <div className="text-lg font-semibold mb-2 print:text-2xl">
-                {fecha && <span>Fecha: {fecha}{"  "}</span>}
-                {hora && <span>Hora: {hora}{"  "}</span>}
-                {lugar && <span>Salida: {lugar}</span>}
-              </div>
-            </div>
-            <PasajerosTableImprimir passengers={passengers} />
-          </div>
-        </div>
-      </div>
-      {/* Estilos para impresión ajustados a vertical */}
-      <style>
-        {`
-        @media print {
-          html, body, #root {
-            background: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 210mm !important;
-            min-width: 210mm !important;
-            height: 297mm !important;
-            min-height: 297mm !important;
-            overflow: hidden !important;
-          }
-          .print\\:hidden { display: none !important; }
-          .print\\:flex { display: flex !important; }
-          .print\\:w-\\[30\\%\\] { width: 30% !important; }
-          .print\\:max-w-\\[28mm\\] { max-width: 28mm !important; }
-          .print\\:w-\\[70\\%\\] { width: 70% !important; }
-          .print\\:min-w-\\[140mm\\] { min-width: 140mm !important; }
-          .print\\:p-1 { padding: 0.25rem !important; }
-          .print\\:p-4 { padding: 1rem !important; }
-          .print\\:border-r { border-right: 2px solid #ccc !important; }
-          .print\\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
-          .print\\:scale-\\[0\\.7\\] { transform: scale(0.7); }
-          .print\\:text-4xl { font-size: 2.2rem !important; }
-          .print\\:text-2xl { font-size: 1.3rem !important; }
-          .print\\:text-lg { font-size: 1.06rem !important; }
-          .print\\:cabecera-asociacion {
-            display: flex !important;
-            align-items: center !important;
-            gap: 20px !important;
-            margin-bottom: 8px !important;
-            border-bottom: 1.5px solid #ccc !important;
-            padding-bottom: 8px !important;
-          }
-          /* Ocultar botones en impresión */
-          .print\\:hidden-imprimir, .print\\:hidden-imprimir * {
-            display: none !important;
-          }
-        }
-        `}
-      </style>
+      {/* INFORME PARA IMPRESIÓN DELEGADO A Index.tsx */}
+      {/* Ahora renderizado por Index automáticamente, no aquí */}
+      {/* <div className="hidden print:block print:w-full">
+        <ExcursionPrintReport passengers={passengers} excursionInfo={excursionInfo} />
+      </div> */}
+      {/* Estilos para impresión sólo si no se incluyen en el reporte */}
+      {/* El reporte tiene su propio css si corresponde */}
     </>
   );
 }
 
-// El archivo está creciendo demasiado, considera pedir una refactorización al finalizar otros cambios.
+// Nota: este archivo sigue largo. Considera refactorizar componentes secundarios.

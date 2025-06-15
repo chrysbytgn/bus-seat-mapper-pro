@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -14,6 +13,7 @@ export interface NewExcursionData {
   date: Date | null;
   time: string;
   place: string;
+  stops?: string[];
 }
 
 interface NewExcursionDialogProps {
@@ -28,6 +28,8 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
   const [place, setPlace] = useState("");
   const [time, setTime] = useState(""); // Simple string: "HH:MM"
   const [timePopoverOpen, setTimePopoverOpen] = useState(false);
+  const [stops, setStops] = useState<string[]>([]);
+  const [newStop, setNewStop] = useState(""); // Para nuevo input de parada
 
   // Reset form on open
   React.useEffect(() => {
@@ -36,6 +38,8 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
       setDate(null);
       setPlace("");
       setTime("");
+      setStops([]);
+      setNewStop("");
       setTimePopoverOpen(false);
     }
   }, [open]);
@@ -122,6 +126,47 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
               className="pl-10"
             />
           </div>
+          {/* Paradas adicionales */}
+          <div>
+            <label className="font-medium">Paradas adicionales para recoger (opcional)</label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                value={newStop}
+                onChange={e => setNewStop(e.target.value)}
+                placeholder="Ej: Barrio El Norte"
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  if (newStop.trim()) {
+                    setStops(list => [...list, newStop.trim()]);
+                    setNewStop("");
+                  }
+                }}
+              >Añadir</Button>
+            </div>
+            <ul className="mt-2 ml-5 list-disc text-sm text-gray-700">
+              {stops.map((stop, idx) => (
+                <li key={idx} className="flex items-center">
+                  <span>{stop}</span>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    type="button"
+                    title="Eliminar parada"
+                    className="text-xs text-red-400 ml-2 px-1"
+                    onClick={() =>
+                      setStops(list => list.filter((_, i) => i !== idx))
+                    }
+                  >
+                    ×
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         <DialogFooter className="pt-4">
           <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
@@ -129,7 +174,7 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
             disabled={!canSave}
             onClick={() => {
               if (canSave) {
-                onSave({ name: name.trim(), date, time, place: place.trim() });
+                onSave({ name: name.trim(), date, time, place: place.trim(), stops });
               }
             }}
           >
@@ -140,4 +185,3 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
     </Dialog>
   );
 }
-
