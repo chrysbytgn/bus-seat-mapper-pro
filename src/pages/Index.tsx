@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
@@ -6,6 +5,7 @@ import { PassengerList } from "@/components/PassengerList";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Save } from "lucide-react";
+import { SeatReceiptsModal } from "@/components/SeatReceiptsModal";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
@@ -23,6 +23,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [excursionInfo, setExcursionInfo] = useState<ExcursionData | null>(null);
+  const [showReceiptsModal, setShowReceiptsModal] = useState(false);
 
   // Carga datos de la excursión
   useEffect(() => {
@@ -99,10 +100,21 @@ const Index = () => {
           <ArrowLeft className="mr-1" />
           Volver atrás
         </Button>
-        <Button variant="default" size="sm" onClick={handleSave}>
-          <Save className="mr-1" />
-          Guardar
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="default" size="sm" onClick={handleSave}>
+            <Save className="mr-1" />
+            Guardar
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowReceiptsModal(true)}
+            disabled={passengers.length === 0}
+            title={passengers.length === 0 ? "Debes agregar pasajeros para generar recibos" : undefined}
+          >
+            Generar recibos
+          </Button>
+        </div>
       </div>
       <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12">
         <section className="flex-1 min-w-[380px]">
@@ -120,6 +132,12 @@ const Index = () => {
           />
         </aside>
       </main>
+      <SeatReceiptsModal
+        open={showReceiptsModal}
+        onClose={() => setShowReceiptsModal(false)}
+        passengers={passengers}
+        excursionInfo={excursionInfo}
+      />
     </div>
   );
 };
