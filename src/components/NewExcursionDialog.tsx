@@ -13,6 +13,7 @@ export interface NewExcursionData {
   date: Date | null;
   time: string;
   place: string;
+  price?: string; // <--- Añadir precio
   stops?: string[];
 }
 
@@ -30,6 +31,7 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
   const [timePopoverOpen, setTimePopoverOpen] = useState(false);
   const [stops, setStops] = useState<string[]>([]);
   const [newStop, setNewStop] = useState(""); // Para nuevo input de parada
+  const [price, setPrice] = useState(""); // <--- price
 
   // Reset form on open
   React.useEffect(() => {
@@ -41,6 +43,7 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
       setStops([]);
       setNewStop("");
       setTimePopoverOpen(false);
+      setPrice("");
     }
   }, [open]);
 
@@ -51,7 +54,7 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
     return `${hour.toString().padStart(2, "0")}:${minute}`;
   });
 
-  const canSave = name.trim() && date && time && place.trim();
+  const canSave = name.trim() && date && time && place.trim() && price.trim();
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onCancel()}>
@@ -126,6 +129,17 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
               className="pl-10"
             />
           </div>
+          {/* Precio */}
+          <div>
+            <label className="font-medium">Precio por asiento (€)</label>
+            <Input
+              placeholder="Precio, ej: 24"
+              type="number"
+              value={price}
+              min="0"
+              onChange={e => setPrice(e.target.value)}
+            />
+          </div>
           {/* Paradas adicionales */}
           <div>
             <label className="font-medium">Paradas adicionales para recoger (opcional)</label>
@@ -174,7 +188,7 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
             disabled={!canSave}
             onClick={() => {
               if (canSave) {
-                onSave({ name: name.trim(), date, time, place: place.trim(), stops });
+                onSave({ name: name.trim(), date, time, place: place.trim(), price: price.trim(), stops });
               }
             }}
           >

@@ -17,6 +17,8 @@ export type ExcursionData = {
   date?: string;
   time?: string;
   place?: string;
+  stops?: string[]; // Añadido ya para paradas
+  price?: string;   // Añadido para precio
 };
 
 const Index = () => {
@@ -41,6 +43,8 @@ const Index = () => {
             date: found.date,
             time: found.time,
             place: found.place,
+            stops: found.stops || [],
+            price: found.price || "", // soportar precio en excursión vieja/nueva
           });
         }
       } catch (e) {
