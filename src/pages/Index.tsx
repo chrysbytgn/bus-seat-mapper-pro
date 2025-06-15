@@ -1,12 +1,41 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
+import { PassengerList } from "@/components/PassengerList";
 
 const Index = () => {
+  const [passengers, setPassengers] = useState<Passenger[]>([]);
+
+  const handleAddOrEditPassenger = (seat: number, name: string, surname: string) => {
+    setPassengers(prev => {
+      const exists = prev.some(p => p.seat === seat);
+      if (exists) {
+        return prev.map(p => p.seat === seat ? { seat, name, surname } : p);
+      }
+      return [...prev, { seat, name, surname }];
+    });
+  };
+
+  const handleClearSeats = () => {
+    setPassengers([]);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="flex min-h-screen w-full bg-background">
+      <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12">
+        <section className="flex-1 min-w-[380px]">
+          <BusSeatMap
+            passengers={passengers}
+            onSeatClick={handleAddOrEditPassenger}
+          />
+        </section>
+        <aside className="flex-1 min-w-[340px]">
+          <PassengerList
+            passengers={passengers}
+            onClear={handleClearSeats}
+          />
+        </aside>
+      </main>
     </div>
   );
 };
