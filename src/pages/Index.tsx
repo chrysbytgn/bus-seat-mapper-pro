@@ -8,6 +8,8 @@ import { ArrowLeft, Save, Edit2 } from "lucide-react";
 import { SeatReceiptsModal } from "@/components/SeatReceiptsModal";
 import { ExcursionPrintReport } from "@/components/ExcursionPrintReport";
 import { EditExcursionDialog } from "@/components/EditExcursionDialog";
+import { ExcursionHeader } from "@/components/ExcursionHeader";
+import { ExcursionMain } from "@/components/ExcursionMain";
 import {
   fetchAssociation,
   fetchExcursionById,
@@ -184,83 +186,26 @@ const Index = () => {
 
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">
-      {/* Fila de botones arriba */}
-      <div className="flex justify-between items-center max-w-5xl mx-auto w-full px-4 pt-8 gap-3 print:hidden">
-        <Button variant="outline" size="sm" onClick={handleBack}>
-          <ArrowLeft className="mr-1" />
-          Volver atrás
-        </Button>
-        <div className="flex gap-2">
-          <Button variant="default" size="sm" onClick={handleSave} disabled={loadingExcursion || !excursionInfo?.id}>
-            <Save className="mr-1" />
-            Guardar
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setShowReceiptsModal(true)}
-            disabled={loadingExcursion || !excursionInfo?.id || passengers.length === 0}
-            title={
-              loadingExcursion
-                ? "Cargando excursión..."
-                : !excursionInfo?.id
-                ? "La excursión aún no está disponible"
-                : passengers.length === 0
-                ? "Debes agregar pasajeros para generar recibos"
-                : undefined
-            }
-          >
-            Generar recibos
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setEditDialogOpen(true)}
-            title="Editar información de la excursión"
-            disabled={loadingExcursion || !excursionInfo?.id}
-          >
-            <Edit2 className="mr-1" /> Editar excursión
-          </Button>
-        </div>
-      </div>
-      {/* CONTENIDO NORMAL */}
-      <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12 print:hidden">
-        <section className="flex-1 min-w-[380px]">
-          {excursionError ? (
-            <div className="flex flex-col items-center justify-center h-64 text-red-500 font-semibold">
-              {excursionError}
-              <Button className="mt-4" onClick={handleBack}>Volver</Button>
-            </div>
-          ) : !excursionInfo || loadingExcursion ? (
-            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-              Cargando excursión...
-            </div>
-          ) : (
-            <BusSeatMap
-              passengers={passengers}
-              onSeatClick={handleAddOrEditPassenger}
-              excursionName={excursionInfo?.name || "Excursión"}
-            />
-          )}
-        </section>
-        <aside className="flex-1 min-w-[340px]">
-          {excursionError ? (
-            <div className="flex flex-col items-center justify-center h-48 text-red-500 font-semibold">
-              {excursionError}
-            </div>
-          ) : !excursionInfo || loadingExcursion ? (
-            <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-              Información no disponible.
-            </div>
-          ) : (
-            <PassengerList
-              passengers={passengers}
-              onClear={handleClearSeats}
-              excursionInfo={excursionInfo}
-            />
-          )}
-        </aside>
-      </main>
+      {/* CABECERA */}
+      <ExcursionHeader
+        loadingExcursion={loadingExcursion}
+        excursionInfo={excursionInfo}
+        onBack={handleBack}
+        onSave={handleSave}
+        onShowReceipts={() => setShowReceiptsModal(true)}
+        onEditExcursion={() => setEditDialogOpen(true)}
+        passengersCount={passengers.length}
+      />
+      {/* CONTENIDO PRINCIPAL */}
+      <ExcursionMain
+        passengers={passengers}
+        excursionInfo={excursionInfo}
+        loadingExcursion={loadingExcursion}
+        excursionError={excursionError}
+        onClearSeats={handleClearSeats}
+        onSeatClick={handleAddOrEditPassenger}
+        onBack={handleBack}
+      />
       {/* INFORME PARA IMPRIMIR */}
       <div className="hidden print:block print:w-full">
         <ExcursionPrintReport passengers={passengers} excursionInfo={excursionInfo} />
