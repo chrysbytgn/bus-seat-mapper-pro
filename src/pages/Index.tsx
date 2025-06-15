@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
@@ -14,13 +15,14 @@ import {
   fetchPassengers,
   upsertPassenger,
   clearPassengers,
+  upsertExcursion // ADD THE IMPORT
 } from "@/utils/supabasePassengers";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
 
 export type ExcursionData = {
-  id: string;
+  id: number; // It is number (matches db), not string
   name: string;
   date?: string;
   time?: string;
@@ -38,19 +40,29 @@ const Index = () => {
   const [showReceiptsModal, setShowReceiptsModal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  // NUEVO: cargar datos desde Supabase
   useEffect(() => {
     if (!id) return;
-    fetchExcursionById(id)
+    fetchExcursionById(Number(id)) // always pass number
       .then(data => {
         if (data) {
+          let parsedStops: string[] = [];
+          if (Array.isArray(data.stops)) {
+            parsedStops = data.stops as string[];
+          } else if (typeof data.stops === "string") {
+            try {
+              const asParsed = JSON.parse(data.stops);
+              if (Array.isArray(asParsed)) parsedStops = asParsed;
+            } catch {}
+          } else if (data.stops && typeof data.stops === "object" && Array.isArray((data.stops as any))) {
+            parsedStops = data.stops as string[];
+          } // else leave as []
           setExcursionInfo({
-            id: data.id,
+            id: Number(data.id),
             name: data.name,
-            date: data.date,
-            time: data.time,
-            place: data.place,
-            stops: data.stops || [],
+            date: data.date || "",
+            time: data.time || "",
+            place: data.place || "",
+            stops: parsedStops,
             price: data.price || "",
             association_id: data.association_id,
           });
@@ -61,7 +73,7 @@ const Index = () => {
 
   useEffect(() => {
     if (!id) return;
-    fetchPassengers(id)
+    fetchPassengers(Number(id)) // pass number type
       .then((data) => setPassengers(data))
       .catch(() => setPassengers([]));
   }, [id]);
@@ -70,8 +82,7 @@ const Index = () => {
     if (!id) return;
     try {
       await upsertPassenger(Number(id), { seat, name, surname });
-      // Refrescar
-      fetchPassengers(id).then(setPassengers);
+      fetchPassengers(Number(id)).then(setPassengers);
     } catch {
       toast({
         title: "Error",
@@ -87,7 +98,6 @@ const Index = () => {
     setPassengers([]);
   };
 
-  // NUEVO: manejo para botón guardar y volver atrás
   const handleBack = () => {
     navigate("/");
   };
@@ -100,16 +110,15 @@ const Index = () => {
     });
   };
 
-  // NUEVO: guardar cambios en excursión tras editar
   const handleEditExcursion = async (data: ExcursionData) => {
     if (!excursionInfo?.association_id || !id) return;
     try {
       await upsertExcursion({
         ...data,
-        id,
+        id: Number(id),
         association_id: excursionInfo.association_id,
       });
-      setExcursionInfo((prev) => prev ? { ...prev, ...data } : prev);
+      setExcursionInfo((prev) => prev ? { ...prev, ...data, id: Number(id) } : prev);
       setEditDialogOpen(false);
       toast({
         title: "Excursión modificada",

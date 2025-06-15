@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Passenger } from "@/components/BusSeatMap";
 import type { ExcursionData } from "@/pages/Index";
 
+// Since ExcursionData now uses id: number
 export async function fetchAssociation() {
-  // Devuelve la primera asociación (por simplicidad, 1 por app)
   const { data, error } = await supabase
     .from("associations")
     .select("*")
@@ -14,7 +14,7 @@ export async function fetchAssociation() {
   return data;
 }
 
-export async function fetchExcursionById(excursionId: string | number) {
+export async function fetchExcursionById(excursionId: number) {
   const { data, error } = await supabase
     .from("excursions")
     .select("*")
@@ -24,7 +24,7 @@ export async function fetchExcursionById(excursionId: string | number) {
   return data;
 }
 
-export async function fetchPassengers(excursionId: string | number) {
+export async function fetchPassengers(excursionId: number) {
   const { data, error } = await supabase
     .from("passengers")
     .select("*")
@@ -34,10 +34,17 @@ export async function fetchPassengers(excursionId: string | number) {
   return data || [];
 }
 
+// Fix types for upsert
 export async function upsertExcursion(excursion: ExcursionData & { association_id: string }) {
+  // Ensure stops is json
+  const record = {
+    ...excursion,
+    id: Number(excursion.id),
+    stops: excursion.stops ?? [],
+  };
   const { data, error } = await supabase
     .from("excursions")
-    .upsert([excursion])
+    .upsert([record])
     .select();
   if (error) throw error;
   return data?.[0];
@@ -47,7 +54,12 @@ export async function upsertPassenger(excursion_id: number, passenger: Passenger
   // seat is unique for excursion_id
   const { data, error } = await supabase
     .from("passengers")
-    .upsert([{ excursion_id, seat: passenger.seat, name: passenger.name, surname: passenger.surname }])
+    .upsert([{
+      excursion_id,
+      seat: passenger.seat,
+      name: passenger.name,
+      surname: passenger.surname
+    }])
     .select();
   if (error) throw error;
   return data?.[0];
