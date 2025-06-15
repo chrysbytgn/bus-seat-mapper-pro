@@ -4,11 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAssociationConfig, setAssociationConfig, AssociationConfig } from "@/utils/associationConfig";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 export default function AssociationOptions() {
   const [config, setConfig] = useState<AssociationConfig>(getAssociationConfig());
   const [logoPreview, setLogoPreview] = useState<string>(config.logo || "");
   const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConfig(c => ({ ...c, [e.target.name]: e.target.value }));
@@ -34,8 +37,18 @@ export default function AssociationOptions() {
 
   return (
     <div className="flex min-h-screen justify-center items-center bg-background">
-      <div className="bg-white border rounded-xl shadow px-7 py-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-5">Opciones de Asociación</h2>
+      <div className="bg-white border rounded-xl shadow px-7 py-8 w-full max-w-md relative">
+        {/* Botón volver atrás */}
+        <Button
+          variant="outline"
+          className="absolute top-4 left-4"
+          size="sm"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeft className="mr-1" />
+          Volver atrás
+        </Button>
+        <h2 className="text-2xl font-bold mb-5 text-center mt-2">Opciones de Asociación</h2>
         <form className="flex flex-col gap-4" onSubmit={handleSave}>
           <div>
             <label className="font-medium">Nombre de la asociación</label>
