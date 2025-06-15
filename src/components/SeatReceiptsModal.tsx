@@ -15,162 +15,208 @@ interface Props {
 }
 
 /**
- * Recibo autogenerado para cada pasajero con mácula (control) y corte.
+ * Recibo autogenerado "vintage" para cada pasajero con mácula (control), corte y estilo bloc antiguo.
  */
 export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: Props) {
   const [generating, setGenerating] = useState(false);
-
-  // Genera el array de 55 asientos (1 a 55)
   const seatRange = Array.from({ length: 55 }, (_, i) => i + 1);
 
-  // Devuelve el pasajero si existe para ese asiento
   function getPassenger(seat:number){
     return passengers.find(p => p.seat === seat) || null;
   }
-
-  // Para mostrar en la lista previa
   const sortedSeatList = seatRange.map(n => ({
     seat: n,
     ...getPassenger(n),
   }));
-
-  // Obtiene siguiente número de recibo básico (puede personalizarse según negocio real)
   function siguienteNumeroRecibo(baseNum: number) {
     return "REC-" + String(baseNum).padStart(3, "0");
   }
 
-  // Genera todos los recibos (1 al 55) en 1 PDF
   async function generarPDFasientos() {
     setGenerating(true);
     const logoURL = "https://www.pngmart.com/files/21/Travel-PNG-Image-HD.png";
     const logoDataURL = await getDataURL(logoURL);
+    // Configuración bloc antiguo
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const fechaEmision = new Date().toLocaleDateString("es-ES");
     const lastSeq = Number(localStorage.getItem("receipt_seq") || "1");
     let actualSeq = lastSeq;
 
-    // Configuración de layout 2 columnas x 2 filas = 4 por página
+    // Layout: 4 por hoja, área ajustada con bordes a "bloc"
     const recibosPorHoja = 4;
-    const colWidth = 100;  // A4 width: 210mm, margen aprox. 5mm a cada lado
-    const rowHeight = 145; // Un poco menos de la mitad de A4 height: 297mm
-
-    passengers; // dummy to avoid TS warning if not used elsewhere
+    const colWidth = 100;
+    const rowHeight = 145;
 
     seatRange.forEach((seatNum, idx) => {
-      // En qué posición de la hoja va este recibo
       const posInPage = idx % recibosPorHoja;
-      const pageIndex = Math.floor(idx / recibosPorHoja);
-
-      // Si es el 1º de la hoja después de la primera, añadir página
       if (posInPage === 0 && idx !== 0) doc.addPage();
-
-      // Cálculo de posición X, Y
       const col = posInPage % 2;
       const row = Math.floor(posInPage / 2);
-
-      // Margen superior/izquierdo
       const left = 7 + col * colWidth;
       const top = 10 + row * (rowHeight - 5);
-
       const p = getPassenger(seatNum);
+
       for (let i = 0; i < 2; i++) {
-        // i=0 original, i=1 copia (la copia debajo de la original, pequeña separación vertical)
-        const yBase = top + i * 62; // Separadas vertical por 62mm, caben 2
+        // Original/Copia
+        const yBase = top + i * 62;
         const etiqueta = i === 0 ? "ORIGINAL" : "COPIA";
 
-        // Borde recibo
-        doc.setDrawColor(180);
-        doc.rect(left + 8, yBase, 83, 58, "S");
+        // --- LADO "BLOC ANTIGUO": bordes, talonario, mácula, etc. ---
+        // Area grande de recibo (fondo blanco)
+        doc.setFillColor(255,255,255);
+        doc.rect(left + 8, yBase, 84, 58, "F");
 
-        // Mácula (lado izquierdo, zona de control)
-        doc.setFillColor(60, 70, 125);
+        // Mácula lateral de control
+        doc.setFillColor(45, 63, 143);
         doc.rect(left, yBase, 8, 58, "F");
 
-        // Línea discontinua vertical para corte
+        // Marca "TALONARIO" en vertical en la mácula
+        doc.saveGraphicsState?.();
+        doc.setTextColor(255,255,255);
+        doc.setFontSize(11);
+        doc.text("TALONARIO", left + 4.4, yBase + 34, {angle: 270, align:"center", maxWidth: 58});
+        doc.restoreGraphicsState?.();
+
+        // Bordes exteriores perforados (simula talonario, puntitos a la izq)
+        for(let yPart = 2; yPart < 58; yPart += 3.2){
+          doc.setDrawColor(175,175,175);
+          doc.line(left+7.8, yBase + yPart, left+8.5, yBase + yPart + 1);
+        }
+
+        // Línea punteada superior (zona de corte del "bloc")
+        doc.setLineDashPattern([1.2,1],0);
+        doc.setDrawColor(120,120,120);
+        doc.line(left+8, yBase+3.7, left+92, yBase+3.7); // tope superior
+        doc.setLineDashPattern([],0);
+
+        // Cabecera grande: Recibo
+        doc.setFillColor(38,66,139);
+        doc.rect(left+8, yBase+4, 84, 11, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13.5);
+        doc.setTextColor(255,255,255);
+        doc.text("RECIBO", left+50, yBase+12, {align: "center", maxWidth: 83});
+
+        // Logo empresa a la izq
+        if (logoDataURL) {
+          doc.addImage(logoDataURL, "PNG", left + 11.5, yBase + 6.5, 7.5, 7.5);
+        }
+        // Datos empresa
+        doc.setFont("times", "italic");
+        doc.setFontSize(7);
+        doc.setTextColor(240,240,240);
+        doc.text("Excursiones ABC", left+19.5, yBase+9.8);
+        doc.setFontSize(5.8);
+        doc.text("Av. Principal 123, Ciudad", left+19.5, yBase+13);
+        doc.text("Tel: 555-123-4567", left+19.5, yBase+15);
+        doc.setTextColor(90,90,90);
+
+        // Recibo nº y fecha
+        doc.setFont("helvetica","bold");
+        doc.setFontSize(8.2);
+        doc.setTextColor(26,44,106);
+        doc.text(`Recibo N°: ${siguienteNumeroRecibo(actualSeq+idx)}`, left+81, yBase+9.5, {align:"right", maxWidth:23});
+        doc.setFontSize(6.1);
+        doc.setTextColor(95,106,130);
+        doc.text(`Fecha: ${fechaEmision}`, left+81, yBase+13.4, {align:"right",maxWidth:23});
+
+        // Etiqueta ORIGINAL/COPIA
+        doc.setFontSize(6.3);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`(${etiqueta})`, left+89.2, yBase+16, {align:"right", maxWidth:13});
+
+        // Línea de corte vertical
         doc.setLineDashPattern([2.2, 2.2], 0);
         doc.setDrawColor(100);
         doc.line(left + 8, yBase, left + 8, yBase + 58);
         doc.setLineDashPattern([], 0);
 
-        // LOGO
-        if (logoDataURL) {
-          doc.addImage(logoDataURL, "PNG", left + 10, yBase + 3, 11, 11);
-        }
-        doc.setFontSize(9.5);
-        doc.setTextColor(33,33,33);
-        doc.text("Excursiones ABC", left + 23, yBase + 9);
-        doc.setFontSize(6.5);
-        doc.text("Av. Principal 123, Ciudad", left + 23, yBase + 13);
-        doc.text("Tel: 555-123-4567    info@excursionesabc.com", left + 23, yBase + 16.5);
-
-        // Recibo N° y fecha
-        doc.setFontSize(7);
-        doc.setTextColor(0,0,180);
-        doc.text(`Recibo N°: ${siguienteNumeroRecibo(actualSeq+idx)}`, left + 80, yBase + 9);
-        doc.setTextColor(100,100,100);
-        doc.text(`Fecha emisión: ${fechaEmision}`, left + 80, yBase + 13);
-
-        // Etiqueta ORIGINAL/COPIA
-        doc.setFontSize(6.5);
-        doc.setTextColor(80,80,80);
-        doc.text(`(${etiqueta})`, left + 88, yBase + 15.5, { align: "right", maxWidth: 15 });
-
-        // Línea horizontal
-        doc.setDrawColor(210);
-        doc.line(left + 10, yBase + 18.5, left + 89, yBase + 18.5);
-
-        // Detalles asiento y excursión
+        // - Detalles asiento y excursión en CUADROS tipo talonario
+        // Asiento y nombre vacío para rellenar a mano
+        doc.setDrawColor(140,140,140);
+        doc.setFont("times","bold");
+        doc.setTextColor(24,34,81);
+        doc.rect(left+12, yBase+18, 29, 8, "S");
         doc.setFontSize(7.5);
-        doc.setTextColor(40,40,40);
-        doc.text(`Asiento: ${seatNum}`, left + 11, yBase + 23);
-        doc.text(`Excursión: ${excursionInfo?.name || ""}`, left + 11, yBase + 27);
-        if (excursionInfo?.date) doc.text(`Fecha exc.: ${formatFecha(excursionInfo.date)}`, left + 11, yBase + 31);
-        if (excursionInfo?.place) doc.text(`Salida: ${excursionInfo.place}`, left + 11, yBase + 35);
+        doc.text("Asiento n°", left+13, yBase+23.7);
+        doc.setFont("courier","bold");
+        doc.setFontSize(10.2);
+        doc.text(`${seatNum}`, left+30, yBase+23.9, {align:"center",maxWidth:13});
 
-        // Línea para anotar nombre manualmente
+        // Cuadro para nombre manuscrito y leyenda
         doc.setDrawColor(150,150,170);
-        doc.setLineDashPattern([1,1], 1.2);
-        doc.line(left + 35, yBase + 42, left + 86, yBase + 42);
-        doc.setLineDashPattern([],0);
-        doc.setFontSize(7.5);
-        doc.setTextColor(50,50,50);
-        doc.text("Nombre del viajero (escribir a mano):", left + 11, yBase + 40);
+        doc.rect(left+44, yBase+18, 42, 8, "S");
+        doc.setFont("times","normal");
+        doc.setFontSize(7.2);
+        doc.setTextColor(32,28,55);
+        doc.text("Pagado por:", left+45, yBase+23.3);
+        doc.setDrawColor(190,190,198);
 
-        // Si hay pasajero, lo muestra a la derecha como referencia pequeña
-        if(p){
-          doc.setFontSize(6.2);
-          doc.setTextColor(80,80,80);
-          doc.text(`Registrado: ${p.name} ${p.surname}`, left + 38, yBase + 23);
+        // Línea para nombre
+        doc.line(left+62, yBase+25.2, left+84, yBase+25.2);
+
+        // Fila referencia de pasajero si existe
+        if (p) {
+          doc.setFontSize(5.7);
+          doc.setTextColor(90,110,80);
+          doc.text(`Registrado: ${p.name} ${p.surname}`, left+45, yBase+27.7, {maxWidth:38});
         }
 
-        // Tabla de monto y pago (simulada a mano)
-        doc.setFontSize(7.2);
-        doc.setTextColor(0,0,0);
-        doc.setDrawColor(180);
-        // Encabezado
-        doc.rect(left + 35, yBase + 44, 37, 7, "S");
-        doc.text("MONTO (€)", left + 37, yBase + 49);
-        doc.line(left + 55, yBase + 44, left + 55, yBase + 51);
-        doc.text("Forma de pago", left + 57, yBase + 49);
-        // Celdas vacías
-        doc.rect(left + 35, yBase + 51, 37, 6, "S");
+        // Concepto excursión / destino
+        doc.setDrawColor(180,180,180);
+        doc.setFont("times","bold");
+        doc.rect(left+12, yBase+28, 74, 7.3, "S");
+        doc.setFont("times","normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(26,44,106);
+        doc.text(`Concepto: Excursión ${excursionInfo?.name ? "a "+excursionInfo?.name : ""}`, left+14, yBase+33.6);
 
-        // Marca de agua PAGADO (más pequeña)
-        // @ts-ignore
+        // Fecha y lugar excursión (si hay)
+        if (excursionInfo?.date || excursionInfo?.place) {
+          doc.setFont("times","italic");
+          doc.setFontSize(6.7);
+          doc.setTextColor(70,70,100);
+          let yInfo = yBase+38.3;
+          if (excursionInfo?.date) {
+            doc.text(`Fecha Exc: ${formatFecha(excursionInfo.date)}`, left+14, yInfo);
+            yInfo += 4.2;
+          }
+          if (excursionInfo?.place) {
+            doc.text(`Salida: ${excursionInfo.place}`, left+14, yInfo);
+          }
+        }
+
+        // Zona para MONTO y firma
+        doc.setDrawColor(80,80,82);
+        doc.setFont("helvetica","bold");
+        doc.rect(left+12, yBase+47, 23.4, 7.3, "S");
+        doc.rect(left+37, yBase+47, 25, 7.3, "S");
+        doc.rect(left+63, yBase+47, 23, 7.3, "S");
+        doc.setFontSize(7.6);
+        doc.setTextColor(47,47,47);
+        doc.text("MONTO (€)", left+13.8, yBase+52);
+        doc.text("Forma pago", left+38, yBase+52);
+        doc.text("Firma", left+67, yBase+52);
+
+        // Cuadros vacíos para rellenar a mano
+        // Monto/forma/firma
+        // (Sin texto, solo cuadros)
+
+        // Marca de agua PAGADO (sutil, vintage)
         if (typeof doc.saveGraphicsState === "function" && typeof doc.setGState === "function") {
-          // @ts-ignore
           doc.saveGraphicsState();
-          doc.setTextColor(120, 120, 120);
-          doc.setFontSize(17);
+          doc.setTextColor(180, 180, 180);
+          doc.setFont("courier","bold");
+          doc.setFontSize(18);
           // @ts-ignore
-          doc.setGState(new doc.GState({ opacity: 0.23 }));
-          doc.text("PAGADO", left + 49, yBase + 58, { align: "center", angle: 0 });
-          // @ts-ignore
+          doc.setGState(new doc.GState({ opacity: 0.22 }));
+          doc.text("PAGADO", left+49, yBase+57.4, {align: "center", angle: -8});
           doc.restoreGraphicsState();
         } else {
           doc.setTextColor(180, 180, 180);
-          doc.setFontSize(17);
-          doc.text("PAGADO", left + 49, yBase + 58, { align: "center", angle: 0 });
+          doc.setFont("courier","bold");
+          doc.setFontSize(18);
+          doc.text("PAGADO", left+49, yBase+57.4, {align: "center", angle: -8});
         }
       }
     });
@@ -189,7 +235,7 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
         <div className="py-2">
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              Se generarán recibos para <b>todos los asientos del bus</b>. Si el asiento está vacío podrás escribir el nombre del viajero a mano. Cada recibo incluye mácula (control) en el lateral, línea de corte vertical y espacio para nombre manual.
+              Se generarán recibos para <b>todos los asientos del bus</b>, ocupados o vacíos, con estilo “bloc antiguo”. Cada recibo tiene mácula, zona perforada, línea de corte y espacio para escribir a mano.
             </p>
           </div>
           <div className="max-h-36 overflow-auto mb-2 border rounded bg-muted px-3 py-2">
