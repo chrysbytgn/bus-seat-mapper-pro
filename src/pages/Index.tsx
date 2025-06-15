@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
@@ -40,18 +39,18 @@ const Index = () => {
   const [showReceiptsModal, setShowReceiptsModal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loadingExcursion, setLoadingExcursion] = useState(true);
+  const [excursionError, setExcursionError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     setLoadingExcursion(true);
-    fetchExcursionById(Number(id)) // always pass number
+    setExcursionError(null);
+    fetchExcursionById(Number(id))
       .then(data => {
-        if (data) {
+        if (data && data.id) {
           let parsedStops: string[] = [];
           const stopsRaw = data.stops;
-
           if (Array.isArray(stopsRaw)) {
-            // Correctly an array
             parsedStops = stopsRaw.filter((v): v is string => typeof v === "string");
           } else if (typeof stopsRaw === "string") {
             try {
@@ -59,14 +58,10 @@ const Index = () => {
               if (Array.isArray(asParsed)) {
                 parsedStops = asParsed.filter((v: unknown): v is string => typeof v === "string");
               } else if (asParsed && typeof asParsed === "object") {
-                // If object, get values as array of string
                 parsedStops = Object.values(asParsed).filter((v): v is string => typeof v === "string");
               }
-            } catch {
-              // invalid JSON, ignore
-            }
+            } catch {}
           } else if (stopsRaw && typeof stopsRaw === "object") {
-            // It's an object like {0: 'a', 1: 'b'}
             parsedStops = Object.values(stopsRaw).filter((v): v is string => typeof v === "string");
           }
           setExcursionInfo({
@@ -81,18 +76,29 @@ const Index = () => {
           });
         } else {
           setExcursionInfo(null);
+          setExcursionError("No se encontró la excursión solicitada. Vuelve atrás y selecciona otra.");
         }
       })
-      .catch(() => setExcursionInfo(null))
+      .catch((err) => {
+        setExcursionInfo(null);
+        setExcursionError("Error al cargar la excursión. Intenta actualizar la página o vuelve atrás.");
+        console.error("Error cargando excursión:", err);
+      })
       .finally(() => setLoadingExcursion(false));
   }, [id]);
 
   useEffect(() => {
-    if (!id) return;
-    fetchPassengers(Number(id)) // pass number type
+    if (!id || !excursionInfo?.id) {
+      setPassengers([]);
+      return;
+    }
+    fetchPassengers(Number(id))
       .then((data) => setPassengers(data))
-      .catch(() => setPassengers([]));
-  }, [id, excursionInfo?.id]); // actualizar si cambia excursion id
+      .catch((err) => {
+        setPassengers([]);
+        console.error("Error cargando pasajeros:", err);
+      });
+  }, [id, excursionInfo?.id]);
 
   const handleAddOrEditPassenger = async (seat: number, name: string, surname: string) => {
     if (!id || !excursionInfo?.id) {
@@ -120,13 +126,23 @@ const Index = () => {
           variant: "destructive"
         });
       }
+      console.error("Error guardando pasajero:", error);
     }
   };
 
   const handleClearSeats = async () => {
-    if (!id) return;
-    await clearPassengers(Number(id));
-    setPassengers([]);
+    if (!id || !excursionInfo?.id) return;
+    try {
+      await clearPassengers(Number(id));
+      setPassengers([]);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "No se pudieron borrar los pasajeros.",
+        variant: "destructive"
+      });
+      console.error("Error limpiando asientos:", err);
+    }
   };
 
   const handleBack = () => {
@@ -156,12 +172,13 @@ const Index = () => {
         description: "La información de la excursión se ha actualizado.",
         duration: 2200,
       });
-    } catch {
+    } catch (err) {
       toast({
         title: "Error",
         description: "No se pudo actualizar la excursión.",
         variant: "destructive"
       });
+      console.error("Error editando excursión:", err);
     }
   };
 
@@ -209,8 +226,12 @@ const Index = () => {
       {/* CONTENIDO NORMAL */}
       <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12 print:hidden">
         <section className="flex-1 min-w-[380px]">
-          {/* Bloqueo visual si no carga excursión */}
-          {!excursionInfo || loadingExcursion ? (
+          {excursionError ? (
+            <div className="flex flex-col items-center justify-center h-64 text-red-500 font-semibold">
+              {excursionError}
+              <Button className="mt-4" onClick={handleBack}>Volver</Button>
+            </div>
+          ) : !excursionInfo || loadingExcursion ? (
             <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
               Cargando excursión...
             </div>
@@ -223,7 +244,11 @@ const Index = () => {
           )}
         </section>
         <aside className="flex-1 min-w-[340px]">
-          {!excursionInfo || loadingExcursion ? (
+          {excursionError ? (
+            <div className="flex flex-col items-center justify-center h-48 text-red-500 font-semibold">
+              {excursionError}
+            </div>
+          ) : !excursionInfo || loadingExcursion ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
               Información no disponible.
             </div>
@@ -257,4 +282,3 @@ const Index = () => {
 };
 
 export default Index;
-
