@@ -19,22 +19,18 @@ interface BusSeatMapProps {
 }
 
 export function BusSeatMap({ passengers, onSeatClick }: BusSeatMapProps) {
-  // Para croquis de bus clásico (2-2), los dos primeros asientos en fila 1 son guía y conductor
-  // Renderizaremos las filas de asientos en un grid
-
   const getPassengerBySeat = (seat: number) =>
     passengers.find(p => p.seat === seat);
 
-  // Mapea los asientos a su posición en el bus (ver imagen buses convencionales)
+  // Nuevo croquis siguiendo requisitos: grupos de 2 asientos por lado, pasillo al centro, última fila 5 asientos juntos
   const seatMap: (number | null)[][] = [];
   let currentSeat = 1;
-  for (let row = 0; row < BUS_ROWS; row++) {
-    const seatsInRow = [];
+  for (let row = 0; row < BUS_ROWS - 1; row++) {
+    const seatsInRow: (number | null)[] = [];
     for (let col = 0; col < BUS_COLUMNS; col++) {
-      // Simular el pasillo:
-      if (col === 2) {
+      if (col === 2) { // pasillo visual
         seatsInRow.push(null);
-      } else if (currentSeat <= TOTAL_SEATS) {
+      } else if (currentSeat <= 50) {
         seatsInRow.push(currentSeat++);
       } else {
         seatsInRow.push(null);
@@ -42,9 +38,8 @@ export function BusSeatMap({ passengers, onSeatClick }: BusSeatMapProps) {
     }
     seatMap.push(seatsInRow);
   }
-
-  // 3 asientos finales juntos en la última fila del bus (tipo europeo)
-  seatMap[seatMap.length - 1] = [52, 53, 54, 55];
+  // Última fila: 5 asientos juntos (51-55)
+  seatMap.push([51, 52, 53, 54, 55]);
 
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
 
@@ -53,7 +48,6 @@ export function BusSeatMap({ passengers, onSeatClick }: BusSeatMapProps) {
     setSelectedSeat(seat);
   };
 
-  // Ayuda visual de filas y asientos, con croquis rectangular y responsive.
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
@@ -68,26 +62,45 @@ export function BusSeatMap({ passengers, onSeatClick }: BusSeatMapProps) {
           <div className="flex flex-col gap-2">
             {seatMap.map((row, rowIdx) => (
               <div key={rowIdx} className="flex flex-row justify-center items-center gap-3">
-                {row.map((seat, colIdx) =>
-                  seat ? (
-                    <button
-                      type="button"
-                      key={seat}
-                      className={cn(
-                        "w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-xs border shadow-sm select-none transition-all",
-                        getPassengerBySeat(seat)
-                          ? "bg-red-500 text-white hover:bg-red-600"
-                          : "bg-green-500 text-white hover:bg-green-600",
-                        selectedSeat === seat ? "ring-2 ring-primary/70 z-10" : ""
-                      )}
-                      onClick={() => handleSeatClick(seat)}
-                    >
-                      {seat}
-                    </button>
-                  ) : (
-                    <div key={colIdx} className="w-6 h-9" />
-                  )
-                )}
+                {/* Última fila: mostrar los 5 asientos juntos */}
+                {rowIdx === seatMap.length - 1
+                  ? row.map((seat, i) =>
+                      seat ? (
+                        <button
+                          key={seat}
+                          type="button"
+                          className={cn(
+                            "w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-xs border shadow-sm select-none transition-all",
+                            getPassengerBySeat(seat)
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : "bg-green-500 text-white hover:bg-green-600",
+                            selectedSeat === seat ? "ring-2 ring-primary/70 z-10" : ""
+                          )}
+                          onClick={() => handleSeatClick(seat)}
+                        >{seat}</button>
+                      ) : (
+                        <div key={i} className="w-6 h-9" />
+                      )
+                    )
+                  : row.map((seat, colIdx) =>
+                      seat ? (
+                        <button
+                          key={seat}
+                          type="button"
+                          className={cn(
+                            "w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-xs border shadow-sm select-none transition-all",
+                            getPassengerBySeat(seat)
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : "bg-green-500 text-white hover:bg-green-600",
+                            selectedSeat === seat ? "ring-2 ring-primary/70 z-10" : ""
+                          )}
+                          onClick={() => handleSeatClick(seat)}
+                        >{seat}</button>
+                      ) : (
+                        <div key={colIdx} className="w-6 h-9" />
+                      )
+                    )
+                }
               </div>
             ))}
           </div>

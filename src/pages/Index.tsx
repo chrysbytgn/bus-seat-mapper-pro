@@ -1,10 +1,32 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
 import { PassengerList } from "@/components/PassengerList";
 
+const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
+
 const Index = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [passengers, setPassengers] = useState<Passenger[]>([]);
+
+  // Load passengers by excursion id
+  useEffect(() => {
+    if (!id) {
+      navigate("/");
+      return;
+    }
+    const saved = window.localStorage.getItem(PASSENGERS_KEY_PREFIX + id);
+    setPassengers(saved ? JSON.parse(saved) : []);
+  }, [id, navigate]);
+
+  // Save passengers on update
+  useEffect(() => {
+    if (id) {
+      window.localStorage.setItem(PASSENGERS_KEY_PREFIX + id, JSON.stringify(passengers));
+    }
+  }, [passengers, id]);
 
   const handleAddOrEditPassenger = (seat: number, name: string, surname: string) => {
     setPassengers(prev => {
