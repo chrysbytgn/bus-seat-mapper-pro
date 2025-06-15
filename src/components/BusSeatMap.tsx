@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PassengerModal } from "./PassengerModal";
 import { cn } from "@/lib/utils";
@@ -20,8 +19,7 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
-  // Creamos el seatMap, pero modificando el orden para subir la fila de 21/22 una arriba (es decir, adelantar una fila).
-  const seatMap: (number | null)[][] = [];
+  // Corrección: eliminamos la declaración duplicada de seatMap (quedándonos solo con seatRows)
   let currentSeat = 1;
 
   // Agregamos el croquis como antes, pero almacenando las filas en un arreglo temporal.
@@ -52,8 +50,6 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
   }
 
   // --- Cambiamos la fila de asientos 21-22 una posición arriba ---
-  // Ubicamos dónde están los asientos 21/22 (en la fila 6, considerando fila vacía después de la 5 e índice inicia en 0)
-  // Buscamos la fila que contiene el 21.
   let idx21 = seatRows.findIndex((row) => row.includes(21));
   if (idx21 > 0) {
     // Intercambiamos esa fila con la anterior (para subirla una posición)
@@ -155,4 +151,3 @@ export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMa
     </div>
   );
 }
-
