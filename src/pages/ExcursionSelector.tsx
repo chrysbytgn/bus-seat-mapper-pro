@@ -21,25 +21,11 @@ export default function ExcursionSelector() {
     const data = window.localStorage.getItem(LOCAL_KEY);
     return data ? JSON.parse(data) : [];
   });
--  const [newName, setNewName] = useState("");
--  const [showNew, setShowNew] = useState(false);
-+  const [showNew, setShowNew] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
   const goToExcursion = (id: string) => {
     navigate(`/excursion/${id}`);
   };
-
--  const handleNewExcursion = () => {
--    if (!newName.trim()) return;
--    const id = Date.now().toString();
--    const newExc = { id, name: newName.trim() };
--    const updated = [...excursions, newExc];
--    setExcursions(updated);
--    window.localStorage.setItem(LOCAL_KEY, JSON.stringify(updated));
--    setNewName("");
--    setShowNew(false);
--    goToExcursion(id);
--  };
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-background">
@@ -69,60 +55,26 @@ export default function ExcursionSelector() {
           ))}
         </div>
 
--        {/* Modal sencillo para añadir nueva excursión */}
--        {showNew && (
--          <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
--            <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-4 w-[95vw] max-w-sm border-2 border-primary">
--              <h2 className="text-xl font-bold mb-2 text-center">Nombre de la nueva excursión</h2>
--              <Input
--                placeholder="Ej: Excursión a la playa"
--                value={newName}
--                onChange={e => setNewName(e.target.value)}
--                onKeyDown={e => {
--                  if (e.key === "Enter") handleNewExcursion();
--                  if (e.key === "Escape") setShowNew(false);
--                }}
--                className="text-lg px-4 py-3"
--                autoFocus
--              />
--              <div className="flex gap-2 justify-center mt-2">
--                <button
--                  className="bg-primary text-white rounded-lg px-5 py-2 text-lg font-semibold hover:bg-primary/90 transition-all"
--                  onClick={handleNewExcursion}
--                  disabled={!newName.trim()}
--                >
--                  Guardar
--                </button>
--                <button
--                  className="bg-gray-200 text-gray-700 rounded-lg px-5 py-2 text-lg font-semibold hover:bg-gray-300 transition-all"
--                  onClick={() => setShowNew(false)}
--                >
--                  Cancelar
--                </button>
--              </div>
--            </div>
--          </div>
--        )}
-+        {/* Dialog para nueva excursión */}
-+        <NewExcursionDialog
-+          open={showNew}
-+          onCancel={() => setShowNew(false)}
-+          onSave={(data: NewExcursionData) => {
-+            const id = Date.now().toString();
-+            const exc = {
-+              id,
-+              name: data.name,
-+              date: data.date ? data.date.toISOString() : undefined,
-+              time: data.time,
-+              place: data.place,
-+            };
-+            const updated = [...excursions, exc];
-+            setExcursions(updated);
-+            window.localStorage.setItem(LOCAL_KEY, JSON.stringify(updated));
-+            setShowNew(false);
-+            goToExcursion(id);
-+          }}
-+        />
+        {/* Dialog para nueva excursión */}
+        <NewExcursionDialog
+          open={showNew}
+          onCancel={() => setShowNew(false)}
+          onSave={(data: NewExcursionData) => {
+            const id = Date.now().toString();
+            const exc = {
+              id,
+              name: data.name,
+              date: data.date ? data.date.toISOString() : undefined,
+              time: data.time,
+              place: data.place,
+            };
+            const updated = [...excursions, exc];
+            setExcursions(updated);
+            window.localStorage.setItem(LOCAL_KEY, JSON.stringify(updated));
+            setShowNew(false);
+            goToExcursion(id);
+          }}
+        />
       </div>
     </div>
   );
