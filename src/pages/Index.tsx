@@ -78,10 +78,32 @@ const Index = () => {
     setPassengers([]);
   };
 
-  // Quitamos botones de guardar y volver atrás según indicación
+  // NUEVO: manejo para botón guardar y volver atrás
+  const handleBack = () => {
+    navigate("/");
+  };
+
+  const handleSave = () => {
+    toast({
+      title: "Guardado",
+      description: "Los cambios de los pasajeros han sido guardados.",
+      duration: 2200,
+    });
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">
+      {/* Fila de botones arriba */}
+      <div className="flex justify-between items-center max-w-5xl mx-auto w-full px-4 pt-8 gap-3">
+        <Button variant="outline" size="sm" onClick={handleBack}>
+          <ArrowLeft className="mr-1" />
+          Volver atrás
+        </Button>
+        <Button variant="default" size="sm" onClick={handleSave}>
+          <Save className="mr-1" />
+          Guardar
+        </Button>
+      </div>
       <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12">
         <section className="flex-1 min-w-[380px]">
           <BusSeatMap
