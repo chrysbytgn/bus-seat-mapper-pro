@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
@@ -80,28 +79,6 @@ const Index = () => {
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">
       {/* BARRA FIJA DE BOTONES */}
-      <div className="w-full bg-primary/70 flex justify-center gap-6 py-4 shadow-md z-50 sticky top-0">
-        <Button
-          onClick={handleBack}
-          size="lg"
-          variant="secondary"
-          className="text-lg font-bold px-8 py-5 flex gap-2 items-center"
-          tabIndex={0}
-        >
-          <ArrowLeft size={28} className="mr-1" />
-          Volver
-        </Button>
-        <Button
-          onClick={handleManualSave}
-          size="lg"
-          variant="default"
-          className="text-lg font-bold px-8 py-5 flex gap-2 items-center"
-          tabIndex={0}
-        >
-          <Save size={28} className="mr-1" />
-          Guardar cambios
-        </Button>
-      </div>
       {/* Main content */}
       <main className="flex flex-1 flex-col lg:flex-row gap-8 items-start py-12">
         <section className="flex-1 min-w-[380px]">
