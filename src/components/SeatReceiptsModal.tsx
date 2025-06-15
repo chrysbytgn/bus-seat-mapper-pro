@@ -199,8 +199,6 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
         doc.text("Firma", left+67, yBase+52);
 
         // Cuadros vacíos para rellenar a mano
-        // Monto/forma/firma
-        // (Sin texto, solo cuadros)
 
         // Marca de agua PAGADO (sutil, vintage)
         if (typeof doc.saveGraphicsState === "function" && typeof doc.setGState === "function") {
