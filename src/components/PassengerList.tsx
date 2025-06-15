@@ -1,10 +1,10 @@
-
 import { Passenger } from "./BusSeatMap";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { Bus } from "lucide-react";
 import type { ExcursionData } from "@/pages/Index";
+import { BusSeatMapPrint } from "./BusSeatMapPrint";
 
 type PrintExcursionData = ExcursionData | null;
 
@@ -113,16 +113,7 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
       >
         {/* Croquis lado izquierdo en proporción más angosta */}
         <div className="print:w-[30%] print:max-w-[28mm] print:p-1 print:border-r print:border-gray-400 flex items-start print:items-start print:justify-center">
-          <div
-            id="croquis-bus-seatmap-print"
-            className="w-[65px] h-[120px] print:w-[52px] print:h-[107mm] print:mx-auto print:my-2 print:scale-[0.7] print:overflow-hidden flex flex-col items-center"
-          >
-            <span className="block text-center text-[12px] print:text-xs font-bold mb-0">Croquis bus</span>
-            <div className="w-full h-full bg-gray-200 border-2 border-gray-400 rounded-xl flex flex-col items-center justify-center">
-              <Bus size={22} className="text-primary print:text-black" />
-              <span className="mt-0.5 text-[9px] font-medium print:text-xs text-gray-700">[croquis]</span>
-            </div>
-          </div>
+          <BusSeatMapPrint passengers={passengers} />
         </div>
         {/* Lista lado derecho (más ancho para tabla) */}
         <div className="print:w-[70%] print:min-w-[140mm] print:p-4 flex flex-col justify-start items-start print:overflow-hidden">
