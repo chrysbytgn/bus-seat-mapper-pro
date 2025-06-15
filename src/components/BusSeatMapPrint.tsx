@@ -3,107 +3,143 @@ import React from "react";
 import { Passenger } from "./BusSeatMap";
 import { cn } from "@/lib/utils";
 
-// Croquis SOLO para impresión, con el lado izquierdo desplazado arriba una fila
+// Layout que corresponde a la imagen proporcionada
+// Fila especial de guía y volante
+const SEAT_LAYOUT = [
+  // Fila 1: volante y plaza guía
+  [null, "guia", null, null, null], // "guia" = plaza guía (asiento 0), la puerta es decorativa al lado
+  // Fila 2-13: filas normales
+  [1, 2, null, 3, 4],
+  [5, 6, null, 7, 8],
+  [9, 10, null, 11, 12],
+  [13, 14, null, 15, 16],
+  [17, 18, null, 19, 20],
+  [21, 22, null, 23, 24],
+  [25, 26, null, 27, 28],
+  [29, 30, null, 31, 32],
+  [33, 34, null, 35, 36],
+  [37, 38, null, 39, 40],
+  [41, 42, null, 43, 44],
+  [45, 46, null, 47, 48],
+  [49, 50, null, 51, 52],
+  // Fila última: los 5 asientos atrás
+  [53, 54, 55, null, null]
+];
+
+// Ayuda: asientos verticales para detectar la puerta (como en el layout)
+const PUERTA_ROWS = [1, 9]; // justo al lado de "guia" y entre 28/29
+
 export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
-  // Estructura igual al BusSeatMap, pero desplazamos SOLO la columna izquierda (asientos [0] de cada fila) hacia arriba una fila
-
-  // Preparamos la distribución básica
-  let currentSeat = 1;
-  const ROWS = 13;
-  const baseSeatRows: (number | null)[][] = [];
-
-  for (let row = 0; row < ROWS; row++) {
-    const seatsInRow: (number | null)[] = [];
-    // Izquierda
-    for (let col = 0; col < 2; col++) {
-      if (currentSeat <= 50) {
-        seatsInRow.push(currentSeat++);
-      } else {
-        seatsInRow.push(null);
-      }
-    }
-    // Pasillo
-    seatsInRow.push(null);
-    // Derecha
-    for (let col = 0; col < 2; col++) {
-      if (currentSeat <= 50) {
-        seatsInRow.push(currentSeat++);
-      } else {
-        seatsInRow.push(null);
-      }
-    }
-    baseSeatRows.push(seatsInRow);
-
-    if (row === 4) {
-      // Fila especial debajo de la 5 (pasillo grande)
-      baseSeatRows.push([null, null, null, null, null]);
-    }
-  }
-
-  // Adelantar SOLO el asiento 21 como en el mapa base
-  let idx21 = baseSeatRows.findIndex((row) => row[0] === 21);
-  if (idx21 > 0) {
-    const temp = baseSeatRows[idx21 - 1][0];
-    baseSeatRows[idx21 - 1][0] = 21;
-    baseSeatRows[idx21][0] = temp;
-  }
-  // Agregamos la última fila de 5 asientos
-  baseSeatRows.push([51, 52, 53, 54, 55]);
-
-  // Aquí aplicamos el DESPLAZAMIENTO: todos los asientos del lado izquierdo (columna 0) suben 1 fila (excepto primera)
-  const seatRows = baseSeatRows.map((row) => [...row]);
-  for (let i = 1; i < seatRows.length; i++) {
-    seatRows[i - 1][0] = baseSeatRows[i][0];
-  }
-  // El primer asiento de la última fila (fila de 5) recibe null en la columna 0 (ya que no hay fila siguiente)
-  seatRows[seatRows.length - 1][0] = null;
-
-  // Resto del croquis: pintar asientos ocupados
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
+  // Render helpers
+  function renderSeat(seat: number | "guia" | null, rowIdx: number, colIdx: number) {
+    if (seat === null) {
+      // Espacio vacío o pasillo
+      // Dibujo puerta cuando corresponde
+      if (
+        (rowIdx === 0 && colIdx === 4) ||
+        (rowIdx === SEAT_LAYOUT.length - 1 && colIdx === 2)
+      ) {
+        // No se dibuja nada: estos son solo espacios fuera
+        return <div key={"empty" + colIdx} className="w-[22px] h-[20px]" />;
+      }
+      // Dibujo la puerta si es en la posición que corresponde
+      // Puerta al lado del guía, y entre 28/29
+      if (PUERTA_ROWS.includes(rowIdx) && colIdx === 4) {
+        return (
+          <div key={"puerta-"+rowIdx} className="flex flex-col items-center justify-center w-[24px] h-[34px] print:h-[30px]">
+            <div
+              className="w-[18px] h-[30px] print:h-[26px] border-l-4 border-gray-300 rounded-r-lg relative flex items-center justify-center"
+              style={{ borderColor: "#555", marginLeft: "-2px" }}
+            >
+              <span
+                className="absolute left-[2px] top-1.5 text-[9px] font-semibold text-gray-700 rotate-90 select-none"
+                style={{ letterSpacing: "1.5px" }}
+              >
+                PUERTA
+              </span>
+            </div>
+          </div>
+        );
+      }
+      // Espacio normal
+      return <div key={"space" + colIdx} className="w-[22px] h-[20px]" />;
+    }
+    if (seat === "guia") {
+      return (
+        <div
+          key="guia"
+          className="relative flex flex-col items-center w-[35px] h-[48px]"
+        >
+          {/* volante */}
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+            <div className="rounded-full border-2 border-gray-500 bg-gray-200 w-8 h-8 flex items-center justify-center">
+              <svg width="20" height="20">
+                <circle cx="10" cy="10" r="8" stroke="#535" strokeWidth="1.5" fill="none" />
+                <circle cx="10" cy="10" r="2.5" stroke="#999" strokeWidth="2" fill="#ccc" />
+                <path d="M10 1.6 L10 18.4" stroke="#666" strokeWidth="1.2"/>
+                <path d="M1.6 10 L18.4 10" stroke="#666" strokeWidth="1.2"/>
+              </svg>
+            </div>
+          </div>
+          {/* asiento guía */}
+          <div className="w-[30px] h-[22px] bg-white border-2 border-gray-400 rounded-md mt-8 flex items-center justify-center print:text-[10px] text-[11px] font-bold italic text-gray-600">
+            Guía
+          </div>
+        </div>
+      );
+    }
+    // Asiento normal
+    const passenger = getPassengerBySeat(seat as number);
+    return (
+      <div
+        key={seat}
+        className={cn(
+          "relative w-[22px] h-[20px] flex flex-col items-center",
+        )}
+      >
+        <div
+          className={cn(
+            "w-full h-full rounded-[4px] border-2 border-gray-400/80 flex items-center justify-center text-xs font-semibold",
+            passenger
+              ? "bg-red-400/90 text-white border-red-500 shadow"
+              : "bg-green-50 text-red-500"
+          )}
+          style={{
+            fontSize: 11,
+            lineHeight: "12px"
+          }}
+        >
+          <span className="mx-auto">{String(seat).padStart(2, "0")}</span>
+        </div>
+        {/* Nombre mini (sólo para impresión, opcional) */}
+        {/* <span className="text-[6px] font-normal truncate w-full text-center">{passenger ? `${passenger.name} ${passenger.surname}` : ""}</span> */}
+      </div>
+    );
+  }
+
   return (
-    <div className="w-[65px] h-[120px] print:w-[52px] print:h-[107mm] print:mx-auto print:my-2 print:scale-[0.7] print:overflow-hidden flex flex-col items-center">
-      <span className="block text-center text-[12px] print:text-xs font-bold mb-0">Croquis bus</span>
-      <div className="w-full h-full bg-gray-200 border-2 border-gray-400 rounded-xl flex flex-col items-center justify-center px-1 py-2">
-        {/* Renderizado del croquis de asientos */}
-        <div className="flex flex-col gap-[2.5px] w-full items-center mt-1">
-          {seatRows.map((row, rowIdx) => (
-            row.every((s) => s === null) ? (
-              // Fila pasillo grande
-              <div key={"pasillo-"+rowIdx} className="w-full h-[7px] print:h-[7px]" />
-            ) : (
-              <div key={rowIdx} className="flex flex-row justify-center items-center gap-[3px]">
-                {row.map((seat, colIdx) => seat === null ? (
-                  <div
-                    key={colIdx}
-                    className={colIdx === 2 ? "w-[8px]" : "w-[6px]"} // pasillo más ancho al centro
-                  />
-                ) : (
-                  <div
-                    key={seat}
-                    className={cn(
-                      "w-[15px] h-[14px] print:w-[12px] print:h-[11px] rounded-[3px] flex items-center justify-center font-bold text-[8px] border border-gray-500 select-none",
-                      getPassengerBySeat(seat)
-                        ? "bg-red-400 text-white border-red-500"
-                        : "bg-green-400 text-white border-green-500"
-                    )}
-                    aria-label={`Asiento ${seat}`}
-                  >{seat}</div>
-                ))}
-              </div>
-            )
+    <div className="print:mx-auto flex flex-col items-center bg-white p-2 print:bg-white print:p-0 rounded-xl w-fit">
+      <span className="block text-center text-[16px] print:text-xs font-bold mb-1">Croquis bus</span>
+      <div className="bg-gray-50 border border-gray-400 rounded-2xl shadow px-2 py-2 print:border print:shadow-none flex flex-col">
+        {/* Despliegue filas */}
+        <div className="flex flex-col gap-[4px] items-center">
+          {SEAT_LAYOUT.map((row, rowIdx) => (
+            <div key={rowIdx} className="flex flex-row gap-[9px] items-center justify-center">
+              {row.map((seat, colIdx) => renderSeat(seat, rowIdx, colIdx))}
+            </div>
           ))}
         </div>
         {/* Leyenda */}
-        <div className="mt-1 flex flex-row justify-center gap-1 w-full">
-          <div className="w-3 h-3 bg-green-400 border border-green-500 rounded-sm" />
-          <span className="text-[8px]">Libre</span>
+        <div className="mt-2 flex flex-row justify-center gap-2 w-full">
+          <div className="w-3 h-3 bg-green-50 border border-green-500 rounded-sm" />
+          <span className="text-[9px]">Libre</span>
           <div className="mx-1 w-3 h-3 bg-red-400 border border-red-500 rounded-sm" />
-          <span className="text-[8px]">Ocup.</span>
+          <span className="text-[9px]">Ocup.</span>
         </div>
       </div>
     </div>
   );
 }
-
