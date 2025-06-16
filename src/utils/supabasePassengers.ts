@@ -51,12 +51,17 @@ export async function fetchPassengers(excursionId: number) {
 export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { association_id: string }) {
   console.log("Creating new excursion:", excursion);
   const record = {
-    ...excursion,
-    stops: excursion.stops ?? [],
+    name: excursion.name,
+    association_id: excursion.association_id,
+    date: excursion.date || null,
+    time: excursion.time || null,
+    place: excursion.place || null,
+    price: excursion.price || null,
+    stops: excursion.stops || null,
   };
   const { data, error } = await supabase
     .from("excursions")
-    .insert([record])
+    .insert(record)
     .select()
     .single();
   if (error) {
