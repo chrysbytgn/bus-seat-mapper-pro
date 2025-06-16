@@ -47,11 +47,15 @@ export async function fetchPassengers(excursionId: number) {
   return data || [];
 }
 
-// Create new excursion - let the database handle ID generation
+// Create new excursion - generate a unique ID using timestamp
 export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { association_id: string }) {
   console.log("Creating new excursion:", excursion);
   
+  // Generate a unique ID using timestamp
+  const uniqueId = Date.now();
+  
   const record = {
+    id: uniqueId,
     name: excursion.name,
     association_id: excursion.association_id,
     date: excursion.date || null,
