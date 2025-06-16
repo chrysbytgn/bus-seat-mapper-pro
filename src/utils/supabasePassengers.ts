@@ -10,32 +10,46 @@ export async function fetchAssociation() {
     .select("*")
     .limit(1)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching association:", error);
+    throw error;
+  }
   return data;
 }
 
 export async function fetchExcursionById(excursionId: number) {
+  console.log("Fetching excursion with ID:", excursionId);
   const { data, error } = await supabase
     .from("excursions")
     .select("*")
     .eq("id", excursionId)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching excursion:", error);
+    throw error;
+  }
+  console.log("Excursion data fetched:", data);
   return data;
 }
 
 export async function fetchPassengers(excursionId: number) {
+  console.log("Fetching passengers for excursion:", excursionId);
   const { data, error } = await supabase
     .from("passengers")
     .select("*")
     .eq("excursion_id", excursionId)
     .order("seat", { ascending: true });
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching passengers:", error);
+    throw error;
+  }
+  console.log("Passengers data fetched:", data);
   return data || [];
 }
 
 // Fix types for upsert
 export async function upsertExcursion(excursion: ExcursionData & { association_id: string }) {
+  console.log("Upserting excursion:", excursion);
   // Ensure stops is json
   const record = {
     ...excursion,
@@ -46,11 +60,29 @@ export async function upsertExcursion(excursion: ExcursionData & { association_i
     .from("excursions")
     .upsert([record])
     .select();
-  if (error) throw error;
+  if (error) {
+    console.error("Error upserting excursion:", error);
+    throw error;
+  }
+  console.log("Excursion upserted:", data);
   return data?.[0];
 }
 
+export async function deleteExcursion(excursionId: number) {
+  console.log("Deleting excursion with ID:", excursionId);
+  const { error } = await supabase
+    .from("excursions")
+    .delete()
+    .eq("id", excursionId);
+  if (error) {
+    console.error("Error deleting excursion:", error);
+    throw error;
+  }
+  console.log("Excursion deleted successfully");
+}
+
 export async function upsertPassenger(excursion_id: number, passenger: Passenger) {
+  console.log("Upserting passenger:", passenger, "for excursion:", excursion_id);
   // seat is unique for excursion_id
   const { data, error } = await supabase
     .from("passengers")
@@ -61,14 +93,23 @@ export async function upsertPassenger(excursion_id: number, passenger: Passenger
       surname: passenger.surname
     }])
     .select();
-  if (error) throw error;
+  if (error) {
+    console.error("Error upserting passenger:", error);
+    throw error;
+  }
+  console.log("Passenger upserted:", data);
   return data?.[0];
 }
 
 export async function clearPassengers(excursion_id: number) {
+  console.log("Clearing passengers for excursion:", excursion_id);
   const { error } = await supabase
     .from("passengers")
     .delete()
     .eq("excursion_id", excursion_id);
-  if (error) throw error;
+  if (error) {
+    console.error("Error clearing passengers:", error);
+    throw error;
+  }
+  console.log("Passengers cleared successfully");
 }

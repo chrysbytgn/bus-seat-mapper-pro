@@ -1,6 +1,17 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Edit2 } from "lucide-react";
+import { ArrowLeft, Save, Edit2, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ExcursionHeaderProps {
   loadingExcursion: boolean;
@@ -9,6 +20,7 @@ interface ExcursionHeaderProps {
   onSave: () => void;
   onShowReceipts: () => void;
   onEditExcursion: () => void;
+  onDeleteExcursion: () => void;
   passengersCount: number;
 }
 
@@ -19,6 +31,7 @@ export function ExcursionHeader({
   onSave,
   onShowReceipts,
   onEditExcursion,
+  onDeleteExcursion,
   passengersCount,
 }: ExcursionHeaderProps) {
   return (
@@ -63,6 +76,33 @@ export function ExcursionHeader({
         >
           <Edit2 className="mr-1" /> Editar excursión
         </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="sm"
+              variant="destructive"
+              title="Eliminar excursión"
+              disabled={loadingExcursion || !excursionInfo?.id}
+            >
+              <Trash2 className="mr-1" /> Eliminar
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar excursión?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción no se puede deshacer. Se eliminará la excursión "{excursionInfo?.name}" 
+                y todos los pasajeros asociados permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={onDeleteExcursion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

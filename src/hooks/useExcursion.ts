@@ -8,6 +8,7 @@ import {
   upsertPassenger,
   clearPassengers,
   upsertExcursion,
+  deleteExcursion,
 } from "@/utils/supabasePassengers";
 import { ExcursionData } from "@/pages/Index";
 
@@ -22,11 +23,20 @@ export function useExcursion() {
   const [excursionError, setExcursionError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      console.log("No excursion ID provided");
+      setLoadingExcursion(false);
+      setExcursionError("ID de excursión no válido");
+      return;
+    }
+    
+    console.log("Loading excursion with ID:", id);
     setLoadingExcursion(true);
     setExcursionError(null);
+    
     fetchExcursionById(Number(id))
       .then(data => {
+        console.log("Excursion fetched:", data);
         if (data && data.id) {
           let parsedStops: string[] = [];
           const stopsRaw = data.stops;
@@ -40,11 +50,14 @@ export function useExcursion() {
               } else if (asParsed && typeof asParsed === "object") {
                 parsedStops = Object.values(asParsed).filter((v): v is string => typeof v === "string");
               }
-            } catch {}
+            } catch {
+              console.log("Could not parse stops as JSON");
+            }
           } else if (stopsRaw && typeof stopsRaw === "object") {
             parsedStops = Object.values(stopsRaw).filter((v): v is string => typeof v === "string");
           }
-          setExcursionInfo({
+          
+          const excursionData = {
             id: Number(data.id),
             name: data.name,
             date: data.date || "",
@@ -53,30 +66,43 @@ export function useExcursion() {
             stops: parsedStops,
             price: data.price || "",
             association_id: data.association_id,
-          });
+          };
+          
+          console.log("Setting excursion info:", excursionData);
+          setExcursionInfo(excursionData);
         } else {
+          console.log("No excursion data found");
           setExcursionInfo(null);
           setExcursionError("No se encontró la excursión solicitada. Vuelve atrás y selecciona otra.");
         }
       })
       .catch((err) => {
+        console.error("Error loading excursion:", err);
         setExcursionInfo(null);
         setExcursionError("Error al cargar la excursión. Intenta actualizar la página o vuelve atrás.");
-        console.error("Error cargando excursión:", err);
       })
-      .finally(() => setLoadingExcursion(false));
+      .finally(() => {
+        console.log("Finished loading excursion");
+        setLoadingExcursion(false);
+      });
   }, [id]);
 
   useEffect(() => {
     if (!id || !excursionInfo?.id) {
+      console.log("Skipping passenger fetch - no excursion ID");
       setPassengers([]);
       return;
     }
+    
+    console.log("Loading passengers for excursion:", excursionInfo.id);
     fetchPassengers(Number(id))
-      .then((data) => setPassengers(data))
+      .then((data) => {
+        console.log("Passengers loaded:", data);
+        setPassengers(data);
+      })
       .catch((err) => {
+        console.error("Error loading passengers:", err);
         setPassengers([]);
-        console.error("Error cargando pasajeros:", err);
       });
   }, [id, excursionInfo?.id]);
 
@@ -162,6 +188,26 @@ export function useExcursion() {
     }
   }, [excursionInfo?.association_id, id]);
 
+  const handleDeleteExcursion = useCallback(async () => {
+    if (!id || !excursionInfo?.id) return;
+    try {
+      await deleteExcursion(Number(id));
+      toast({
+        title: "Excursión eliminada",
+        description: "La excursión ha sido eliminada correctamente.",
+        duration: 2200,
+      });
+      navigate("/");
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la excursión.",
+        variant: "destructive"
+      });
+      console.error("Error eliminando excursión:", err);
+    }
+  }, [id, excursionInfo?.id, navigate]);
+
   return {
     passengers,
     excursionInfo,
@@ -176,6 +222,6 @@ export function useExcursion() {
     handleBack,
     handleSave,
     handleEditExcursion,
+    handleDeleteExcursion,
   };
 }
-

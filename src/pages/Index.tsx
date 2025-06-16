@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BusSeatMap, Passenger } from "@/components/BusSeatMap";
@@ -49,6 +50,7 @@ const Index = () => {
     handleBack,
     handleSave,
     handleEditExcursion,
+    handleDeleteExcursion,
   } = useExcursion();
 
   return (
@@ -61,6 +63,7 @@ const Index = () => {
         onSave={handleSave}
         onShowReceipts={() => setShowReceiptsModal(true)}
         onEditExcursion={() => setEditDialogOpen(true)}
+        onDeleteExcursion={handleDeleteExcursion}
         passengersCount={passengers.length}
       />
       {/* CONTENIDO PRINCIPAL */}
