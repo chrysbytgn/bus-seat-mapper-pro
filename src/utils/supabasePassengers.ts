@@ -47,7 +47,27 @@ export async function fetchPassengers(excursionId: number) {
   return data || [];
 }
 
-// Fix types for upsert
+// Crear nueva excursión
+export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { association_id: string }) {
+  console.log("Creating new excursion:", excursion);
+  const record = {
+    ...excursion,
+    stops: excursion.stops ?? [],
+  };
+  const { data, error } = await supabase
+    .from("excursions")
+    .insert([record])
+    .select()
+    .single();
+  if (error) {
+    console.error("Error creating excursion:", error);
+    throw error;
+  }
+  console.log("Excursion created:", data);
+  return data;
+}
+
+// Fix types for upsert - ahora solo para actualizar excursiones existentes
 export async function upsertExcursion(excursion: ExcursionData & { association_id: string }) {
   console.log("Upserting excursion:", excursion);
   // Ensure stops is json

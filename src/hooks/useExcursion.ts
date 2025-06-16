@@ -30,11 +30,19 @@ export function useExcursion() {
       return;
     }
     
-    console.log("Loading excursion with ID:", id);
+    const excursionId = Number(id);
+    if (isNaN(excursionId)) {
+      console.log("Invalid excursion ID:", id);
+      setLoadingExcursion(false);
+      setExcursionError("ID de excursión no válido");
+      return;
+    }
+    
+    console.log("Loading excursion with ID:", excursionId);
     setLoadingExcursion(true);
     setExcursionError(null);
     
-    fetchExcursionById(Number(id))
+    fetchExcursionById(excursionId)
       .then(data => {
         console.log("Excursion fetched:", data);
         if (data && data.id) {
@@ -71,9 +79,9 @@ export function useExcursion() {
           console.log("Setting excursion info:", excursionData);
           setExcursionInfo(excursionData);
         } else {
-          console.log("No excursion data found");
+          console.log("No excursion data found for ID:", excursionId);
           setExcursionInfo(null);
-          setExcursionError("No se encontró la excursión solicitada. Vuelve atrás y selecciona otra.");
+          setExcursionError("No se encontró la excursión solicitada. Es posible que no exista o haya sido eliminada.");
         }
       })
       .catch((err) => {
@@ -94,8 +102,9 @@ export function useExcursion() {
       return;
     }
     
-    console.log("Loading passengers for excursion:", excursionInfo.id);
-    fetchPassengers(Number(id))
+    const excursionId = Number(id);
+    console.log("Loading passengers for excursion:", excursionId);
+    fetchPassengers(excursionId)
       .then((data) => {
         console.log("Passengers loaded:", data);
         setPassengers(data);
@@ -116,8 +125,9 @@ export function useExcursion() {
       return;
     }
     try {
-      await upsertPassenger(Number(id), { seat, name, surname });
-      fetchPassengers(Number(id)).then(setPassengers);
+      const excursionId = Number(id);
+      await upsertPassenger(excursionId, { seat, name, surname });
+      fetchPassengers(excursionId).then(setPassengers);
     } catch (error: any) {
       if (error && typeof error.message === "string" && error.message.includes("foreign key constraint")) {
         toast({
@@ -139,7 +149,8 @@ export function useExcursion() {
   const handleClearSeats = useCallback(async () => {
     if (!id || !excursionInfo?.id) return;
     try {
-      await clearPassengers(Number(id));
+      const excursionId = Number(id);
+      await clearPassengers(excursionId);
       setPassengers([]);
     } catch (err) {
       toast({
@@ -166,12 +177,13 @@ export function useExcursion() {
   const handleEditExcursion = useCallback(async (data: ExcursionData) => {
     if (!excursionInfo?.association_id || !id) return;
     try {
+      const excursionId = Number(id);
       await upsertExcursion({
         ...data,
-        id: Number(id),
+        id: excursionId,
         association_id: excursionInfo.association_id,
       });
-      setExcursionInfo((prev) => prev ? { ...prev, ...data, id: Number(id) } : prev);
+      setExcursionInfo((prev) => prev ? { ...prev, ...data, id: excursionId } : prev);
       setEditDialogOpen(false);
       toast({
         title: "Excursión modificada",
@@ -191,7 +203,8 @@ export function useExcursion() {
   const handleDeleteExcursion = useCallback(async () => {
     if (!id || !excursionInfo?.id) return;
     try {
-      await deleteExcursion(Number(id));
+      const excursionId = Number(id);
+      await deleteExcursion(excursionId);
       toast({
         title: "Excursión eliminada",
         description: "La excursión ha sido eliminada correctamente.",
