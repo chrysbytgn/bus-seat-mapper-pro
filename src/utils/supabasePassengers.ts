@@ -47,27 +47,11 @@ export async function fetchPassengers(excursionId: number) {
   return data || [];
 }
 
-// Create new excursion - we need to provide an ID since the schema requires it
+// Create new excursion - let the database handle ID generation
 export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { association_id: string }) {
   console.log("Creating new excursion:", excursion);
   
-  // First, get the next available ID
-  const { data: maxData, error: maxError } = await supabase
-    .from("excursions")
-    .select("id")
-    .order("id", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  
-  if (maxError) {
-    console.error("Error getting max ID:", maxError);
-    throw maxError;
-  }
-  
-  const nextId = maxData ? maxData.id + 1 : 1;
-  
   const record = {
-    id: nextId,
     name: excursion.name,
     association_id: excursion.association_id,
     date: excursion.date || null,
