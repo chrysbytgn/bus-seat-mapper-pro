@@ -25,6 +25,7 @@ export default function ExcursionSelector() {
   const [showAssocOptions, setShowAssocOptions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [association, setAssociation] = useState<any>(null);
+  const [needsAssociation, setNeedsAssociation] = useState(false);
 
   // Cargar asociación y excursiones al montar el componente
   useEffect(() => {
@@ -34,10 +35,17 @@ export default function ExcursionSelector() {
         
         // Cargar asociación
         const assoc = await fetchAssociation();
-        setAssociation(assoc);
         console.log("Association loaded:", assoc);
         
-        if (assoc?.id) {
+        if (!assoc) {
+          console.log("No association found, user needs to create one");
+          setNeedsAssociation(true);
+          setAssociation(null);
+          setExcursions([]);
+        } else {
+          setAssociation(assoc);
+          setNeedsAssociation(false);
+          
           // Cargar excursiones de la asociación
           const { data: excursionsData, error } = await supabase
             .from("excursions")
@@ -71,6 +79,40 @@ export default function ExcursionSelector() {
 
     loadData();
   }, []);
+
+  // Función para crear una asociación básica
+  const createDefaultAssociation = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("associations")
+        .insert({
+          name: "Mi Asociación",
+          phone: "",
+          address: "",
+          logo: ""
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAssociation(data);
+      setNeedsAssociation(false);
+      
+      toast({
+        title: "Asociación creada",
+        description: "Se ha creado una asociación básica. Puedes editarla en 'Opciones'.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Error creating association:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la asociación.",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (showAssocOptions) {
     return <AssociationOptions onBack={() => setShowAssocOptions(false)} />;
@@ -133,6 +175,32 @@ export default function ExcursionSelector() {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-background">
         <div className="text-xl">Cargando excursiones...</div>
+      </div>
+    );
+  }
+
+  if (needsAssociation) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-background">
+        <div className="rounded-xl shadow-md py-10 px-4 w-full max-w-2xl bg-white">
+          <h1 className="text-3xl lg:text-4xl font-bold mb-8 text-center">Bienvenido</h1>
+          <div className="text-center mb-8">
+            <p className="text-lg mb-4">
+              Para empezar a usar el sistema, necesitas crear una asociación.
+            </p>
+            <p className="text-gray-600 mb-6">
+              Puedes configurar los detalles más tarde en las opciones.
+            </p>
+          </div>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={createDefaultAssociation}
+              className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Crear Asociación
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
