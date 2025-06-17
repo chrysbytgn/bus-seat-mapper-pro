@@ -1,12 +1,13 @@
+
 import React from "react";
 import { Passenger } from "./BusSeatMap";
 import { cn } from "@/lib/utils";
 
-// Genera el layout exacto de un autobús de 55 plazas como en el estándar real
+// Layout corregido para impresión con alineación perfecta
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
 
-  // FILA 0: Conductor (izq), puerta delantera y primeros 2 asientos
+  // Fila 0: Conductor, puerta delantera y primeros 2 asientos
   seatRows.push([
     "C",    // Conductor
     "PD",   // Puerta delantera
@@ -27,14 +28,13 @@ const buildSeatLayout = () => {
     currentSeat += 4;
   }
 
-  // FILA ESPECIAL: tras asientos 19, 20 (fila con puerta trasera en el centro y asientos a los lados)
-  // Asientos 19-20 izquierda, puerta, 21-22 derecha
+  // FILA ESPECIAL: 19-20 (izq), puerta trasera, 21-22 (der) - ALINEADOS CON 17-18
   seatRows.push([
     19,
     20,
     "PT",   // Puerta trasera
-    21,
-    22,
+    21,     // Alineado con columna de 18
+    22,     // Alineado con columna de asientos derechos
   ]);
   currentSeat = 23;
 
@@ -50,12 +50,7 @@ const buildSeatLayout = () => {
     currentSeat += 4;
   }
 
-  // La última fila puede tener nulls si nos pasamos de 50
-  seatRows[seatRows.length - 1] = seatRows[seatRows.length - 1].map(
-    (s) => (typeof s === "number" && s > 50 ? null : s)
-  );
-
-  // FILA FINAL: 5 asientos juntos (51-55)
+  // FILA FINAL: 5 asientos juntos (51-55) ALINEADOS con 47-50
   seatRows.push([51, 52, 53, 54, 55]);
 
   return seatRows;

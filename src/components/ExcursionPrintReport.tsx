@@ -8,32 +8,31 @@ import type { ExcursionData } from "@/pages/Index";
 const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
 
 /**
- * Tabla: nombre y apellido juntos (Nombre completo), columna documento (vacía si no hay).
- * Compacta, fuente pequeña, mínimo padding.
+ * Tabla optimizada para personas mayores: fuente más grande, mejor contraste
  */
 function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
   return (
-    <table className="w-full text-[10px] print:text-[9px] border-separate border-spacing-y-[0.5px]">
+    <table className="w-full text-[12px] print:text-[11px] border-separate border-spacing-y-[1px]">
       <thead>
-        <tr>
-          <th className="text-left px-1 py-0.5 font-semibold w-[18px]">#</th>
-          <th className="text-left px-1 py-0.5 font-semibold min-w-[78px]">Nombre completo</th>
-          <th className="text-left px-1 py-0.5 font-semibold min-w-[40px]">Documento</th>
+        <tr className="bg-gray-100">
+          <th className="text-left px-2 py-1 font-semibold w-[25px] border-b border-gray-300">#</th>
+          <th className="text-left px-2 py-1 font-semibold min-w-[120px] border-b border-gray-300">Nombre completo</th>
+          <th className="text-left px-2 py-1 font-semibold min-w-[60px] border-b border-gray-300">Documento</th>
         </tr>
       </thead>
       <tbody>
         {ALL_SEATS.map(seatNum => {
           const p = passengers.find(pass => pass.seat === seatNum);
           return (
-            <tr key={seatNum}>
-              <td className="px-1 py-0.5 font-bold">{seatNum}</td>
-              <td className="px-1 py-0.5">
+            <tr key={seatNum} className="hover:bg-gray-50">
+              <td className="px-2 py-1 font-bold text-center border-b border-gray-100">{seatNum}</td>
+              <td className="px-2 py-1 border-b border-gray-100">
                 {p
                   ? `${p.name} ${p.surname}`.trim()
-                  : <span className="italic text-gray-400 print:text-gray-700">(vacío)</span>
+                  : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                 }
               </td>
-              <td className="px-1 py-0.5">{/* Documento: queda vacío si no hay */}</td>
+              <td className="px-2 py-1 border-b border-gray-100">{/* Documento: campo vacío para rellenar */}</td>
             </tr>
           );
         })}
@@ -56,66 +55,62 @@ export function ExcursionPrintReport({
     : "";
   const hora = excursionInfo?.time || "";
   const lugar = excursionInfo?.place || "";
-  const paradas = Array.isArray(excursionInfo?.stops) && excursionInfo?.stops.length > 0
-    ? excursionInfo?.stops
-    : [];
 
   return (
-    <div className="print:w-full print:h-full print:p-0 print:m-0 bg-white">
-      {/* CABECERA */}
-      <div className="flex items-center gap-3 mb-1.5 border-b border-gray-300 print:pt-2 print:pb-1 print:px-4 print:w-full">
+    <div className="print:w-full print:h-full print:p-0 print:m-0 bg-white print:text-black">
+      {/* CABECERA COMPACTA */}
+      <div className="flex items-center gap-3 mb-3 border-b-2 border-gray-400 print:pt-3 print:pb-2 print:px-4 print:w-full">
         {association.logo && (
           <img
             src={association.logo}
             alt="Logo Asociación"
-            className="h-10 w-10 object-cover rounded-full border border-gray-300 mr-2"
-            style={{ minWidth: 40 }}
+            className="h-12 w-12 object-cover rounded-full border border-gray-300"
+            style={{ minWidth: 48 }}
           />
         )}
         <div className="flex flex-col">
-          <span className="text-[15px] print:text-[13px] font-bold text-primary mb-0.5">
+          <span className="text-[18px] print:text-[16px] font-bold text-black mb-1">
             {association.name || "Asociación"}
           </span>
           {association.address && (
-            <span className="text-[10px] print:text-[10px] text-gray-800">{association.address}</span>
+            <span className="text-[12px] print:text-[11px] text-gray-700">{association.address}</span>
           )}
           {association.phone && (
-            <span className="text-[10px] print:text-[10px] text-gray-800">
+            <span className="text-[12px] print:text-[11px] text-gray-700">
               Tel: {association.phone}
             </span>
           )}
         </div>
       </div>
-      {/* INFORMACIÓN Y LAYOUT */}
-      <div className="flex flex-row gap-2 print:px-4 w-full min-h-[85px] print:min-h-[65px] items-start">
-        {/* Croquis bus a la izquierda, más pequeño */}
-        <div className="flex flex-col items-center print:w-[120px] pl-1 pr-2 flex-shrink-0">
+      
+      {/* LAYOUT HORIZONTAL: CROQUIS IZQUIERDA + LISTA DERECHA */}
+      <div className="flex flex-row gap-4 print:px-4 w-full items-start">
+        
+        {/* CROQUIS BUS - LADO IZQUIERDO FIJO */}
+        <div className="flex flex-col items-center print:w-[200px] flex-shrink-0">
           <BusSeatMapPrint passengers={passengers} />
         </div>
-        {/* Info + tabla a la derecha */}
-        <div className="flex flex-col flex-1">
-          <span className="text-[13px] font-bold print:text-[12px] mb-0.5">{excursionTitle}</span>
-          <div className="text-[11px] font-semibold print:text-[10px] mb-0.5">
-            {fecha && <span>Fecha: {fecha}{" "}</span>}
-            {hora && <span>Hora: {hora}{" "}</span>}
-          </div>
-          <div className="text-[11px] font-semibold print:text-[10px] mb-0.5">
-            {lugar && <span>Salida: {lugar}</span>}
-          </div>
-          {paradas.length > 0 && (
-            <div className="print:mt-0.5 mt-0.5">
-              <span className="block font-semibold text-[9px] print:text-[9px] mb-0.5">Paradas adicionales:</span>
-              <ul className="list-disc ml-4 text-[9px] print:text-[9px] mb-0.5">
-                {paradas.map((stop, idx) =>
-                  <li key={idx}>{stop}</li>
-                )}
-              </ul>
+        
+        {/* INFORMACIÓN Y LISTA - LADO DERECHO */}
+        <div className="flex flex-col flex-1 min-w-0">
+          
+          {/* Info de la excursión */}
+          <div className="mb-3">
+            <h2 className="text-[16px] font-bold print:text-[15px] mb-2 text-black">{excursionTitle}</h2>
+            
+            <div className="grid grid-cols-2 gap-2 text-[13px]  print:text-[12px] font-semibold text-gray-800">
+              {fecha && <div>Fecha: {fecha}</div>}
+              {hora && <div>Hora: {hora}</div>}
+              {lugar && <div className="col-span-2">Salida: {lugar}</div>}
             </div>
-          )}
-          {/* Tabla lista pasajeros */}
-          <div className="w-full print:pr-0 pt-0 max-w-full overflow-x-auto">
+          </div>
+          
+          {/* LISTA DE PASAJEROS - Fuente legible para mayores */}
+          <div className="w-full print:pr-0 max-w-full overflow-hidden">
+            <h3 className="text-[14px] print:text-[13px] font-bold mb-2 text-black">Lista de Pasajeros</h3>
             <PasajerosTableImprimir passengers={passengers} />
           </div>
+          
         </div>
       </div>
     </div>
