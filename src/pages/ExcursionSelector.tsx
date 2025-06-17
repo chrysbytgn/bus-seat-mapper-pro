@@ -1,38 +1,141 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { NewExcursionDialog, NewExcursionData } from "@/components/NewExcursionDialog";
 import AssociationOptions from "@/components/AssociationOptions";
+import { fetchAssociation, createExcursion } from "@/utils/supabasePassengers";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface Excursion {
-  id: string;
+  id: number;
   name: string;
   date?: string;
   time?: string;
   place?: string;
+  association_id?: string;
 }
-
-const LOCAL_KEY = "excursions";
 
 export default function ExcursionSelector() {
   const navigate = useNavigate();
-  const [excursions, setExcursions] = useState<Excursion[]>(() => {
-    const data = window.localStorage.getItem(LOCAL_KEY);
-    return data ? JSON.parse(data) : [];
-  });
+  const [excursions, setExcursions] = useState<Excursion[]>([]);
   const [showNew, setShowNew] = useState(false);
   const [showAssocOptions, setShowAssocOptions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [association, setAssociation] = useState<any>(null);
+
+  // Cargar asociación y excursiones al montar el componente
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Cargar asociación
+        const assoc = await fetchAssociation();
+        setAssociation(assoc);
+        console.log("Association loaded:", assoc);
+        
+        if (assoc?.id) {
+          // Cargar excursiones de la asociación
+          const { data: excursionsData, error } = await supabase
+            .from("excursions")
+            .select("*")
+            .eq("association_id", assoc.id)
+            .order("created_at", { ascending: false });
+
+          if (error) {
+            console.error("Error loading excursions:", error);
+            toast({
+              title: "Error",
+              description: "No se pudieron cargar las excursiones.",
+              variant: "destructive"
+            });
+          } else {
+            console.log("Excursions loaded:", excursionsData);
+            setExcursions(excursionsData || []);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+        toast({
+          title: "Error",
+          description: "Error al cargar los datos.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   if (showAssocOptions) {
-    // Pasamos un callback para volver al listado principal
     return <AssociationOptions onBack={() => setShowAssocOptions(false)} />;
   }
 
-  const goToExcursion = (id: string) => {
+  const goToExcursion = (id: number) => {
+    console.log("Navigating to excursion:", id);
     navigate(`/excursion/${id}`);
   };
+
+  const handleCreateExcursion = async (data: NewExcursionData) => {
+    if (!association?.id) {
+      toast({
+        title: "Error",
+        description: "No se pudo encontrar la asociación.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      console.log("Creating excursion with data:", data);
+      
+      const excursionData = {
+        name: data.name,
+        date: data.date ? data.date.toISOString().split('T')[0] : "",
+        time: data.time || "",
+        place: data.place || "",
+        price: "",
+        stops: [],
+        association_id: association.id,
+      };
+
+      const newExcursion = await createExcursion(excursionData);
+      console.log("Excursion created:", newExcursion);
+      
+      // Actualizar la lista local
+      setExcursions(prev => [newExcursion, ...prev]);
+      setShowNew(false);
+      
+      toast({
+        title: "Excursión creada",
+        description: `La excursión "${data.name}" ha sido creada correctamente.`,
+        duration: 2200,
+      });
+
+      // Navegar a la nueva excursión
+      goToExcursion(newExcursion.id);
+    } catch (error) {
+      console.error("Error creating excursion:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la excursión.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-background">
+        <div className="text-xl">Cargando excursiones...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-background">
@@ -50,6 +153,7 @@ export default function ExcursionSelector() {
             <Plus size={48} className="text-primary mb-2" />
             <span className="text-xl font-semibold text-primary">Nueva excursión</span>
           </button>
+          
           {/* Acceso directo a opciones de Asociación */}
           <button
             className="flex flex-col items-center justify-center rounded-2xl border-2 border-green-600 bg-white text-green-700 text-2xl font-bold shadow-md py-10 px-4 hover:scale-105 transition-all"
@@ -57,6 +161,7 @@ export default function ExcursionSelector() {
           >
             <span>Opciones</span>
           </button>
+          
           {/* Lista de excursiones existentes */}
           {excursions.map(exc => (
             <button
@@ -73,24 +178,9 @@ export default function ExcursionSelector() {
         <NewExcursionDialog
           open={showNew}
           onCancel={() => setShowNew(false)}
-          onSave={(data: NewExcursionData) => {
-            const id = Date.now().toString();
-            const exc = {
-              id,
-              name: data.name,
-              date: data.date ? data.date.toISOString() : undefined,
-              time: data.time,
-              place: data.place,
-            };
-            const updated = [...excursions, exc];
-            setExcursions(updated);
-            window.localStorage.setItem(LOCAL_KEY, JSON.stringify(updated));
-            setShowNew(false);
-            goToExcursion(id);
-          }}
+          onSave={handleCreateExcursion}
         />
       </div>
     </div>
   );
 }
-
