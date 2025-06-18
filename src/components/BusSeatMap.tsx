@@ -21,45 +21,38 @@ interface BusSeatMapProps {
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
   
-  // Fila 0: Conductor, espacio, pasillo, pasillo, espacio, puerta delantera (PD)
+  // Fila 0: Conductor, puerta delantera y primeros 2 asientos
   seatRows.push([
-    "C",     // 0: Conductor
-    null,    // 1: Espacio para acompañante/guía
-    null,    // 2: Pasillo
-    null,    // 3: Pasillo
-    null,    // 4: Espacio
-    "PD",    // 5: Puerta Delantera
+    "C",    // Conductor
+    "PD",   // Puerta delantera
+    1,
+    2,
   ]);
   
-  // Fila 1: 1 2 null 3 4 null
-  seatRows.push([1, 2, null, 3, 4, null]);
-  
-  // Filas 2-5 (5-20): [izq, izq, pasillo, der, der, null]
-  let currentSeat = 5;
+  // Siguientes filas normales (filas 1-4 con asientos del 3 al 18)
+  let currentSeat = 3;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
-      currentSeat,        // 0
-      currentSeat + 1,    // 1
-      null,               // 2: Pasillo
-      currentSeat + 2,    // 3
-      currentSeat + 3,    // 4
-      null,               // 5
+      currentSeat,
+      currentSeat + 1,
+      null,
+      currentSeat + 2,
+      currentSeat + 3,
     ]);
     currentSeat += 4;
   }
   
-  // Fila 6: 21, 22 alineados con 17, 18 + puerta trasera
+  // FILA ESPECIAL: 19-20 (izq), puerta trasera, 21-22 (der) - ALINEADOS CON 17-18
   seatRows.push([
-    21,   // Alineado con columna 0 (debajo del 17)
-    22,   // Alineado con columna 1 (debajo del 18)
-    null, // Pasillo (columna 2)
-    null, // Pasillo (columna 3)
-    null, // Espacio (columna 4)
-    "PT", // Puerta Trasera (columna 5)
+    19,
+    20,
+    "PT",   // Puerta trasera
+    21,     // Alineado con columna de 18
+    22,     // Alineado con columna de asientos derechos
   ]);
-  
-  // Filas 7-13 (23-50): estructura estándar
   currentSeat = 23;
+  
+  // Siguientes filas normales hasta asiento 50 (7 filas: 23-50)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
       currentSeat,
@@ -67,21 +60,14 @@ const buildSeatLayout = () => {
       null,
       currentSeat + 2,
       currentSeat + 3,
-      null,
     ]);
     currentSeat += 4;
   }
   
-  // Fila final (51-55) alineada correctamente con el 47-50
-  // Los asientos 47,48,49,50 están en columnas 0,1,3,4
-  seatRows.push([
-    51,     // col 0: alineado con 47
-    52,     // col 1: alineado con 48
-    null,   // col 2: pasillo
-    53,     // col 3: alineado con 49
-    54,     // col 4: alineado con 50
-    55      // col 5: extremo derecho
-  ]);
+  // FILA FINAL: 5 asientos juntos (51-55) ALINEADOS con 47-50
+  // 47,48 están en columnas 0,1 - 49,50 están en columnas 3,4
+  // Por tanto: 51,52 en columnas 0,1 - 53 pegado al 52 - 54,55 en columnas 3,4
+  seatRows.push([51, 52, 53, 54, 55]);
   
   return seatRows;
 };

@@ -3,7 +3,7 @@ import React from "react";
 import { Passenger } from "./BusSeatMap";
 import { cn } from "@/lib/utils";
 
-// Layout corregido para impresión con alineación perfecta
+// Layout unificado para impresión - IDÉNTICO al de BusSeatMap.tsx
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
 
@@ -51,6 +51,8 @@ const buildSeatLayout = () => {
   }
 
   // FILA FINAL: 5 asientos juntos (51-55) ALINEADOS con 47-50
+  // 47,48 están en columnas 0,1 - 49,50 están en columnas 3,4
+  // Por tanto: 51,52 en columnas 0,1 - 53 pegado al 52 - 54,55 en columnas 3,4
   seatRows.push([51, 52, 53, 54, 55]);
 
   return seatRows;
