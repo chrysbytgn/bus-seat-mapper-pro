@@ -16,7 +16,7 @@ interface BusSeatMapProps {
 }
 
 /**
- * Croquis de bus 55 plazas con alineación correcta de asientos
+ * Croquis de bus 55 plazas con alineación correcta de asientos específicos
  */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
@@ -43,12 +43,13 @@ const buildSeatLayout = () => {
   }
   
   // FILA ESPECIAL: 19-20 (izq), puerta trasera, 21-22 (der) - ALINEADOS CON 17-18
+  // 17 está en columna 0, 18 en columna 1, por tanto 21 va en columna 3, 22 en columna 4
   seatRows.push([
     19,
     20,
     "PT",   // Puerta trasera
-    21,     // Alineado con columna de 18
-    22,     // Alineado con columna de asientos derechos
+    21,     // Alineado con columna 3 (donde está 18)
+    22,     // Alineado con columna 4
   ]);
   currentSeat = 23;
   
@@ -66,13 +67,13 @@ const buildSeatLayout = () => {
   
   // FILA FINAL: 5 asientos juntos (51-55) ALINEADOS con 47-50
   // 47,48 están en columnas 0,1 - 49,50 están en columnas 3,4
-  // Por tanto: 51,52 en columnas 0,1 - 53 pegado al 52 - 54,55 en columnas 3,4
+  // 51,52 en columnas 0,1 - 53 pegado al 52 (columna 2) - 54,55 en columnas 3,4
   seatRows.push([51, 52, 53, 54, 55]);
   
   return seatRows;
 };
 
-export function BusSeatMap({ passengers, onSeatClick, excursionName }: BusSeatMapProps) {
+export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMapProps) {
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 

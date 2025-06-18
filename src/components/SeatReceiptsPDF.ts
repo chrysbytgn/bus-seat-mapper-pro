@@ -22,7 +22,12 @@ export async function generarPDFasientos(
 
   // --- LOGO y datos asociación ---
   const logoURL = association?.logo || "https://www.pngmart.com/files/21/Travel-PNG-Image-HD.png";
-  const logoDataURL = await getDataURL(logoURL);
+  let logoDataURL = null;
+  try {
+    logoDataURL = await getDataURL(logoURL);
+  } catch (error) {
+    console.log("No se pudo cargar el logo, continuando sin él");
+  }
 
   // 3 recibos por página (1 columna, 3 filas)
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -69,7 +74,11 @@ export async function generarPDFasientos(
     
     // Logo
     if (logoDataURL) {
-      doc.addImage(logoDataURL, "PNG", marginLeft + 5, top + 5, 20, 20);
+      try {
+        doc.addImage(logoDataURL, "PNG", marginLeft + 5, top + 5, 20, 20);
+      } catch (error) {
+        console.log("Error al añadir logo al PDF");
+      }
     }
     
     // Nombre de asociación en dos líneas para mejor legibilidad
@@ -103,7 +112,7 @@ export async function generarPDFasientos(
     
     // Número de recibo
     doc.setFontSize(12);
-    doc.text(`Recibo N°: ${siguienteNumeroRecibo(actualSeq + idx)}`, marginLeft + recWidth - 10, top + 25, { align: "right" });
+    doc.text(`Recibo N°: ${siguienteNumeroRecibo(actualSeq + idx)}`, marginLeft + recWidth - 10, top + 25,{ align: "right" });
     
     // Información de la excursión
     doc.setFontSize(11);
@@ -121,6 +130,9 @@ export async function generarPDFasientos(
     if (p) {
       doc.text(`Pasajero: ${p.name} ${p.surname}`, marginLeft + 5, yPos, { maxWidth: recWidth - 10 });
       yPos += 8;
+    } else {
+      doc.text(`Pasajero: ______________________________`, marginLeft + 5, yPos);
+      yPos += 8;
     }
     
     if (excursionInfo) {
@@ -135,7 +147,7 @@ export async function generarPDFasientos(
         yPos += 8;
       }
       
-      // INCLUIR PRECIO (corregido)
+      // INCLUIR PRECIO
       if (excursionInfo.price) {
         doc.text(`Precio: ${excursionInfo.price} €`, marginLeft + 5, yPos);
         yPos += 8;
