@@ -63,6 +63,11 @@ export async function generarPDFasientos(
     return out.trim();
   }
 
+  function formatParadas() {
+    if (!excursionInfo?.stops || excursionInfo.stops.length === 0) return "";
+    return excursionInfo.stops.join(" → ");
+  }
+
   seatRange.forEach((seatNum, idx) => {
     const posInPage = idx % recibosPorHoja;
     if (posInPage === 0 && idx !== 0) doc.addPage();
@@ -112,10 +117,18 @@ export async function generarPDFasientos(
       doc.text(excurCorta, marginLeft + 2, top + 42, { maxWidth: talonWidth - 4 });
     }
     
+    // Paradas (reducido)
+    const paradas = formatParadas();
+    if (paradas) {
+      const paradasCortas = paradas.length > 12 ? paradas.substring(0, 12) + "..." : paradas;
+      doc.setFontSize(6);
+      doc.text(paradasCortas, marginLeft + 2, top + 50, { maxWidth: talonWidth - 4 });
+    }
+    
     // Precio
     if (excursionInfo?.price) {
       doc.setFontSize(9);
-      doc.text(`${excursionInfo.price} €`, marginLeft + 2, top + 52);
+      doc.text(`${excursionInfo.price} €`, marginLeft + 2, top + 62);
     }
     
     // Fecha (campo para rellenar)
@@ -204,6 +217,12 @@ export async function generarPDFasientos(
       
       if (excursionInfo.place) {
         doc.text(`Salida: ${excursionInfo.place}`, reciboLeft + 5, yPos, { maxWidth: reciboMainWidth - 10 });
+        yPos += 8;
+      }
+      
+      // Paradas adicionales
+      if (paradas) {
+        doc.text(`Paradas: ${paradas}`, reciboLeft + 5, yPos, { maxWidth: reciboMainWidth - 10 });
         yPos += 8;
       }
       

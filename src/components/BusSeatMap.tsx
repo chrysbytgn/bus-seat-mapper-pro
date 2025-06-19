@@ -16,24 +16,34 @@ interface BusSeatMapProps {
 }
 
 /**
- * Croquis de bus 55 plazas con layout corregido:
- * - Asientos 1-2 detrás del conductor
- * - Puerta delantera a la derecha del conductor
- * - Puerta trasera desplazada a la derecha
+ * Croquis de bus 55 plazas con layout corregido según imagen:
+ * - Conductor solo en primera fila
+ * - Puerta delantera a la derecha + asientos 1-2 a la izquierda en segunda fila
+ * - Numeración secuencial 3-55 en filas siguientes
+ * - Puerta trasera posicionada correctamente
  */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
   
-  // Fila 0: Conductor + espacio + Puerta delantera (derecha) + Asientos 1-2
+  // Fila 0: Solo conductor
   seatRows.push([
     "C",    // Conductor
     null,   // Espacio
-    "PD",   // Puerta delantera (derecha)
-    1,      // Asiento 1 (detrás conductor)
-    2,      // Asiento 2
+    null,   // Espacio
+    null,   // Espacio
+    null,   // Espacio
   ]);
   
-  // Filas 1-4: Asientos 3-18 (estructura normal 2+2 con pasillo)
+  // Fila 1: Asientos 1-2 a la izquierda + puerta delantera a la derecha
+  seatRows.push([
+    1,      // Asiento 1
+    2,      // Asiento 2
+    null,   // Pasillo
+    "PD",   // Puerta delantera (derecha)
+    null,   // Espacio
+  ]);
+  
+  // Filas 2-5: Asientos 3-18 (estructura normal 2+2 con pasillo)
   let currentSeat = 3;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
@@ -46,17 +56,7 @@ const buildSeatLayout = () => {
     currentSeat += 4;
   }
   
-  // Fila especial: 19-20 + espacio libre + 21-22 (sin puerta aquí)
-  seatRows.push([
-    19,   // Izquierda 1
-    20,   // Izquierda 2
-    null, // Espacio libre (sin puerta)
-    21,   // Derecha 1
-    22,   // Derecha 2
-  ]);
-  currentSeat = 23;
-  
-  // Filas 6-12: Asientos 23-50 (estructura normal 2+2)
+  // Filas 6-12: Asientos 19-46 (estructura normal 2+2)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
       currentSeat,     // Izquierda 1
@@ -68,20 +68,29 @@ const buildSeatLayout = () => {
     currentSeat += 4;
   }
   
-  // Fila con puerta trasera: quitamos asientos del lado derecho
+  // Fila 13: Asientos 47-50 + puerta trasera (derecha)
+  seatRows.push([
+    47,   // Izquierda 1
+    48,   // Izquierda 2
+    null, // Pasillo
+    49,   // Derecha 1
+    50,   // Derecha 2
+  ]);
+  
+  // Fila 14: Puerta trasera a la derecha + últimos 3 asientos
   seatRows.push([
     51,   // Izquierda 1
     52,   // Izquierda 2
     null, // Pasillo
     "PT", // Puerta trasera (derecha)
-    null, // Espacio (sin asiento)
+    null, // Espacio
   ]);
   
-  // Fila final: 3 asientos restantes (53-55) alineados a la izquierda
+  // Fila 15: Últimos 3 asientos (53-55) centrados
   seatRows.push([
     53,   // Izquierda 1
-    54,   // Izquierda 2
-    55,   // Centro
+    54,   // Centro
+    55,   // Derecha 1
     null, // Espacio
     null, // Espacio
   ]);

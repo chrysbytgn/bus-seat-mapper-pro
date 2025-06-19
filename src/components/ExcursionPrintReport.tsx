@@ -86,6 +86,7 @@ export function ExcursionPrintReport({
     : "";
   const hora = excursionInfo?.time || "";
   const lugar = excursionInfo?.place || "";
+  const paradas = excursionInfo?.stops || [];
 
   return (
     <div className="print:w-full print:h-full print:p-0 print:m-0 bg-white print:text-black print:page-break-inside-avoid">
@@ -126,6 +127,15 @@ export function ExcursionPrintReport({
             {hora && <div>Hora: {hora}</div>}
             {lugar && <div>Salida: {lugar}</div>}
           </div>
+          
+          {/* Paradas adicionales */}
+          {paradas && paradas.length > 0 && (
+            <div className="mt-2">
+              <div className="text-[11px] print:text-[10px] text-gray-700">
+                <strong>Paradas:</strong> {paradas.join(" → ")}
+              </div>
+            </div>
+          )}
         </div>
         
         {/* LAYOUT HORIZONTAL: CROQUIS IZQUIERDA + LISTA AL LADO */}
