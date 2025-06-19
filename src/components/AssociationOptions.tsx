@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getAssociationConfig, setAssociationConfig, AssociationConfig } from "@/utils/associationConfig";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import AssociationDocumentPreview from "./AssociationDocumentPreview";
 
 interface Props {
   onBack?: () => void;
@@ -13,6 +14,7 @@ interface Props {
 export default function AssociationOptions({ onBack }: Props) {
   const [config, setConfig] = useState<AssociationConfig>(getAssociationConfig());
   const [logoPreview, setLogoPreview] = useState<string>(config.logo || "");
+  const [showPreview, setShowPreview] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,9 +36,36 @@ export default function AssociationOptions({ onBack }: Props) {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setAssociationConfig(config);
-    toast({ title: "Guardado", description: "Los datos de la asociación han sido guardados.", duration: 1800 });
+    toast({ 
+      title: "Guardado", 
+      description: "Los datos de la asociación han sido guardados.", 
+      duration: 1800 
+    });
+    
+    // Mostrar vista previa después de guardar
+    setShowPreview(true);
   };
 
+  const handleModifyData = () => {
+    setShowPreview(false);
+  };
+
+  const handleContinue = () => {
+    onBack?.();
+  };
+
+  // Si estamos en modo preview, mostrar el componente de preview
+  if (showPreview) {
+    return (
+      <AssociationDocumentPreview
+        config={config}
+        onModify={handleModifyData}
+        onContinue={handleContinue}
+      />
+    );
+  }
+
+  // Formulario original
   return (
     <div className="flex min-h-screen justify-center items-center bg-background">
       <div className="bg-white border rounded-xl shadow px-7 py-8 w-full max-w-md relative">
