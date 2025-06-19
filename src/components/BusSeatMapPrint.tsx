@@ -6,54 +6,69 @@ import { cn } from "@/lib/utils";
 // Layout unificado para impresión - IDÉNTICO al de BusSeatMap.tsx
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
-
-  // Fila 0: Conductor, puerta delantera y primeros 2 asientos
+  
+  // Fila 0: Conductor + espacio + Puerta delantera (derecha) + Asientos 1-2
   seatRows.push([
     "C",    // Conductor
-    "PD",   // Puerta delantera
-    1,
-    2,
+    null,   // Espacio
+    "PD",   // Puerta delantera (derecha)
+    1,      // Asiento 1 (detrás conductor)
+    2,      // Asiento 2
   ]);
-
-  // Siguientes filas normales (filas 1-4 con asientos del 3 al 18)
+  
+  // Filas 1-4: Asientos 3-18 (estructura normal 2+2 con pasillo)
   let currentSeat = 3;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
-      currentSeat,
-      currentSeat + 1,
-      null,
-      currentSeat + 2,
-      currentSeat + 3,
+      currentSeat,     // Izquierda 1
+      currentSeat + 1, // Izquierda 2
+      null,            // Pasillo
+      currentSeat + 2, // Derecha 1
+      currentSeat + 3, // Derecha 2
     ]);
     currentSeat += 4;
   }
-
-  // FILA ESPECIAL: 19-20 (izq), puerta trasera, 21-22 (der) - ALINEADOS CON 17-18
+  
+  // Fila especial: 19-20 + espacio libre + 21-22 (sin puerta aquí)
   seatRows.push([
-    19,
-    20,
-    "PT",   // Puerta trasera
-    21,     // Alineado con columna 3
-    22,     // Alineado con columna 4
+    19,   // Izquierda 1
+    20,   // Izquierda 2
+    null, // Espacio libre (sin puerta)
+    21,   // Derecha 1
+    22,   // Derecha 2
   ]);
   currentSeat = 23;
-
-  // Siguientes filas normales hasta asiento 50 (7 filas: 23-50)
+  
+  // Filas 6-12: Asientos 23-50 (estructura normal 2+2)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
-      currentSeat,
-      currentSeat + 1,
-      null,
-      currentSeat + 2,
-      currentSeat + 3,
+      currentSeat,     // Izquierda 1
+      currentSeat + 1, // Izquierda 2
+      null,            // Pasillo
+      currentSeat + 2, // Derecha 1
+      currentSeat + 3, // Derecha 2
     ]);
     currentSeat += 4;
   }
-
-  // FILA FINAL: 5 asientos juntos (51-55) ALINEADOS con 47-50
-  // 51,52 en columnas 0,1 - 53 pegado al 52 (columna 2) - 54,55 en columnas 3,4
-  seatRows.push([51, 52, 53, 54, 55]);
-
+  
+  // Fila con puerta trasera: quitamos asientos del lado derecho
+  seatRows.push([
+    51,   // Izquierda 1
+    52,   // Izquierda 2
+    null, // Pasillo
+    "PT", // Puerta trasera (derecha)
+    null, // Espacio (sin asiento)
+  ]);
+  
+  // Fila final: 3 asientos restantes (53-55) alineados a la izquierda
+  seatRows.push([
+    53,   // Izquierda 1
+    54,   // Izquierda 2
+    55,   // Centro
+    null, // Espacio
+    null, // Espacio
+  ]);
+  
   return seatRows;
 };
 
@@ -98,35 +113,22 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
                     </div>
                   );
                 }
-                // Puerta delantera
-                if (cell === "PD") {
+                // Puerta delantera/trasera
+                if (cell === "PD" || cell === "PT") {
                   return (
                     <div
-                      key="puerta-del"
+                      key={cell}
                       className="w-5 h-5 print:w-4 print:h-4 flex items-center justify-center border border-black text-[7px] print:text-[7px] bg-white"
                       style={{ fontSize: "8px", padding: 0 }}
-                      title="Puerta delantera"
+                      title={cell === "PD" ? "Puerta delantera" : "Puerta trasera"}
                     >
                       <span className="block w-full border-b-2 border-dashed border-black" style={{ height: 7 }} />
                     </div>
                   );
                 }
-                // Puerta trasera
-                if (cell === "PT") {
-                  return (
-                    <div
-                      key="puerta-tras"
-                      className="w-5 h-5 print:w-4 print:h-4 flex items-center justify-center border border-black text-[7px] print:text-[7px] bg-white"
-                      style={{ fontSize: "8px", padding: 0 }}
-                      title="Puerta trasera"
-                    >
-                      <span className="block w-full border-b-2 border-dashed border-black" style={{ height: 7 }} />
-                    </div>
-                  );
-                }
-                // Pasillo
+                // Pasillo/espacio
                 if (cell === null) {
-                  return <div key={"pasillo-" + colIdx} className="w-3 print:w-2" />;
+                  return <div key={"espacio-" + colIdx + "-" + rowIdx} className="w-3 print:w-2" />;
                 }
                 // Asientos normales
                 const seatNum = Number(cell);

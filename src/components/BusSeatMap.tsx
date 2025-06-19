@@ -16,59 +16,75 @@ interface BusSeatMapProps {
 }
 
 /**
- * Croquis de bus 55 plazas con alineación correcta de asientos específicos
+ * Croquis de bus 55 plazas con layout corregido:
+ * - Asientos 1-2 detrás del conductor
+ * - Puerta delantera a la derecha del conductor
+ * - Puerta trasera desplazada a la derecha
  */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
   
-  // Fila 0: Conductor, puerta delantera y primeros 2 asientos
+  // Fila 0: Conductor + espacio + Puerta delantera (derecha) + Asientos 1-2
   seatRows.push([
     "C",    // Conductor
-    "PD",   // Puerta delantera
-    1,
-    2,
+    null,   // Espacio
+    "PD",   // Puerta delantera (derecha)
+    1,      // Asiento 1 (detrás conductor)
+    2,      // Asiento 2
   ]);
   
-  // Siguientes filas normales (filas 1-4 con asientos del 3 al 18)
+  // Filas 1-4: Asientos 3-18 (estructura normal 2+2 con pasillo)
   let currentSeat = 3;
   for (let f = 0; f < 4; f++) {
     seatRows.push([
-      currentSeat,
-      currentSeat + 1,
-      null,
-      currentSeat + 2,
-      currentSeat + 3,
+      currentSeat,     // Izquierda 1
+      currentSeat + 1, // Izquierda 2
+      null,            // Pasillo
+      currentSeat + 2, // Derecha 1
+      currentSeat + 3, // Derecha 2
     ]);
     currentSeat += 4;
   }
   
-  // FILA ESPECIAL: 19-20 (izq), puerta trasera, 21-22 (der) - ALINEADOS CON 17-18
-  // 17 está en columna 0, 18 en columna 1, por tanto 21 va en columna 3, 22 en columna 4
+  // Fila especial: 19-20 + espacio libre + 21-22 (sin puerta aquí)
   seatRows.push([
-    19,
-    20,
-    "PT",   // Puerta trasera
-    21,     // Alineado con columna 3 (donde está 18)
-    22,     // Alineado con columna 4
+    19,   // Izquierda 1
+    20,   // Izquierda 2
+    null, // Espacio libre (sin puerta)
+    21,   // Derecha 1
+    22,   // Derecha 2
   ]);
   currentSeat = 23;
   
-  // Siguientes filas normales hasta asiento 50 (7 filas: 23-50)
+  // Filas 6-12: Asientos 23-50 (estructura normal 2+2)
   for (let f = 0; f < 7; f++) {
     seatRows.push([
-      currentSeat,
-      currentSeat + 1,
-      null,
-      currentSeat + 2,
-      currentSeat + 3,
+      currentSeat,     // Izquierda 1
+      currentSeat + 1, // Izquierda 2
+      null,            // Pasillo
+      currentSeat + 2, // Derecha 1
+      currentSeat + 3, // Derecha 2
     ]);
     currentSeat += 4;
   }
   
-  // FILA FINAL: 5 asientos juntos (51-55) ALINEADOS con 47-50
-  // 47,48 están en columnas 0,1 - 49,50 están en columnas 3,4
-  // 51,52 en columnas 0,1 - 53 pegado al 52 (columna 2) - 54,55 en columnas 3,4
-  seatRows.push([51, 52, 53, 54, 55]);
+  // Fila con puerta trasera: quitamos asientos del lado derecho
+  seatRows.push([
+    51,   // Izquierda 1
+    52,   // Izquierda 2
+    null, // Pasillo
+    "PT", // Puerta trasera (derecha)
+    null, // Espacio (sin asiento)
+  ]);
+  
+  // Fila final: 3 asientos restantes (53-55) alineados a la izquierda
+  seatRows.push([
+    53,   // Izquierda 1
+    54,   // Izquierda 2
+    55,   // Centro
+    null, // Espacio
+    null, // Espacio
+  ]);
   
   return seatRows;
 };
@@ -131,7 +147,7 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMa
                   }
                   // Pasillo/espacio vacío
                   if (cell === null) {
-                    return <div key={"pasillo-" + colIdx + "-" + rowIdx} className="w-6 h-10 sm:w-8 sm:h-10" />;
+                    return <div key={"espacio-" + colIdx + "-" + rowIdx} className="w-6 h-10 sm:w-8 sm:h-10" />;
                   }
                   // Asientos normales clicables
                   const seatNum = Number(cell);
