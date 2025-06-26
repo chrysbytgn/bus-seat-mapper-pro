@@ -7,45 +7,27 @@ import { Book } from "lucide-react";
 /**
  * Layout unificado para impresión - IDÉNTICO al de BusSeatMap.tsx
  * Croquis de bus 55 plazas con layout mejorado:
- * - Conductor (izquierda) + Guía/Líder (derecha) en fila frontal
- * - Fila 1: Asientos 01-04 + Puerta delantera
- * - Filas 2-7: Asientos 05-28 (secuencial 4 por fila)
- * - Puerta media entre asientos 28-29
- * - Filas 8-21: Asientos 29-55 (incluyendo asiento 55 individual)
+ * - Conductor (izquierda) + Guía/Líder (derecha) + Puerta principal al lado del guía
+ * - Filas 1-7: Asientos 01-28 (4 por fila)
+ * - Fila especial: Asientos 29-30 (izquierda) + Puerta trasera (derecha, detrás de 27-28)
+ * - Filas intermedias: Asientos 31-50
+ * - Fila final: Asientos 51-55 (todos en una sola fila)
  */
 const buildSeatLayout = () => {
   const seatRows: (number | string | null)[][] = [];
   
-  // Fila 0: Conductor (izquierda) + Guía/Líder (derecha)
+  // Fila 0: Conductor + Guía + Puerta principal al lado del guía
   seatRows.push([
     "C",    // Conductor
     null,   // Espacio
     null,   // Pasillo central
-    null,   // Espacio  
     "G",    // Guía/Líder
+    "P",    // Puerta principal al lado del guía
   ]);
   
-  // Fila 1: Asientos 01-04 + Puerta delantera
-  seatRows.push([
-    1,      // Asiento 01
-    2,      // Asiento 02
-    null,   // Pasillo
-    3,      // Asiento 03
-    4,      // Asiento 04
-  ]);
-  
-  // Puerta delantera
-  seatRows.push([
-    "PD",   // Puerta delantera (izquierda)
-    "PD",   // Puerta delantera (centro)
-    null,   // Pasillo
-    "PD",   // Puerta delantera (derecha)
-    null,   // Espacio
-  ]);
-  
-  // Filas 2-7: Asientos 05-28 (6 filas × 4 asientos = 24 asientos)
-  let currentSeat = 5;
-  for (let fila = 0; fila < 6; fila++) {
+  // Filas 1-7: Asientos 01-28 (7 filas × 4 asientos = 28 asientos)
+  let currentSeat = 1;
+  for (let fila = 0; fila < 7; fila++) {
     seatRows.push([
       currentSeat,     // Izquierda 1
       currentSeat + 1, // Izquierda 2
@@ -56,57 +38,36 @@ const buildSeatLayout = () => {
     currentSeat += 4;
   }
   
-  // Puerta media (entre asientos 28 y 29)
+  // Fila especial: Asientos 29-30 (izquierda) + Puerta trasera (derecha, detrás de 27-28)
   seatRows.push([
-    "PM",   // Puerta media (izquierda)
-    "PM",   // Puerta media (centro)
+    29,     // Asiento 29 (izquierda, detrás de 25)
+    30,     // Asiento 30 (izquierda, detrás de 26)
     null,   // Pasillo
-    "PM",   // Puerta media (derecha)
-    null,   // Espacio
+    "PT",   // Puerta trasera (derecha, detrás de 27)
+    "PT",   // Puerta trasera (derecha, detrás de 28)
   ]);
   
-  // Filas 8-20: Asientos 29-54 (13 filas × 2 asientos + algunas de 4)
-  // 29-30, 31-32, 33-34, 35-36, 37-38, 39-40, 41-42, 43-44, 45-46, 47-48, 49-50, 51-52, 53-54
-  currentSeat = 29;
-  for (let fila = 0; fila < 13; fila++) {
-    if (currentSeat <= 54) {
-      if (currentSeat + 3 <= 54) {
-        // Fila completa con 4 asientos
-        seatRows.push([
-          currentSeat,     // Izquierda 1
-          currentSeat + 1, // Izquierda 2
-          null,            // Pasillo
-          currentSeat + 2, // Derecha 1
-          currentSeat + 3, // Derecha 2
-        ]);
-        currentSeat += 4;
-      } else {
-        // Últimos asientos (puede ser menos de 4)
-        const remaining = 55 - currentSeat;
-        if (remaining >= 2) {
-          seatRows.push([
-            currentSeat,     // Izquierda 1
-            currentSeat + 1, // Izquierda 2
-            null,            // Pasillo
-            remaining > 2 ? currentSeat + 2 : null, // Derecha 1
-            remaining > 3 ? currentSeat + 3 : null, // Derecha 2
-          ]);
-        }
-        currentSeat += remaining;
-      }
-    }
+  // Filas intermedias: Asientos 31-50 (5 filas × 4 asientos = 20 asientos)
+  currentSeat = 31;
+  for (let fila = 0; fila < 5; fila++) {
+    seatRows.push([
+      currentSeat,     // Izquierda 1
+      currentSeat + 1, // Izquierda 2
+      null,            // Pasillo
+      currentSeat + 2, // Derecha 1
+      currentSeat + 3, // Derecha 2
+    ]);
+    currentSeat += 4;
   }
   
-  // Fila final: Asiento 55 (individual, centrado)
-  if (currentSeat === 55) {
-    seatRows.push([
-      null,   // Espacio
-      55,     // Asiento 55 (centrado)
-      null,   // Pasillo
-      null,   // Espacio
-      null,   // Espacio
-    ]);
-  }
+  // Fila final: Asientos 51-55 (todos en una sola fila)
+  seatRows.push([
+    51,     // Asiento 51
+    52,     // Asiento 52
+    53,     // Asiento 53 (centro)
+    54,     // Asiento 54
+    55,     // Asiento 55
+  ]);
   
   return seatRows;
 };
@@ -166,13 +127,13 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
                   );
                 }
                 // Puertas
-                if (cell === "PD" || cell === "PM") {
+                if (cell === "P" || cell === "PT") {
                   return (
                     <div
                       key={cell + "-" + colIdx}
                       className="w-5 h-3 print:w-4 print:h-2 flex items-center justify-center border border-black text-[6px] print:text-[5px] bg-white"
                       style={{ fontSize: "5px", padding: 0 }}
-                      title={cell === "PD" ? "Puerta delantera" : "Puerta media"}
+                      title={cell === "P" ? "Puerta principal" : "Puerta trasera"}
                     >
                       <span className="font-bold">PUERTA</span>
                     </div>
