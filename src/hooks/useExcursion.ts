@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -115,7 +114,7 @@ export function useExcursion() {
       });
   }, [id, excursionInfo?.id]);
 
-  const handleAddOrEditPassenger = useCallback(async (seat: number, name: string, surname: string) => {
+  const handleAddOrEditPassenger = useCallback(async (seat: number, name: string, surname: string, phone: string = "") => {
     if (!id || !excursionInfo?.id) {
       toast({
         title: "Excursión no encontrada",
@@ -126,7 +125,7 @@ export function useExcursion() {
     }
     try {
       const excursionId = Number(id);
-      await upsertPassenger(excursionId, { seat, name, surname });
+      await upsertPassenger(excursionId, { seat, name, surname, phone });
       fetchPassengers(excursionId).then(setPassengers);
     } catch (error: any) {
       if (error && typeof error.message === "string" && error.message.includes("foreign key constraint")) {

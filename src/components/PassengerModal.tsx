@@ -7,9 +7,10 @@ import { useState, useEffect } from "react";
 interface PassengerModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (name: string, surname: string) => void;
+  onSave: (name: string, surname: string, phone: string) => void;
   defaultName?: string;
   defaultSurname?: string;
+  defaultPhone?: string;
   seatNumber: number | null;
 }
 
@@ -19,15 +20,18 @@ export function PassengerModal({
   onSave,
   defaultName = "",
   defaultSurname = "",
+  defaultPhone = "",
   seatNumber
 }: PassengerModalProps) {
   const [name, setName] = useState(defaultName);
   const [surname, setSurname] = useState(defaultSurname);
+  const [phone, setPhone] = useState(defaultPhone);
 
   useEffect(() => {
     setName(defaultName);
     setSurname(defaultSurname);
-  }, [defaultName, defaultSurname, open]);
+    setPhone(defaultPhone);
+  }, [defaultName, defaultSurname, defaultPhone, open]);
 
   return (
     <Dialog open={open} onOpenChange={v => !v ? onClose() : undefined}>
@@ -47,11 +51,17 @@ export function PassengerModal({
             value={surname}
             onChange={e => setSurname(e.target.value)}
           />
+          <Input
+            placeholder="Teléfono (opcional)"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+            type="tel"
+          />
         </div>
         <DialogFooter className="gap-2">
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           <Button disabled={!name.trim() || !surname.trim()} onClick={() => {
-            onSave(name.trim(), surname.trim());
+            onSave(name.trim(), surname.trim(), phone.trim());
             onClose();
           }}>Guardar</Button>
         </DialogFooter>

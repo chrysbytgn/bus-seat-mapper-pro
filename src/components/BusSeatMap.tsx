@@ -1,13 +1,13 @@
-
-import { useState } from "react";
-import { PassengerModal } from "./PassengerModal";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import { PassengerModal } from "./PassengerModal";
 import { Book } from "lucide-react";
 
 export interface Passenger {
   seat: number;
   name: string;
   surname: string;
+  phone?: string;
 }
 
 interface BusSeatMapProps {

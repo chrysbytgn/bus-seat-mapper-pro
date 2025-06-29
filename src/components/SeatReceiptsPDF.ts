@@ -1,4 +1,3 @@
-
 import jsPDF from "jspdf";
 // @ts-ignore
 import autoTable from "jspdf-autotable";
@@ -113,6 +112,14 @@ export async function generarPDFasientos(
       doc.text(nombreCorto, marginLeft + 3, top + 39);
     }
     
+    // Teléfono en el talón
+    if (p?.phone) {
+      doc.setFontSize(6);
+      doc.text("Tel:", marginLeft + 2, top + 46);
+      const telefonoCorto = p.phone.length > 12 ? p.phone.substring(0, 12) : p.phone;
+      doc.text(telefonoCorto, marginLeft + 2, top + 51);
+    }
+    
     // Excursión (reducido)
     if (excursionInfo?.name) {
       const excurCorta = excursionInfo.name.length > 10 ? excursionInfo.name.substring(0, 10) + "..." : excursionInfo.name;
@@ -210,13 +217,24 @@ export async function generarPDFasientos(
     doc.setFontSize(10);
     if (p) {
       doc.text(`Pasajero: ${p.name} ${p.surname}`, reciboLeft + 5, yPos, { maxWidth: reciboMainWidth - 10 });
+      yPos += 8;
+      // Teléfono del pasajero en el recibo principal
+      if (p.phone) {
+        doc.setFontSize(9);
+        doc.text(`Teléfono: ${p.phone}`, reciboLeft + 5, yPos);
+        yPos += 8;
+      }
     } else {
       doc.text(`Pasajero:`, reciboLeft + 5, yPos);
       // Recuadro más visible para escribir el nombre
       doc.setDrawColor(100, 100, 100);
       doc.rect(reciboLeft + 35, yPos - 4, 80, 6);
+      yPos += 8;
+      // Campo para teléfono
+      doc.setFontSize(9);
+      doc.text(`Teléfono: ________________________`, reciboLeft + 5, yPos);
+      yPos += 8;
     }
-    yPos += 8;
     
     if (excursionInfo) {
       const fechaHora = infoExcursionLinea();

@@ -121,7 +121,8 @@ export async function upsertPassenger(excursion_id: number, passenger: Passenger
       excursion_id,
       seat: passenger.seat,
       name: passenger.name,
-      surname: passenger.surname
+      surname: passenger.surname,
+      phone: passenger.phone || null
     }])
     .select();
   if (error) {

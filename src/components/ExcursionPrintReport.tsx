@@ -21,8 +21,9 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
       <table className="w-full border-separate border-spacing-y-[1px]">
         <thead>
           <tr className="bg-gray-100">
-            <th className="text-left px-1 py-1 font-semibold w-[25px] border-b border-gray-300 text-[10px]">#</th>
-            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[10px]">Nombre completo</th>
+            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[10px]">#</th>
+            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[10px]">Nombre</th>
+            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[10px]">Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -37,6 +38,9 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
                     : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                   }
                 </td>
+                <td className="px-1 py-[1px] border-b border-gray-100 text-[9px]">
+                  {p?.phone || ""}
+                </td>
               </tr>
             );
           })}
@@ -47,8 +51,9 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
       <table className="w-full border-separate border-spacing-y-[1px]">
         <thead>
           <tr className="bg-gray-100">
-            <th className="text-left px-1 py-1 font-semibold w-[25px] border-b border-gray-300 text-[10px]">#</th>
-            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[10px]">Nombre completo</th>
+            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[10px]">#</th>
+            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[10px]">Nombre</th>
+            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[10px]">Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -62,6 +67,9 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
                     ? `${p.name} ${p.surname}`.trim()
                     : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                   }
+                </td>
+                <td className="px-1 py-[1px] border-b border-gray-100 text-[9px]">
+                  {p?.phone || ""}
                 </td>
               </tr>
             );

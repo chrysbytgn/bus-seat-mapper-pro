@@ -86,6 +86,7 @@ export type Database = {
           excursion_id: number
           id: number
           name: string
+          phone: string | null
           seat: number
           surname: string
         }
@@ -94,6 +95,7 @@ export type Database = {
           excursion_id: number
           id?: number
           name: string
+          phone?: string | null
           seat: number
           surname: string
         }
@@ -102,6 +104,7 @@ export type Database = {
           excursion_id?: number
           id?: number
           name?: string
+          phone?: string | null
           seat?: number
           surname?: string
         }
