@@ -102,33 +102,37 @@ export async function generarPDFasientos(
     doc.setFontSize(10);
     doc.text(`Asiento: ${seatNum}`, marginLeft + 2, top + 24);
     
-    // Pasajero (reducido)
+    // Campo para NOMBRE DEL PASAJERO en mácula
+    doc.setFontSize(7);
+    doc.text("Pasajero:", marginLeft + 2, top + 32);
+    doc.rect(marginLeft + 2, top + 34, talonWidth - 4, 8);
     if (p) {
       const nombreCompleto = `${p.name} ${p.surname}`;
       const nombreCorto = nombreCompleto.length > 12 ? nombreCompleto.substring(0, 12) + "..." : nombreCompleto;
-      doc.setFontSize(8);
-      doc.text(nombreCorto, marginLeft + 2, top + 32, { maxWidth: talonWidth - 4 });
+      doc.setFontSize(7);
+      doc.text(nombreCorto, marginLeft + 3, top + 39);
     }
     
     // Excursión (reducido)
     if (excursionInfo?.name) {
       const excurCorta = excursionInfo.name.length > 10 ? excursionInfo.name.substring(0, 10) + "..." : excursionInfo.name;
       doc.setFontSize(7);
-      doc.text(excurCorta, marginLeft + 2, top + 42, { maxWidth: talonWidth - 4 });
+      doc.text(excurCorta, marginLeft + 2, top + 48, { maxWidth: talonWidth - 4 });
     }
     
-    // Paradas (reducido)
+    // Paradas adicionales en mácula (mejorado)
     const paradas = formatParadas();
     if (paradas) {
-      const paradasCortas = paradas.length > 12 ? paradas.substring(0, 12) + "..." : paradas;
       doc.setFontSize(6);
-      doc.text(paradasCortas, marginLeft + 2, top + 50, { maxWidth: talonWidth - 4 });
+      doc.text("Paradas:", marginLeft + 2, top + 54);
+      const paradasCortas = paradas.length > 15 ? paradas.substring(0, 15) + "..." : paradas;
+      doc.text(paradasCortas, marginLeft + 2, top + 59, { maxWidth: talonWidth - 4 });
     }
     
     // Precio
     if (excursionInfo?.price) {
       doc.setFontSize(9);
-      doc.text(`${excursionInfo.price} €`, marginLeft + 2, top + 62);
+      doc.text(`${excursionInfo.price} €`, marginLeft + 2, top + 68);
     }
     
     // Fecha (campo para rellenar)
@@ -155,37 +159,39 @@ export async function generarPDFasientos(
       }
     }
     
-    // Nombre de asociación en el recibo principal
+    // Nombre de asociación en el recibo principal (TAMAÑO REDUCIDO)
     const words = associationName.split(' ');
     const midPoint = Math.ceil(words.length / 2);
     const firstLine = words.slice(0, midPoint).join(' ');
     const secondLine = words.slice(midPoint).join(' ');
     
-    doc.setFontSize(16);
+    doc.setFontSize(12); // Reducido de 16 a 12
     doc.setTextColor(0, 0, 0);
     doc.text(firstLine, reciboLeft + 30, top + 12);
     if (secondLine) {
-      doc.text(secondLine, reciboLeft + 30, top + 20);
+      doc.text(secondLine, reciboLeft + 30, top + 19); // Ajustado espaciado
     }
+    
+    // Número de recibo JUSTO DEBAJO del nombre de la asociación, alineado a la derecha
+    doc.setFontSize(10); // Reducido de 12 a 10
+    const yPosNumRecibo = secondLine ? top + 26 : top + 19;
+    doc.text(`Recibo N°: ${numeroRecibo}`, reciboLeft + reciboMainWidth - 10, yPosNumRecibo, { align: "right" });
+    
+    // Título del recibo MÁS PEQUEÑO en la parte superior derecha
+    doc.setFontSize(10); // Reducido de 14 a 10
+    doc.setTextColor(80, 80, 80);
+    doc.text("RECIBO EXCURSIÓN", reciboLeft + reciboMainWidth - 10, top + 10, { align: "right" });
     
     // Información de contacto
-    doc.setFontSize(10);
+    doc.setFontSize(9); // Reducido de 10 a 9
     doc.setTextColor(80, 80, 80);
+    const yContactStart = secondLine ? top + 32 : top + 25;
     if (association?.address) {
-      doc.text(association.address, reciboLeft + 30, top + 28, { maxWidth: reciboMainWidth - 35 });
+      doc.text(association.address, reciboLeft + 30, yContactStart, { maxWidth: reciboMainWidth - 35 });
     }
     if (association?.phone) {
-      doc.text(`Tel: ${association.phone}`, reciboLeft + 30, top + 34);
+      doc.text(`Tel: ${association.phone}`, reciboLeft + 30, yContactStart + 6);
     }
-    
-    // Título del recibo
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text("RECIBO EXCURSIÓN", reciboLeft + reciboMainWidth - 10, top + 15, { align: "right" });
-    
-    // Número de recibo
-    doc.setFontSize(12);
-    doc.text(`Recibo N°: ${numeroRecibo}`, reciboLeft + reciboMainWidth - 10, top + 25, { align: "right" });
     
     // Información de la excursión
     doc.setFontSize(11);
@@ -200,13 +206,17 @@ export async function generarPDFasientos(
     doc.text(`Asiento: ${seatNum}`, reciboLeft + 5, yPos);
     yPos += 8;
     
+    // Campo mejorado para el pasajero con recuadro más visible
+    doc.setFontSize(10);
     if (p) {
       doc.text(`Pasajero: ${p.name} ${p.surname}`, reciboLeft + 5, yPos, { maxWidth: reciboMainWidth - 10 });
-      yPos += 8;
     } else {
-      doc.text(`Pasajero: ______________________________`, reciboLeft + 5, yPos);
-      yPos += 8;
+      doc.text(`Pasajero:`, reciboLeft + 5, yPos);
+      // Recuadro más visible para escribir el nombre
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(reciboLeft + 35, yPos - 4, 80, 6);
     }
+    yPos += 8;
     
     if (excursionInfo) {
       const fechaHora = infoExcursionLinea();
@@ -220,13 +230,33 @@ export async function generarPDFasientos(
         yPos += 8;
       }
       
-      // Paradas adicionales
+      // Paradas adicionales MEJORADAS - solo si existen
       if (paradas) {
-        doc.text(`Paradas: ${paradas}`, reciboLeft + 5, yPos, { maxWidth: reciboMainWidth - 10 });
-        yPos += 8;
+        doc.setFontSize(9);
+        doc.text(`Paradas adicionales:`, reciboLeft + 5, yPos);
+        yPos += 6;
+        doc.setFontSize(8);
+        // Dividir paradas en múltiples líneas si es necesario
+        const palabras = paradas.split(' ');
+        let lineaActual = '';
+        palabras.forEach((palabra, index) => {
+          const lineaTest = lineaActual + (lineaActual ? ' ' : '') + palabra;
+          if (lineaTest.length > 45) { // Límite por línea
+            doc.text(lineaActual, reciboLeft + 8, yPos);
+            yPos += 5;
+            lineaActual = palabra;
+          } else {
+            lineaActual = lineaTest;
+          }
+          if (index === palabras.length - 1) {
+            doc.text(lineaActual, reciboLeft + 8, yPos);
+            yPos += 6;
+          }
+        });
       }
       
       if (excursionInfo.price) {
+        doc.setFontSize(11);
         doc.text(`Precio: ${excursionInfo.price} €`, reciboLeft + 5, yPos);
         yPos += 8;
       }
