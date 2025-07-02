@@ -1,3 +1,4 @@
+
 import jsPDF from "jspdf";
 // @ts-ignore
 import autoTable from "jspdf-autotable";
@@ -160,50 +161,54 @@ export async function generarPDFasientos(
     // Logo en el recibo principal
     if (logoDataURL) {
       try {
-        doc.addImage(logoDataURL, "PNG", reciboLeft + 5, top + 5, 20, 20);
+        doc.addImage(logoDataURL, "PNG", reciboLeft + 5, top + 5, 15, 15);
       } catch (error) {
         console.log("Error al añadir logo al PDF");
       }
     }
     
-    // Nombre de asociación en el recibo principal (TAMAÑO REDUCIDO)
+    // Título "RECIBO EXCURSIÓN" en la esquina superior derecha (más pequeño)
+    doc.setFontSize(8);
+    doc.setTextColor(80, 80, 80);
+    doc.text("RECIBO EXCURSIÓN", reciboLeft + reciboMainWidth - 5, top + 8, { align: "right" });
+    
+    // Nombre de asociación (REDUCIDO y junto al logo)
     const words = associationName.split(' ');
     const midPoint = Math.ceil(words.length / 2);
     const firstLine = words.slice(0, midPoint).join(' ');
     const secondLine = words.slice(midPoint).join(' ');
     
-    doc.setFontSize(12); // Reducido de 16 a 12
-    doc.setTextColor(0, 0, 0);
-    doc.text(firstLine, reciboLeft + 30, top + 12);
-    if (secondLine) {
-      doc.text(secondLine, reciboLeft + 30, top + 19); // Ajustado espaciado
-    }
-    
-    // Número de recibo JUSTO DEBAJO del nombre de la asociación, alineado a la derecha
     doc.setFontSize(10); // Reducido de 12 a 10
-    const yPosNumRecibo = secondLine ? top + 26 : top + 19;
-    doc.text(`Recibo N°: ${numeroRecibo}`, reciboLeft + reciboMainWidth - 10, yPosNumRecibo, { align: "right" });
+    doc.setTextColor(0, 0, 0);
+    doc.text(firstLine, reciboLeft + 25, top + 12);
+    if (secondLine) {
+      doc.text(secondLine, reciboLeft + 25, top + 18);
+    }
     
-    // Título del recibo MÁS PEQUEÑO en la parte superior derecha
-    doc.setFontSize(10); // Reducido de 14 a 10
+    // Información de contacto PEGADA al nombre de asociación
+    doc.setFontSize(8);
     doc.setTextColor(80, 80, 80);
-    doc.text("RECIBO EXCURSIÓN", reciboLeft + reciboMainWidth - 10, top + 10, { align: "right" });
+    const yContactStart = secondLine ? top + 22 : top + 16;
     
-    // Información de contacto
-    doc.setFontSize(9); // Reducido de 10 a 9
-    doc.setTextColor(80, 80, 80);
-    const yContactStart = secondLine ? top + 32 : top + 25;
+    // Dirección/lugar pegado al nombre
     if (association?.address) {
-      doc.text(association.address, reciboLeft + 30, yContactStart, { maxWidth: reciboMainWidth - 35 });
+      doc.text(association.address, reciboLeft + 25, yContactStart, { maxWidth: reciboMainWidth - 30 });
     }
+    // Teléfono debajo de la dirección
     if (association?.phone) {
-      doc.text(`Tel: ${association.phone}`, reciboLeft + 30, yContactStart + 6);
+      doc.text(`Tel: ${association.phone}`, reciboLeft + 25, yContactStart + 4);
     }
+    
+    // Número de recibo debajo de la información de contacto
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    const yPosNumRecibo = yContactStart + (association?.phone ? 10 : 6);
+    doc.text(`Recibo N°: ${numeroRecibo}`, reciboLeft + 25, yPosNumRecibo);
     
     // Información de la excursión
     doc.setFontSize(11);
     doc.setTextColor(50, 50, 50);
-    let yPos = top + 45;
+    let yPos = top + 40;
     
     if (excursionInfo?.name) {
       doc.text(`Excursión: ${excursionInfo.name}`, reciboLeft + 5, yPos);
@@ -213,7 +218,7 @@ export async function generarPDFasientos(
     doc.text(`Asiento: ${seatNum}`, reciboLeft + 5, yPos);
     yPos += 8;
     
-    // Campo mejorado para el pasajero con recuadro más visible
+    // Campo para el pasajero SIN RECUADRO - CON LÍNEA
     doc.setFontSize(10);
     if (p) {
       doc.text(`Pasajero: ${p.name} ${p.surname}`, reciboLeft + 5, yPos, { maxWidth: reciboMainWidth - 10 });
@@ -226,13 +231,14 @@ export async function generarPDFasientos(
       }
     } else {
       doc.text(`Pasajero:`, reciboLeft + 5, yPos);
-      // Recuadro más visible para escribir el nombre
+      // LÍNEA HORIZONTAL en lugar de recuadro
       doc.setDrawColor(100, 100, 100);
-      doc.rect(reciboLeft + 35, yPos - 4, 80, 6);
+      doc.line(reciboLeft + 35, yPos - 1, reciboLeft + 120, yPos - 1);
       yPos += 8;
-      // Campo para teléfono
+      // Campo para teléfono con línea
       doc.setFontSize(9);
-      doc.text(`Teléfono: ________________________`, reciboLeft + 5, yPos);
+      doc.text(`Teléfono:`, reciboLeft + 5, yPos);
+      doc.line(reciboLeft + 25, yPos - 1, reciboLeft + 120, yPos - 1);
       yPos += 8;
     }
     
@@ -280,9 +286,10 @@ export async function generarPDFasientos(
       }
     }
     
-    // Fecha emisión (campo para rellenar)
+    // Fecha emisión AL FINAL DEL RECIBO para máximo espacio
     doc.setFontSize(9);
-    doc.text("Fecha emisión: ________________________", reciboLeft + 5, top + recHeight - 8);
+    doc.text("Fecha emisión:", reciboLeft + 5, top + recHeight - 10);
+    doc.line(reciboLeft + 30, top + recHeight - 11, reciboLeft + 120, top + recHeight - 11);
 
     // Línea separadora entre recibos (excepto el último)
     if (posInPage < recibosPorHoja - 1) {

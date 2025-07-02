@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { PassengerModal } from "./PassengerModal";
@@ -12,7 +13,7 @@ export interface Passenger {
 
 interface BusSeatMapProps {
   passengers: Passenger[];
-  onSeatClick: (seat: number, name: string, surname: string) => void;
+  onSeatClick: (seat: number, name: string, surname: string, phone: string) => void;
   excursionName?: string;
 }
 
@@ -215,9 +216,10 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMa
           seatNumber={selectedSeat}
           defaultName={selectedSeat ? (getPassengerBySeat(selectedSeat)?.name ?? "") : ""}
           defaultSurname={selectedSeat ? (getPassengerBySeat(selectedSeat)?.surname ?? "") : ""}
-          onSave={(name, surname) => {
+          defaultPhone={selectedSeat ? (getPassengerBySeat(selectedSeat)?.phone ?? "") : ""}
+          onSave={(name, surname, phone) => {
             if (selectedSeat) {
-              onSeatClick(selectedSeat, name, surname);
+              onSeatClick(selectedSeat, name, surname, phone);
             }
           }}
         />
