@@ -1,3 +1,4 @@
+
 import { Passenger } from "./BusSeatMap";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -78,12 +79,13 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
                 <th className="text-left px-2 py-1"># Asiento</th>
                 <th className="text-left px-2 py-1">Nombre</th>
                 <th className="text-left px-2 py-1">Apellido</th>
+                <th className="text-left px-2 py-1">Teléfono</th>
               </tr>
             </thead>
             <tbody>
               {passengers.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-4 text-center text-gray-400">Ningún pasajero ingresado</td>
+                  <td colSpan={4} className="py-4 text-center text-gray-400">Ningún pasajero ingresado</td>
                 </tr>
               ) : (
                 passengers
@@ -93,6 +95,7 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
                       <td className="px-2 py-1 font-semibold">{p.seat}</td>
                       <td className="px-2 py-1">{p.name}</td>
                       <td className="px-2 py-1">{p.surname}</td>
+                      <td className="px-2 py-1 text-gray-600">{p.phone || "-"}</td>
                     </tr>
                   ))
               )}
@@ -105,15 +108,6 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           </Button>
         </div>
       </div>
-      {/* INFORME PARA IMPRESIÓN DELEGADO A Index.tsx */}
-      {/* Ahora renderizado por Index automáticamente, no aquí */}
-      {/* <div className="hidden print:block print:w-full">
-        <ExcursionPrintReport passengers={passengers} excursionInfo={excursionInfo} />
-      </div> */}
-      {/* Estilos para impresión sólo si no se incluyen en el reporte */}
-      {/* El reporte tiene su propio css si corresponde */}
     </>
   );
 }
-
-// Nota: este archivo sigue largo. Considera refactorizar componentes secundarios.

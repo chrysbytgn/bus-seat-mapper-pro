@@ -22,123 +22,125 @@ export function renderMainReceipt(
 ) {
   const { MAIN_RECEIPT_WIDTH, RECEIPT_HEIGHT, FONTS, COLORS } = PDF_CONFIG;
   
-  // Logo
+  // Header section with logo and association name - improved layout
+  let headerHeight = 25; // Reserve more space for header
+  
   if (logoDataURL) {
     try {
-      doc.addImage(logoDataURL, "PNG", x + 5, y + 5, 15, 15);
+      // Logo positioned at top-left
+      doc.addImage(logoDataURL, "PNG", x + 5, y + 5, 20, 20);
     } catch (error) {
       console.log("Error al añadir logo al PDF");
     }
   }
   
-  // Title "RECIBO EXCURSIÓN" - smaller and more to the right
-  doc.setFontSize(FONTS.MEDIUM);
-  doc.setTextColor(...COLORS.DARK_GRAY);
-  doc.text("RECIBO EXCURSIÓN", x + MAIN_RECEIPT_WIDTH - 5, y + 8, { align: "right" });
-  
-  // Association name - smaller and next to logo
-  const associationName = association?.name || "Asociación";
-  const words = associationName.split(' ');
-  const midPoint = Math.ceil(words.length / 2);
-  const firstLine = words.slice(0, midPoint).join(' ');
-  const secondLine = words.slice(midPoint).join(' ');
-  
-  doc.setFontSize(FONTS.XLARGE); // Reduced from 12 to 10
-  doc.setTextColor(...COLORS.BLACK);
-  doc.text(firstLine, x + 25, y + 12);
-  if (secondLine) {
-    doc.text(secondLine, x + 25, y + 18);
+  // Association name - full name next to logo
+  if (association?.name) {
+    doc.setFontSize(FONTS.TITLE);
+    doc.setTextColor(...COLORS.BLACK);
+    const nameLines = splitTextIntoLines(association.name, 25);
+    let nameY = y + 10;
+    nameLines.forEach((line, index) => {
+      doc.text(line, x + 30, nameY + (index * 6));
+    });
+    // Adjust header height based on name lines
+    headerHeight = Math.max(25, 15 + (nameLines.length * 6));
   }
   
-  // Contact information - attached to association name
+  // Title "RECIBO EXCURSIÓN" - positioned at top right
   doc.setFontSize(FONTS.MEDIUM);
   doc.setTextColor(...COLORS.DARK_GRAY);
-  const yContactStart = secondLine ? y + 22 : y + 16;
+  doc.text("RECIBO EXCURSIÓN", x + MAIN_RECEIPT_WIDTH - 5, y + 10, { align: "right" });
   
-  // Address/place attached to name
+  // Contact information - moved down below association name
+  let currentY = y + headerHeight;
+  doc.setFontSize(FONTS.SMALL);
+  doc.setTextColor(...COLORS.DARK_GRAY);
+  
   if (association?.address) {
-    doc.text(association.address, x + 25, yContactStart, { maxWidth: MAIN_RECEIPT_WIDTH - 30 });
-  }
-  // Phone below address
-  if (association?.phone) {
-    doc.text(`Tel: ${association.phone}`, x + 25, yContactStart + 4);
+    doc.text(association.address, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
+    currentY += 6;
   }
   
-  // Receipt number below contact info
+  if (association?.phone) {
+    doc.text(`Tel: ${association.phone}`, x + 5, currentY);
+    currentY += 6;
+  }
+  
+  // Receipt number - moved down
   doc.setFontSize(FONTS.LARGE);
   doc.setTextColor(...COLORS.BLACK);
-  const yPosReceiptNum = yContactStart + (association?.phone ? 10 : 6);
-  doc.text(`Recibo N°: ${receiptNumber}`, x + 25, yPosReceiptNum);
+  doc.text(`Recibo N°: ${receiptNumber}`, x + 5, currentY);
+  currentY += 10;
   
-  // Excursion information
+  // Excursion information - starts lower to give more space to header
   doc.setFontSize(FONTS.TITLE);
   doc.setTextColor(...COLORS.TEXT_GRAY);
-  let yPos = y + 40;
   
   if (excursionInfo?.name) {
-    doc.text(`Excursión: ${excursionInfo.name}`, x + 5, yPos);
-    yPos += 8;
+    doc.text(`Excursión: ${excursionInfo.name}`, x + 5, currentY);
+    currentY += 8;
   }
   
-  doc.text(`Asiento: ${seatNum}`, x + 5, yPos);
-  yPos += 8;
+  doc.text(`Asiento: ${seatNum}`, x + 5, currentY);
+  currentY += 8;
   
   // Passenger field WITHOUT BOX - WITH LINE
   doc.setFontSize(FONTS.XLARGE);
   if (passenger) {
-    doc.text(`Pasajero: ${passenger.name} ${passenger.surname}`, x + 5, yPos, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
-    yPos += 8;
+    doc.text(`Pasajero: ${passenger.name} ${passenger.surname}`, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
+    currentY += 8;
     // Phone number in main receipt
     if (passenger.phone) {
       doc.setFontSize(FONTS.LARGE);
-      doc.text(`Teléfono: ${passenger.phone}`, x + 5, yPos);
-      yPos += 8;
+      doc.text(`Teléfono: ${passenger.phone}`, x + 5, currentY);
+      currentY += 8;
     }
   } else {
-    doc.text(`Pasajero:`, x + 5, yPos);
+    doc.text(`Pasajero:`, x + 5, currentY);
     // HORIZONTAL LINE instead of box
     doc.setDrawColor(...COLORS.FIELD_GRAY);
-    doc.line(x + 35, yPos - 1, x + 120, yPos - 1);
-    yPos += 8;
+    doc.line(x + 35, currentY - 1, x + 120, currentY - 1);
+    currentY += 8;
     // Phone field with line
     doc.setFontSize(FONTS.LARGE);
-    doc.text(`Teléfono:`, x + 5, yPos);
-    doc.line(x + 25, yPos - 1, x + 120, yPos - 1);
-    yPos += 8;
+    doc.text(`Teléfono:`, x + 5, currentY);
+    doc.line(x + 25, currentY - 1, x + 120, currentY - 1);
+    currentY += 8;
   }
   
   if (excursionInfo) {
     const dateTime = getExcursionInfoLine(excursionInfo);
     if (dateTime) {
-      doc.text(`Fecha/Hora: ${dateTime}`, x + 5, yPos);
-      yPos += 8;
+      doc.text(`Fecha/Hora: ${dateTime}`, x + 5, currentY);
+      currentY += 8;
     }
     
     if (excursionInfo.place) {
-      doc.text(`Salida: ${excursionInfo.place}`, x + 5, yPos, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
-      yPos += 8;
+      doc.text(`Salida: ${excursionInfo.place}`, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
+      currentY += 8;
     }
     
     // Improved additional stops - only if they exist
     const stops = formatStops(excursionInfo);
     if (stops) {
       doc.setFontSize(FONTS.LARGE);
-      doc.text(`Paradas adicionales:`, x + 5, yPos);
-      yPos += 6;
+      doc.text(`Paradas adicionales:`, x + 5, currentY);
+      currentY += 6;
       doc.setFontSize(FONTS.MEDIUM);
       // Split stops into multiple lines if necessary
       const lines = splitTextIntoLines(stops, 45);
       lines.forEach(line => {
-        doc.text(line, x + 8, yPos);
-        yPos += 5;
+        doc.text(line, x + 8, currentY);
+        currentY += 5;
       });
-      yPos += 1; // Extra spacing after stops
+      currentY += 1; // Extra spacing after stops
     }
     
     if (excursionInfo.price) {
       doc.setFontSize(FONTS.TITLE);
-      doc.text(`Precio: ${excursionInfo.price} €`, x + 5, yPos);
-      yPos += 8;
+      doc.text(`Precio: ${excursionInfo.price} €`, x + 5, currentY);
+      currentY += 8;
     }
   }
   

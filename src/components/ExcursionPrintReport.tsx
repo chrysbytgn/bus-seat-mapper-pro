@@ -98,25 +98,25 @@ export function ExcursionPrintReport({
 
   return (
     <div className="print:w-full print:h-full print:p-0 print:m-0 bg-white print:text-black print:page-break-inside-avoid">
-      {/* CABECERA COMPACTA */}
-      <div className="flex items-center gap-2 mb-3 border-b-2 border-gray-400 print:pt-2 print:pb-2 print:px-3 print:w-full">
+      {/* CABECERA MEJORADA CON LOGO Y NOMBRE COMPLETO */}
+      <div className="flex items-start gap-3 mb-4 border-b-2 border-gray-400 print:pt-3 print:pb-3 print:px-4 print:w-full">
         {association.logo && (
           <img
             src={association.logo}
             alt="Logo Asociación"
-            className="h-12 w-12 object-cover rounded-full border border-gray-300"
-            style={{ minWidth: 48 }}
+            className="h-16 w-16 object-cover rounded-lg border border-gray-300 flex-shrink-0"
+            style={{ minWidth: 64, minHeight: 64 }}
           />
         )}
-        <div className="flex flex-col">
-          <span className="text-[16px] print:text-[14px] font-bold text-black mb-1">
+        <div className="flex flex-col flex-1">
+          <span className="text-[18px] print:text-[16px] font-bold text-black mb-2 leading-tight">
             {association.name || "Asociación"}
           </span>
           {association.address && (
-            <span className="text-[11px] print:text-[10px] text-gray-700">{association.address}</span>
+            <span className="text-[12px] print:text-[11px] text-gray-700 mb-1">{association.address}</span>
           )}
           {association.phone && (
-            <span className="text-[11px] print:text-[10px] text-gray-700">
+            <span className="text-[12px] print:text-[11px] text-gray-700">
               Tel: {association.phone}
             </span>
           )}
@@ -124,11 +124,11 @@ export function ExcursionPrintReport({
       </div>
       
       {/* LAYOUT PARA UNA PÁGINA CON CROQUIS A LA IZQUIERDA Y NOMBRES AL LADO */}
-      <div className="print:px-3 w-full">
+      <div className="print:px-4 w-full">
         
         {/* Información de la excursión - COMPACTA */}
-        <div className="mb-3">
-          <h2 className="text-[16px] font-bold print:text-[14px] mb-1 text-black">{excursionTitle}</h2>
+        <div className="mb-4">
+          <h2 className="text-[16px] font-bold print:text-[14px] mb-2 text-black">{excursionTitle}</h2>
           
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] print:text-[11px] font-semibold text-gray-800">
             {fecha && <div>Fecha: {fecha}</div>}
@@ -147,18 +147,18 @@ export function ExcursionPrintReport({
         </div>
         
         {/* LAYOUT HORIZONTAL: CROQUIS IZQUIERDA + LISTA AL LADO */}
-        <div className="flex gap-4 w-full">
+        <div className="flex gap-4 w-full items-start">
           
-          {/* CROQUIS BUS - PARTE IZQUIERDA */}
+          {/* CROQUIS BUS - PARTE IZQUIERDA - MEJORADO */}
           <div className="flex-shrink-0">
-            <div className="print:w-[200px]">
+            <div className="print:w-[220px] w-[220px]">
               <BusSeatMapPrint passengers={passengers} />
             </div>
           </div>
           
-          {/* LISTA DE PASAJEROS - AL LADO DEL CROQUIS */}
+          {/* LISTA DE PASAJEROS - AL LADO DEL CROQUIS CON TELÉFONOS */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-[13px] print:text-[12px] font-bold mb-2 text-black">Lista de Pasajeros (55 asientos)</h3>
+            <h3 className="text-[13px] print:text-[12px] font-bold mb-3 text-black">Lista de Pasajeros (55 asientos)</h3>
             <PasajerosTableImprimir passengers={passengers} />
           </div>
           
