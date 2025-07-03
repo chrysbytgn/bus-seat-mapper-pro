@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Passenger } from "@/components/BusSeatMap";
 import type { ExcursionData } from "@/pages/Index";
@@ -114,7 +113,7 @@ export async function deleteExcursion(excursionId: number) {
 
 export async function upsertPassenger(excursion_id: number, passenger: Passenger) {
   console.log("Upserting passenger:", passenger, "for excursion:", excursion_id);
-  // seat is unique for excursion_id
+  // seat is unique for excursion_id - specify onConflict to handle updates properly
   const { data, error } = await supabase
     .from("passengers")
     .upsert([{
@@ -123,7 +122,9 @@ export async function upsertPassenger(excursion_id: number, passenger: Passenger
       name: passenger.name,
       surname: passenger.surname,
       phone: passenger.phone || null
-    }])
+    }], {
+      onConflict: 'excursion_id,seat'
+    })
     .select();
   if (error) {
     console.error("Error upserting passenger:", error);
