@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { generarPDFasientos } from "./SeatReceiptsPDF";
+import { generateReceiptsPDF } from "./SeatReceiptsPDF";
 import type { Passenger } from "./BusSeatMap";
 import type { ExcursionData } from "@/pages/Index";
 
@@ -28,8 +28,22 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
     ...getPassenger(n),
   }));
 
-  const handlePDF = () =>
-    generarPDFasientos(seatRange, passengers, excursionInfo, setGenerating);
+  const handlePDF = async () => {
+    setGenerating(true);
+    try {
+      // Create passengers array for all seats
+      const allSeatsPassengers = seatRange.map(seatNum => {
+        const passenger = passengers.find(p => p.seat === seatNum);
+        return passenger || { seat: seatNum, name: '', surname: '', phone: '' } as Passenger;
+      });
+      
+      await generateReceiptsPDF(allSeatsPassengers, excursionInfo);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={v => !v ? onClose() : undefined}>
@@ -40,7 +54,7 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
         <div className="py-2">
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
-              Se generarán recibos para <b>todos los asientos del bus</b>, ocupados o vacíos, con estilo “bloc antiguo”. Cada recibo tiene mácula, zona perforada, línea de corte y espacio para escribir a mano.
+              Se generarán recibos para <b>todos los asientos del bus</b>, ocupados o vacíos, con estilo "bloc antiguo". Cada recibo tiene mácula, zona perforada, línea de corte y espacio para escribir a mano.
             </p>
           </div>
           <div className="max-h-36 overflow-auto mb-2 border rounded bg-muted px-3 py-2">
