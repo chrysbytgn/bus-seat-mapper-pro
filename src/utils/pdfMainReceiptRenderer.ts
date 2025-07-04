@@ -1,4 +1,3 @@
-
 import jsPDF from "jspdf";
 import type { Passenger } from "@/components/BusSeatMap";
 import type { ExcursionData } from "@/pages/Index";
@@ -76,26 +75,39 @@ export function renderMainReceipt(
   doc.text(`Asiento: ${seatNum}`, x + 5, currentY);
   currentY += 6;
   
-  // Passenger field
+  // Passenger field - ALWAYS show line for manual writing
   doc.setFontSize(FONTS.LARGE);
+  
+  // Show registered passenger as reference if exists
   if (passenger) {
-    doc.text(`Pasajero: ${passenger.name} ${passenger.surname}`, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
-    currentY += 6;
-    if (passenger.phone) {
-      doc.text(`Teléfono: ${passenger.phone}`, x + 5, currentY);
-      currentY += 6;
-    }
-  } else {
-    doc.text(`Pasajero:`, x + 5, currentY);
-    doc.setDrawColor(...COLORS.LIGHT_GRAY);
-    // Cambiar rectángulo por línea continua
-    doc.line(x + 30, currentY, x + 120, currentY);
-    currentY += 8;
-    doc.text(`Teléfono:`, x + 5, currentY);
-    // Cambiar rectángulo por línea continua
-    doc.line(x + 30, currentY, x + 120, currentY);
-    currentY += 8;
+    doc.setFontSize(FONTS.SMALL);
+    doc.setTextColor(...COLORS.TEXT_GRAY);
+    doc.text(`(Ref: ${passenger.name} ${passenger.surname})`, x + 5, currentY);
+    currentY += 4;
   }
+  
+  // Always show "Pasajero:" with line for manual writing
+  doc.setFontSize(FONTS.LARGE);
+  doc.setTextColor(...COLORS.BLACK);
+  doc.text(`Pasajero:`, x + 5, currentY);
+  doc.setDrawColor(...COLORS.LIGHT_GRAY);
+  doc.line(x + 30, currentY, x + 120, currentY);
+  currentY += 8;
+  
+  // Phone field - same logic
+  if (passenger?.phone) {
+    doc.setFontSize(FONTS.SMALL);
+    doc.setTextColor(...COLORS.TEXT_GRAY);
+    doc.text(`(Ref: ${passenger.phone})`, x + 5, currentY);
+    currentY += 4;
+  }
+  
+  doc.setFontSize(FONTS.LARGE);
+  doc.setTextColor(...COLORS.BLACK);
+  doc.text(`Teléfono:`, x + 5, currentY);
+  doc.setDrawColor(...COLORS.LIGHT_GRAY);
+  doc.line(x + 30, currentY, x + 120, currentY);
+  currentY += 8;
   
   if (excursionInfo) {
     const dateTime = getExcursionInfoLine(excursionInfo);
