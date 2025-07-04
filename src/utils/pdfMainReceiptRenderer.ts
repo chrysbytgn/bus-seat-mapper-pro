@@ -88,10 +88,12 @@ export function renderMainReceipt(
   } else {
     doc.text(`Pasajero:`, x + 5, currentY);
     doc.setDrawColor(...COLORS.LIGHT_GRAY);
-    doc.rect(x + 30, currentY - 4, 90, 6);
+    // Cambiar rectángulo por línea continua
+    doc.line(x + 30, currentY, x + 120, currentY);
     currentY += 8;
     doc.text(`Teléfono:`, x + 5, currentY);
-    doc.rect(x + 30, currentY - 4, 90, 6);
+    // Cambiar rectángulo por línea continua
+    doc.line(x + 30, currentY, x + 120, currentY);
     currentY += 8;
   }
   

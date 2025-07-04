@@ -65,11 +65,13 @@ export function renderReceiptStub(
   doc.setFontSize(FONTS.SMALL);
   doc.text("Pasajero:", x + 2, currentY);
   currentY += 3;
-  doc.rect(x + 2, currentY, STUB_WIDTH - 4, 6);
+  // Cambiar rectángulo por línea continua
+  doc.setDrawColor(...COLORS.LIGHT_GRAY);
+  doc.line(x + 2, currentY + 3, x + STUB_WIDTH - 2, currentY + 3);
   if (passenger) {
     const fullName = `${passenger.name} ${passenger.surname}`;
     const shortName = truncateText(fullName, 12);
-    doc.text(shortName, x + 3, currentY + 4);
+    doc.text(shortName, x + 3, currentY + 2);
   }
   currentY += 8;
   

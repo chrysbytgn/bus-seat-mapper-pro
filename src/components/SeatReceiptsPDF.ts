@@ -1,3 +1,4 @@
+
 import jsPDF from "jspdf";
 import type { Passenger } from "@/components/BusSeatMap";
 import type { ExcursionData } from "@/pages/Index";
@@ -21,6 +22,7 @@ export async function generateReceiptsPDF(
     VERTICAL_GAP,
     STUB_WIDTH,
     DIVIDER_LINE_X_OFFSET,
+    COLORS,
   } = PDF_CONFIG;
   
   const marginLeft = MARGIN_LEFT;
@@ -92,6 +94,10 @@ export async function generateReceiptsPDF(
       stubWidth + marginLeft + dividerOffset - 1,
       yPosition + receiptHeight
     );
+    
+    // Marco completo del recibo para facilitar el corte
+    doc.setDrawColor(...COLORS.LIGHT_GRAY);
+    doc.rect(marginLeft, yPosition, receiptWidth, receiptHeight);
   }
   
   // Open the PDF in a new tab
