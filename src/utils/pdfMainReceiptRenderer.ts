@@ -75,39 +75,21 @@ export function renderMainReceipt(
   doc.text(`Asiento: ${seatNum}`, x + 5, currentY);
   currentY += 6;
   
-  // Passenger field - ALWAYS show line for manual writing
+  // Passenger field
   doc.setFontSize(FONTS.LARGE);
+  doc.setTextColor(...COLORS.BLACK);
   
-  // Show registered passenger as reference if exists
   if (passenger) {
-    doc.setFontSize(FONTS.SMALL);
-    doc.setTextColor(...COLORS.TEXT_GRAY);
-    doc.text(`(Ref: ${passenger.name} ${passenger.surname})`, x + 5, currentY);
-    currentY += 4;
+    // Pasajero registrado - mostrar nombre directo
+    doc.text(`Pasajero: ${passenger.name} ${passenger.surname}`, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
+    currentY += 6;
+  } else {
+    // Sin pasajero - mostrar línea para escribir
+    doc.text(`Pasajero:`, x + 5, currentY);
+    doc.setDrawColor(...COLORS.LIGHT_GRAY);
+    doc.line(x + 30, currentY, x + 120, currentY);
+    currentY += 8;
   }
-  
-  // Always show "Pasajero:" with line for manual writing
-  doc.setFontSize(FONTS.LARGE);
-  doc.setTextColor(...COLORS.BLACK);
-  doc.text(`Pasajero:`, x + 5, currentY);
-  doc.setDrawColor(...COLORS.LIGHT_GRAY);
-  doc.line(x + 30, currentY, x + 120, currentY);
-  currentY += 8;
-  
-  // Phone field - same logic
-  if (passenger?.phone) {
-    doc.setFontSize(FONTS.SMALL);
-    doc.setTextColor(...COLORS.TEXT_GRAY);
-    doc.text(`(Ref: ${passenger.phone})`, x + 5, currentY);
-    currentY += 4;
-  }
-  
-  doc.setFontSize(FONTS.LARGE);
-  doc.setTextColor(...COLORS.BLACK);
-  doc.text(`Teléfono:`, x + 5, currentY);
-  doc.setDrawColor(...COLORS.LIGHT_GRAY);
-  doc.line(x + 30, currentY, x + 120, currentY);
-  currentY += 8;
   
   if (excursionInfo) {
     const dateTime = getExcursionInfoLine(excursionInfo);
