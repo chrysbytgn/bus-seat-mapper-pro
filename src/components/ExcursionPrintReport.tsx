@@ -11,19 +11,18 @@ const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
  * Tabla compacta optimizada para imprimir 55 asientos en una página
  */
 function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
-  // Dividir los asientos en dos columnas para mejor aprovechamiento del espacio
+  // Agrupar asientos en filas para mejor presentación
   const leftColumnSeats = ALL_SEATS.slice(0, 28); // 1-28
   const rightColumnSeats = ALL_SEATS.slice(28); // 29-55
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full text-[16px] print:text-[14px]">
+    <div className="grid grid-cols-2 gap-4 w-full text-[14px] print:text-[14px]">
       {/* Columna izquierda */}
       <table className="w-full border-separate border-spacing-y-[2px]">
         <thead>
           <tr className="bg-gray-100">
             <th className="text-left px-2 py-2 font-semibold w-[25px] border-b border-gray-300 text-[15px] print:text-[14px]">#</th>
-            <th className="text-left px-2 py-2 font-semibold border-b border-gray-300 text-[15px] print:text-[14px]">Nombre</th>
-            <th className="text-left px-2 py-2 font-semibold w-[70px] border-b border-gray-300 text-[15px] print:text-[14px]">Teléfono</th>
+            <th className="text-left px-2 py-2 font-semibold border-b border-gray-300 text-[15px] print:text-[14px]">Pasajero y Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -33,13 +32,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
               <tr key={seatNum}>
                 <td className="px-2 py-1 font-bold text-center border-b border-gray-100 text-[14px] print:text-[14px]">{seatNum}</td>
                 <td className="px-2 py-1 border-b border-gray-100 text-[14px] print:text-[14px]">
-                  {p
-                    ? `${p.name} ${p.surname}`.trim()
-                    : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
-                  }
-                </td>
-                <td className="px-2 py-1 border-b border-gray-100 text-[13px] print:text-[13px]">
-                  {p?.phone || ""}
+                  {p ? (
+                    <div>
+                      <span className="font-medium">{`${p.name} ${p.surname}`.trim()}</span>
+                      {p.phone && <span className="text-gray-600 ml-2">({p.phone})</span>}
+                    </div>
+                  ) : (
+                    <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
+                  )}
                 </td>
               </tr>
             );
@@ -52,8 +52,7 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
         <thead>
           <tr className="bg-gray-100">
             <th className="text-left px-2 py-2 font-semibold w-[25px] border-b border-gray-300 text-[15px] print:text-[14px]">#</th>
-            <th className="text-left px-2 py-2 font-semibold border-b border-gray-300 text-[15px] print:text-[14px]">Nombre</th>
-            <th className="text-left px-2 py-2 font-semibold w-[70px] border-b border-gray-300 text-[15px] print:text-[14px]">Teléfono</th>
+            <th className="text-left px-2 py-2 font-semibold border-b border-gray-300 text-[15px] print:text-[14px]">Pasajero y Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -63,13 +62,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
               <tr key={seatNum}>
                 <td className="px-2 py-1 font-bold text-center border-b border-gray-100 text-[14px] print:text-[14px]">{seatNum}</td>
                 <td className="px-2 py-1 border-b border-gray-100 text-[14px] print:text-[14px]">
-                  {p
-                    ? `${p.name} ${p.surname}`.trim()
-                    : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
-                  }
-                </td>
-                <td className="px-2 py-1 border-b border-gray-100 text-[13px] print:text-[13px]">
-                  {p?.phone || ""}
+                  {p ? (
+                    <div>
+                      <span className="font-medium">{`${p.name} ${p.surname}`.trim()}</span>
+                      {p.phone && <span className="text-gray-600 ml-2">({p.phone})</span>}
+                    </div>
+                  ) : (
+                    <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
+                  )}
                 </td>
               </tr>
             );
