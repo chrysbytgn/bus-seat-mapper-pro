@@ -16,14 +16,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
   const rightColumnSeats = ALL_SEATS.slice(28); // 29-55
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full text-[11px] print:text-[10px]">
+    <div className="grid grid-cols-2 gap-3 w-full text-[13px] print:text-[12px]">
       {/* Columna izquierda */}
       <table className="w-full border-separate border-spacing-y-[1px]">
         <thead>
           <tr className="bg-gray-100">
-            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[10px]">#</th>
-            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[10px]">Nombre</th>
-            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[10px]">Teléfono</th>
+            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[12px]">#</th>
+            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[12px]">Nombre</th>
+            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[12px]">Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -31,14 +31,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
             const p = passengers.find(pass => pass.seat === seatNum);
             return (
               <tr key={seatNum}>
-                <td className="px-1 py-[1px] font-bold text-center border-b border-gray-100 text-[10px]">{seatNum}</td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[10px]">
+                <td className="px-1 py-[1px] font-bold text-center border-b border-gray-100 text-[12px]">{seatNum}</td>
+                <td className="px-1 py-[1px] border-b border-gray-100 text-[12px]">
                   {p
                     ? `${p.name} ${p.surname}`.trim()
                     : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                   }
                 </td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[9px]">
+                <td className="px-1 py-[1px] border-b border-gray-100 text-[11px]">
                   {p?.phone || ""}
                 </td>
               </tr>
@@ -51,9 +51,9 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
       <table className="w-full border-separate border-spacing-y-[1px]">
         <thead>
           <tr className="bg-gray-100">
-            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[10px]">#</th>
-            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[10px]">Nombre</th>
-            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[10px]">Teléfono</th>
+            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[12px]">#</th>
+            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[12px]">Nombre</th>
+            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[12px]">Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -61,14 +61,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
             const p = passengers.find(pass => pass.seat === seatNum);
             return (
               <tr key={seatNum}>
-                <td className="px-1 py-[1px] font-bold text-center border-b border-gray-100 text-[10px]">{seatNum}</td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[10px]">
+                <td className="px-1 py-[1px] font-bold text-center border-b border-gray-100 text-[12px]">{seatNum}</td>
+                <td className="px-1 py-[1px] border-b border-gray-100 text-[12px]">
                   {p
                     ? `${p.name} ${p.surname}`.trim()
                     : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                   }
                 </td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[9px]">
+                <td className="px-1 py-[1px] border-b border-gray-100 text-[11px]">
                   {p?.phone || ""}
                 </td>
               </tr>
