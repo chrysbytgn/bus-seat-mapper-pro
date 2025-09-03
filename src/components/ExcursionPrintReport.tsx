@@ -16,14 +16,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
   const rightColumnSeats = ALL_SEATS.slice(28); // 29-55
 
   return (
-    <div className="grid grid-cols-2 gap-3 w-full text-[13px] print:text-[12px]">
+    <div className="grid grid-cols-2 gap-3 w-full text-[16px] print:text-[14px]">
       {/* Columna izquierda */}
-      <table className="w-full border-separate border-spacing-y-[1px]">
+      <table className="w-full border-separate border-spacing-y-[2px]">
         <thead>
           <tr className="bg-gray-100">
-            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[12px]">#</th>
-            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[12px]">Nombre</th>
-            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[12px]">Teléfono</th>
+            <th className="text-left px-2 py-2 font-semibold w-[25px] border-b border-gray-300 text-[15px] print:text-[14px]">#</th>
+            <th className="text-left px-2 py-2 font-semibold border-b border-gray-300 text-[15px] print:text-[14px]">Nombre</th>
+            <th className="text-left px-2 py-2 font-semibold w-[70px] border-b border-gray-300 text-[15px] print:text-[14px]">Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -31,14 +31,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
             const p = passengers.find(pass => pass.seat === seatNum);
             return (
               <tr key={seatNum}>
-                <td className="px-1 py-[1px] font-bold text-center border-b border-gray-100 text-[12px]">{seatNum}</td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[12px]">
+                <td className="px-2 py-1 font-bold text-center border-b border-gray-100 text-[14px] print:text-[14px]">{seatNum}</td>
+                <td className="px-2 py-1 border-b border-gray-100 text-[14px] print:text-[14px]">
                   {p
                     ? `${p.name} ${p.surname}`.trim()
                     : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                   }
                 </td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[11px]">
+                <td className="px-2 py-1 border-b border-gray-100 text-[13px] print:text-[13px]">
                   {p?.phone || ""}
                 </td>
               </tr>
@@ -48,12 +48,12 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
       </table>
 
       {/* Columna derecha */}
-      <table className="w-full border-separate border-spacing-y-[1px]">
+      <table className="w-full border-separate border-spacing-y-[2px]">
         <thead>
           <tr className="bg-gray-100">
-            <th className="text-left px-1 py-1 font-semibold w-[20px] border-b border-gray-300 text-[12px]">#</th>
-            <th className="text-left px-1 py-1 font-semibold border-b border-gray-300 text-[12px]">Nombre</th>
-            <th className="text-left px-1 py-1 font-semibold w-[60px] border-b border-gray-300 text-[12px]">Teléfono</th>
+            <th className="text-left px-2 py-2 font-semibold w-[25px] border-b border-gray-300 text-[15px] print:text-[14px]">#</th>
+            <th className="text-left px-2 py-2 font-semibold border-b border-gray-300 text-[15px] print:text-[14px]">Nombre</th>
+            <th className="text-left px-2 py-2 font-semibold w-[70px] border-b border-gray-300 text-[15px] print:text-[14px]">Teléfono</th>
           </tr>
         </thead>
         <tbody>
@@ -61,14 +61,14 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
             const p = passengers.find(pass => pass.seat === seatNum);
             return (
               <tr key={seatNum}>
-                <td className="px-1 py-[1px] font-bold text-center border-b border-gray-100 text-[12px]">{seatNum}</td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[12px]">
+                <td className="px-2 py-1 font-bold text-center border-b border-gray-100 text-[14px] print:text-[14px]">{seatNum}</td>
+                <td className="px-2 py-1 border-b border-gray-100 text-[14px] print:text-[14px]">
                   {p
                     ? `${p.name} ${p.surname}`.trim()
                     : <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
                   }
                 </td>
-                <td className="px-1 py-[1px] border-b border-gray-100 text-[11px]">
+                <td className="px-2 py-1 border-b border-gray-100 text-[13px] print:text-[13px]">
                   {p?.phone || ""}
                 </td>
               </tr>
@@ -109,14 +109,14 @@ export function ExcursionPrintReport({
           />
         )}
         <div className="flex flex-col flex-1">
-          <span className="text-[18px] print:text-[16px] font-bold text-black mb-2 leading-tight">
+          <span className="text-[20px] print:text-[18px] font-bold text-black mb-2 leading-tight">
             {association.name || "Asociación"}
           </span>
           {association.address && (
-            <span className="text-[12px] print:text-[11px] text-gray-700 mb-1">{association.address}</span>
+            <span className="text-[15px] print:text-[14px] text-gray-700 mb-1">{association.address}</span>
           )}
           {association.phone && (
-            <span className="text-[12px] print:text-[11px] text-gray-700">
+            <span className="text-[15px] print:text-[14px] text-gray-700">
               Tel: {association.phone}
             </span>
           )}
@@ -128,9 +128,9 @@ export function ExcursionPrintReport({
         
         {/* Información de la excursión - COMPACTA */}
         <div className="mb-4">
-          <h2 className="text-[16px] font-bold print:text-[14px] mb-2 text-black">{excursionTitle}</h2>
+          <h2 className="text-[18px] font-bold print:text-[16px] mb-2 text-black">{excursionTitle}</h2>
           
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] print:text-[11px] font-semibold text-gray-800">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[15px] print:text-[14px] font-semibold text-gray-800">
             {fecha && <div>Fecha: {fecha}</div>}
             {hora && <div>Hora: {hora}</div>}
             {lugar && <div>Salida: {lugar}</div>}
@@ -139,7 +139,7 @@ export function ExcursionPrintReport({
           {/* Paradas adicionales */}
           {paradas && paradas.length > 0 && (
             <div className="mt-2">
-              <div className="text-[11px] print:text-[10px] text-gray-700">
+              <div className="text-[14px] print:text-[13px] text-gray-700">
                 <strong>Paradas:</strong> {paradas.join(" → ")}
               </div>
             </div>
@@ -158,7 +158,7 @@ export function ExcursionPrintReport({
           
           {/* LISTA DE PASAJEROS - AL LADO DEL CROQUIS CON TELÉFONOS */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-[13px] print:text-[12px] font-bold mb-3 text-black">Lista de Pasajeros (55 asientos)</h3>
+            <h3 className="text-[16px] print:text-[15px] font-bold mb-3 text-black">Lista de Pasajeros (55 asientos)</h3>
             <PasajerosTableImprimir passengers={passengers} />
           </div>
           

@@ -85,33 +85,24 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
               />
             </PopoverContent>
           </Popover>
-          {/* Hora */}
-          <Popover open={timePopoverOpen} onOpenChange={setTimePopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                tabIndex={0}
-                type="button"
-              >
-                <ClockIcon className="mr-2" />
-                {time ? time : "Hora de salida"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-44 p-0">
-              <div className="max-h-56 overflow-y-auto">
-                {timeOptions.map(opt => (
-                  <button
-                    key={opt}
-                    className={`w-full text-left px-3 py-2 hover:bg-primary/10 ${time === opt ? 'font-bold text-primary' : ''}`}
-                    onClick={() => { setTime(opt); setTimePopoverOpen(false); }}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+          {/* Hora - Input manual */}
+          <div className="relative flex items-center">
+            <ClockIcon size={20} className="absolute left-3 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Hora de salida (ej: 09:30)"
+              value={time}
+              onChange={e => {
+                const value = e.target.value;
+                // Allow only time format HH:MM
+                if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value) || value === '') {
+                  setTime(value);
+                }
+              }}
+              className="pl-10"
+              pattern="[0-2][0-9]:[0-5][0-9]"
+              title="Formato de hora: HH:MM (ej: 09:30)"
+            />
+          </div>
           <div className="relative flex items-center">
             <MapPin size={20} className="absolute left-3 text-muted-foreground pointer-events-none" />
             <Input
