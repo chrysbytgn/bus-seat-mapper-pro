@@ -83,6 +83,13 @@ export type Database = {
             referencedRelation: "associations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_excursions_association"
+            columns: ["association_id"]
+            isOneToOne: false
+            referencedRelation: "associations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       passengers: {
@@ -115,6 +122,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_passengers_excursion"
+            columns: ["excursion_id"]
+            isOneToOne: false
+            referencedRelation: "excursions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "passengers_excursion_id_fkey"
             columns: ["excursion_id"]
             isOneToOne: false
@@ -122,6 +136,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
