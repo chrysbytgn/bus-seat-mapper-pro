@@ -62,6 +62,7 @@ export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { a
     place: excursion.place || null,
     price: excursion.price || null,
     stops: excursion.stops || null,
+    available_seats: excursion.available_seats || 55,
   };
   
   const { data, error } = await supabase
@@ -85,6 +86,7 @@ export async function upsertExcursion(excursion: ExcursionData & { association_i
     ...excursion,
     id: Number(excursion.id),
     stops: excursion.stops ?? [],
+    available_seats: excursion.available_seats ?? 55,
   };
   const { data, error } = await supabase
     .from("excursions")

@@ -33,6 +33,7 @@ export type ExcursionData = {
   stops?: string[];
   price?: string;
   association_id?: string;
+  available_seats?: number; // New field for limiting available seats
 };
 
 const Index = () => {

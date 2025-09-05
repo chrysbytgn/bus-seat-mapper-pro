@@ -39,6 +39,7 @@ export function ExcursionMain({
             passengers={passengers}
             onSeatClick={onSeatClick}
             excursionName={excursionInfo?.name || "Excursión"}
+            availableSeats={excursionInfo?.available_seats || 55}
           />
         )}
       </section>

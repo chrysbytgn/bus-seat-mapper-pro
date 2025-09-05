@@ -26,6 +26,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
   const [stops, setStops] = useState<string[]>([]);
   const [newStop, setNewStop] = useState(""); // Para nuevo input de parada
   const [price, setPrice] = useState("");
+  const [availableSeats, setAvailableSeats] = useState(55);
 
   useEffect(() => {
     if (excursion) {
@@ -36,6 +37,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
       setStops(excursion.stops ? [...excursion.stops] : []);
       setNewStop("");
       setPrice(excursion.price || "");
+      setAvailableSeats(excursion.available_seats || 55);
     }
   }, [excursion, open]);
 
@@ -46,7 +48,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
     return `${hour.toString().padStart(2, "0")}:${minute}`;
   });
 
-  const canSave = name.trim() && date && time && place.trim() && price.trim();
+  const canSave = name.trim() && date && time && place.trim() && price.trim() && availableSeats >= 1 && availableSeats <= 55;
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onCancel()}>
@@ -110,6 +112,17 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
               value={place}
               onChange={e => setPlace(e.target.value)}
               className="pl-10"
+            />
+          </div>
+          <div>
+            <label className="font-medium">Plazas disponibles</label>
+            <Input
+              placeholder="Número de asientos disponibles (máx. 55)"
+              type="number"
+              value={availableSeats}
+              min="1"
+              max="55"
+              onChange={e => setAvailableSeats(Number(e.target.value) || 55)}
             />
           </div>
           <div>
@@ -177,6 +190,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
                   place: place.trim(),
                   price: price.trim(),
                   stops,
+                  available_seats: availableSeats,
                 });
               }
             }}

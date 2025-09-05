@@ -73,6 +73,7 @@ export function useExcursion() {
             stops: parsedStops,
             price: data.price || "",
             association_id: data.association_id,
+            available_seats: data.available_seats || 55,
           };
           
           console.log("Setting excursion info:", excursionData);

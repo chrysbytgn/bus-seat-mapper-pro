@@ -15,6 +15,7 @@ interface BusSeatMapProps {
   passengers: Passenger[];
   onSeatClick: (seat: number, name: string, surname: string, phone: string) => void;
   excursionName?: string;
+  availableSeats?: number; // New prop to limit available seats
 }
 
 /**
@@ -84,7 +85,7 @@ const buildSeatLayout = () => {
   return seatRows;
 };
 
-export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMapProps) {
+export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSeats = 55 }: BusSeatMapProps) {
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
@@ -93,6 +94,8 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMa
 
   const handleSeatClick = (seat: number | null) => {
     if (seat === null || seat === undefined) return;
+    // Don't allow clicking on disabled seats
+    if (seat > availableSeats) return;
     setSelectedSeat(seat);
   };
 
@@ -161,15 +164,20 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMa
                   // Asientos normales clicables
                   const seatNum = Number(cell);
                   const ocupado = !!getPassengerBySeat(seatNum);
+                  const isDisabled = seatNum > availableSeats;
+                  
                   return (
                     <button
                       key={seatNum}
                       type="button"
+                      disabled={isDisabled}
                       className={cn(
-                        "w-12 h-12 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-lg border-2 select-none transition-all shadow cursor-pointer",
-                        ocupado
-                          ? "bg-red-500 text-white hover:bg-red-600 border-red-700"
-                          : "bg-green-500 text-white hover:bg-green-600 border-green-700",
+                        "w-12 h-12 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-lg border-2 select-none transition-all shadow",
+                        isDisabled
+                          ? "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
+                          : ocupado
+                          ? "bg-red-500 text-white hover:bg-red-600 border-red-700 cursor-pointer"
+                          : "bg-green-500 text-white hover:bg-green-600 border-green-700 cursor-pointer",
                         selectedSeat === seatNum ? "ring-4 ring-primary/60 z-10" : ""
                       )}
                       onClick={() => handleSeatClick(seatNum)}
@@ -193,6 +201,10 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMa
             <span>Ocupado</span>
           </div>
           <div className="flex items-center gap-1">
+            <div className="w-5 h-5 rounded-full bg-gray-300 border" />
+            <span>No disponible</span>
+          </div>
+          <div className="flex items-center gap-1">
             <div className="w-5 h-5 rounded-full bg-gray-700 border" />
             <span>Conductor</span>
           </div>
@@ -209,6 +221,13 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick }: BusSeatMa
             <span>Puerta</span>
           </div>
         </div>
+        
+        {/* Mostrar información de plazas disponibles */}
+        {availableSeats < 55 && (
+          <div className="mt-2 text-sm text-gray-600 text-center">
+            <strong>Plazas disponibles:</strong> {availableSeats} de 55
+          </div>
+        )}
         {/* Modal */}
         <PassengerModal
           open={selectedSeat !== null}

@@ -44,6 +44,7 @@ export type Database = {
       excursions: {
         Row: {
           association_id: string
+          available_seats: number | null
           created_at: string
           date: string | null
           id: number
@@ -55,6 +56,7 @@ export type Database = {
         }
         Insert: {
           association_id: string
+          available_seats?: number | null
           created_at?: string
           date?: string | null
           id: number
@@ -66,6 +68,7 @@ export type Database = {
         }
         Update: {
           association_id?: string
+          available_seats?: number | null
           created_at?: string
           date?: string | null
           id?: number
