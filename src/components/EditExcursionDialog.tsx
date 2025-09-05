@@ -93,16 +93,9 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
             <Input
               placeholder="Hora de salida (ej: 09:30)"
               value={time}
-              onChange={e => {
-                const value = e.target.value;
-                // Allow only time format HH:MM
-                if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value) || value === '') {
-                  setTime(value);
-                }
-              }}
+              onChange={e => setTime(e.target.value)}
               className="pl-10"
-              pattern="[0-2][0-9]:[0-5][0-9]"
-              title="Formato de hora: HH:MM (ej: 09:30)"
+              maxLength={5}
             />
           </div>
           <div className="relative flex items-center">
@@ -119,10 +112,15 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
             <Input
               placeholder="Número de asientos disponibles (máx. 55)"
               type="number"
-              value={availableSeats}
+              value={availableSeats.toString()}
               min="1"
               max="55"
-              onChange={e => setAvailableSeats(Number(e.target.value) || 55)}
+              onChange={e => {
+                const value = e.target.value;
+                if (value === '' || (Number(value) >= 1 && Number(value) <= 55)) {
+                  setAvailableSeats(value === '' ? 55 : Number(value));
+                }
+              }}
             />
           </div>
           <div>
