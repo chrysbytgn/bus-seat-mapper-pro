@@ -111,14 +111,24 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
             <label className="font-medium">Plazas disponibles</label>
             <Input
               placeholder="Número de asientos disponibles (máx. 55)"
-              type="number"
+              type="text"
               value={availableSeats.toString()}
-              min="1"
-              max="55"
               onChange={e => {
                 const value = e.target.value;
-                if (value === '' || (Number(value) >= 1 && Number(value) <= 55)) {
-                  setAvailableSeats(value === '' ? 55 : Number(value));
+                // Allow empty or valid numbers between 1-55
+                if (value === '' || /^\d+$/.test(value)) {
+                  const num = value === '' ? 55 : parseInt(value);
+                  if (num >= 1 && num <= 55) {
+                    setAvailableSeats(num);
+                  } else if (value === '') {
+                    setAvailableSeats(55);
+                  }
+                }
+              }}
+              onBlur={() => {
+                // Ensure we have a valid value when leaving the field
+                if (availableSeats < 1 || availableSeats > 55) {
+                  setAvailableSeats(55);
                 }
               }}
             />
