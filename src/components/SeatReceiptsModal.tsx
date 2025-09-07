@@ -18,7 +18,8 @@ interface Props {
  */
 export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: Props) {
   const [generating, setGenerating] = useState(false);
-  const seatRange = Array.from({ length: 55 }, (_, i) => i + 1);
+  const seatsCount = Math.max(1, Math.min(55, excursionInfo?.available_seats ?? 55));
+  const seatRange = Array.from({ length: seatsCount }, (_, i) => i + 1);
 
   function getPassenger(seat:number){
     return passengers.find(p => p.seat === seat) || null;

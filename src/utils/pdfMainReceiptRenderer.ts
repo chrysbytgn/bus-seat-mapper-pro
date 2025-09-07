@@ -21,29 +21,45 @@ export function renderMainReceipt(
 ) {
   const { MAIN_RECEIPT_WIDTH, RECEIPT_HEIGHT, FONTS, COLORS } = PDF_CONFIG;
   
-  // Header section with logo
+  // Header with logo and association name inline, preventing overlap
+  const logoSize = 15;
+  let addedLogo = false;
+  let nameX = x + 5; // default if no logo
+  const headerTop = y + 5;
+
   if (logoDataURL) {
     try {
-      doc.addImage(logoDataURL, "PNG", x + 5, y + 5, 15, 15);
+      doc.addImage(logoDataURL, "PNG", x + 5, headerTop, logoSize, logoSize);
+      addedLogo = true;
+      nameX = x + 5 + logoSize + 5; // space to the right of the logo
     } catch (error) {
       console.log("Error al añadir logo al PDF");
     }
   }
   
-  // Association name
+  // Prepare association name lines to fit the remaining width
+  let nameLines: string[] = [];
   if (association?.name) {
+    const availableWidth = MAIN_RECEIPT_WIDTH - (nameX - x) - 5;
+    nameLines = doc.splitTextToSize(association.name, availableWidth) as unknown as string[];
     doc.setFontSize(FONTS.MEDIUM);
     doc.setTextColor(...COLORS.BLACK);
-    doc.text(association.name, x + 25, y + 12, { maxWidth: MAIN_RECEIPT_WIDTH - 30 });
+    if (nameLines.length > 0) {
+      doc.text(nameLines, nameX, headerTop + 7, { lineHeightFactor: 1.2 });
+    }
   }
   
-  // Title
+  // Title at top-right
   doc.setFontSize(FONTS.LARGE);
   doc.setTextColor(...COLORS.DARK_GRAY);
   doc.text("RECIBO EXCURSIÓN", x + MAIN_RECEIPT_WIDTH - 5, y + 8, { align: "right" });
   
-  // Contact information
-  let currentY = y + 20;
+  // Compute header height to avoid overlapping following content
+  const nameBlockHeight = (nameLines.length > 0 ? nameLines.length : (association?.name ? 1 : 0)) * 4; // approx line height in mm
+  const headerHeight = Math.max(addedLogo ? logoSize : 0, nameBlockHeight);
+  
+  // Contact information starts after header
+  let currentY = headerTop + headerHeight + 6;
   doc.setFontSize(FONTS.SMALL);
   doc.setTextColor(...COLORS.DARK_GRAY);
   

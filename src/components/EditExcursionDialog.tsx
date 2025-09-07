@@ -27,6 +27,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
   const [newStop, setNewStop] = useState(""); // Para nuevo input de parada
   const [price, setPrice] = useState("");
   const [availableSeats, setAvailableSeats] = useState(55);
+  const [seatsInput, setSeatsInput] = useState("55");
 
   useEffect(() => {
     if (excursion) {
@@ -38,6 +39,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
       setNewStop("");
       setPrice(excursion.price || "");
       setAvailableSeats(excursion.available_seats || 55);
+      setSeatsInput(String(excursion.available_seats || 55));
     }
   }, [excursion, open]);
 
@@ -112,23 +114,25 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
             <Input
               placeholder="Número de asientos disponibles (máx. 55)"
               type="text"
-              value={availableSeats.toString()}
+              value={seatsInput}
               onChange={e => {
-                const value = e.target.value;
-                // Allow empty or valid numbers between 1-55
-                if (value === '' || /^\d+$/.test(value)) {
-                  const num = value === '' ? 55 : parseInt(value);
-                  if (num >= 1 && num <= 55) {
-                    setAvailableSeats(num);
-                  } else if (value === '') {
-                    setAvailableSeats(55);
+                const v = e.target.value;
+                // Permitir vacío o solo dígitos; no forzar inmediatamente el número final
+                if (/^\d*$/.test(v)) {
+                  setSeatsInput(v);
+                  if (v !== "" && Number(v) >= 1 && Number(v) <= 55) {
+                    setAvailableSeats(Number(v));
                   }
                 }
               }}
               onBlur={() => {
-                // Ensure we have a valid value when leaving the field
-                if (availableSeats < 1 || availableSeats > 55) {
+                const num = Number(seatsInput);
+                if (!seatsInput || isNaN(num) || num < 1 || num > 55) {
+                  setSeatsInput("55");
                   setAvailableSeats(55);
+                } else {
+                  setSeatsInput(String(num));
+                  setAvailableSeats(num);
                 }
               }}
             />

@@ -26,29 +26,36 @@ export function renderReceiptStub(
   doc.setDrawColor(...COLORS.LIGHT_GRAY);
   doc.rect(x, y, STUB_WIDTH, RECEIPT_HEIGHT);
   
+  // Header: logo + association name inline
   let currentY = y + 5;
+  const logoSize = 10;
+  let nameStartX = x + 2;
+  let logoAdded = false;
   
-  // Association logo at the top
   if (logoDataURL) {
     try {
-      doc.addImage(logoDataURL, "PNG", x + 2, currentY, 10, 10);
-      currentY += 12;
+      doc.addImage(logoDataURL, "PNG", x + 2, currentY, logoSize, logoSize);
+      nameStartX = x + 2 + logoSize + 2;
+      logoAdded = true;
     } catch (error) {
       console.log("Error al añadir logo al talón");
-      currentY += 2;
     }
   }
   
-  // Association name (full name, multiple lines if needed)
+  // Association name to the right of logo (wrap if needed)
+  let nameLines: string[] = [];
   if (association?.name) {
     doc.setFontSize(FONTS.SMALL);
     doc.setTextColor(...COLORS.BLACK);
-    const nameLines = splitTextIntoLines(association.name, 15);
+    nameLines = splitTextIntoLines(association.name, 14);
     nameLines.forEach((line, index) => {
-      doc.text(line, x + 2, currentY + (index * 4));
+      doc.text(line, nameStartX, currentY + 3 + (index * 4));
     });
-    currentY += nameLines.length * 4 + 2;
   }
+  
+  const nameBlockHeight = nameLines.length * 4 + (nameLines.length ? 2 : 0);
+  const headerHeight = Math.max(logoAdded ? logoSize : 0, nameBlockHeight);
+  currentY = y + 5 + headerHeight + 2;
   
   // Receipt number
   doc.setFontSize(FONTS.MEDIUM);
@@ -114,5 +121,5 @@ export function renderReceiptStub(
   // Date field at the bottom
   doc.setFontSize(FONTS.SMALL);
   doc.text("Fecha:", x + 2, y + RECEIPT_HEIGHT - 8);
-  doc.text("___________", x + 2, y + RECEIPT_HEIGHT - 4);
+  doc.text("___________", x + 14, y + RECEIPT_HEIGHT - 8);
 }
