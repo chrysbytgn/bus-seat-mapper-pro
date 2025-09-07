@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Clock as ClockIcon, MapPin } from "lucide-react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import type { ExcursionData } from "@/pages/Index";
 
 // props: open, excursion, onCancel, onSave
@@ -30,7 +31,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
   const [seatsInput, setSeatsInput] = useState("55");
 
   useEffect(() => {
-    if (excursion) {
+    if (open && excursion) {
       setName(excursion.name || "");
       setDate(excursion.date ? new Date(excursion.date) : null);
       setPlace(excursion.place || "");
@@ -40,6 +41,17 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
       setPrice(excursion.price || "");
       setAvailableSeats(excursion.available_seats || 55);
       setSeatsInput(String(excursion.available_seats || 55));
+    } else if (open && !excursion) {
+      // Reset form when creating new excursion
+      setName("");
+      setDate(null);
+      setPlace("");
+      setTime("");
+      setStops([]);
+      setNewStop("");
+      setPrice("");
+      setAvailableSeats(55);
+      setSeatsInput("55");
     }
   }, [excursion, open]);
 
@@ -75,7 +87,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
                 type="button"
               >
                 <CalendarIcon className="mr-2" />
-                {date ? format(date, "dd/MM/yyyy") : "Seleccione la fecha"}
+                {date ? format(date, "dd/MM/yyyy", { locale: es }) : "Seleccione la fecha"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -86,6 +98,7 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
                 initialFocus
                 className="p-3 pointer-events-auto"
                 disabled={d => d < new Date(new Date().setHours(0,0,0,0))}
+                locale={es}
               />
             </PopoverContent>
           </Popover>
