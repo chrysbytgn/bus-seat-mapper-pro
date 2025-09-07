@@ -99,6 +99,12 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
                 className="p-3 pointer-events-auto"
                 disabled={d => d < new Date(new Date().setHours(0,0,0,0))}
                 locale={es}
+                formatters={{
+                  formatWeekdayName: (day) => format(day, "EEEE", { locale: es }),
+                }}
+                classNames={{
+                  head_cell: "text-muted-foreground rounded-md px-2 font-medium text-[0.8rem] whitespace-nowrap",
+                }}
               />
             </PopoverContent>
           </Popover>
