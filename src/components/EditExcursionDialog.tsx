@@ -207,10 +207,11 @@ export function EditExcursionDialog({ open, excursion, onCancel, onSave }: Props
             disabled={!canSave}
             onClick={() => {
               if (canSave) {
+                const dateString = date ? format(date, "yyyy-MM-dd") : undefined; // guarda fecha sin zona horaria
                 onSave({
                   ...excursion!,
                   name: name.trim(),
-                  date: date ? date.toISOString() : undefined,
+                  date: dateString,
                   time,
                   place: place.trim(),
                   price: price.trim(),
