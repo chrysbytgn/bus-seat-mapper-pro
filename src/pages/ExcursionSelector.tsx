@@ -35,7 +35,7 @@ export default function ExcursionSelector() {
         
         // Cargar asociación
         const assoc = await fetchAssociation();
-        console.log("Association loaded:", assoc);
+        console.log("Association loaded successfully");
         
         if (!assoc) {
           console.log("No association found, user needs to create one");
@@ -61,7 +61,7 @@ export default function ExcursionSelector() {
               variant: "destructive"
             });
           } else {
-            console.log("Excursions loaded:", excursionsData);
+            console.log(`${excursionsData?.length || 0} excursions loaded successfully`);
             setExcursions(excursionsData || []);
           }
         }
@@ -134,7 +134,7 @@ export default function ExcursionSelector() {
     }
 
     try {
-      console.log("Creating excursion with data:", data);
+      console.log("Creating excursion:", data.name);
       
       const excursionData = {
         name: data.name,
@@ -147,7 +147,7 @@ export default function ExcursionSelector() {
       };
 
       const newExcursion = await createExcursion(excursionData);
-      console.log("Excursion created:", newExcursion);
+      console.log("Excursion created successfully");
       
       // Actualizar la lista local
       setExcursions(prev => [newExcursion, ...prev]);

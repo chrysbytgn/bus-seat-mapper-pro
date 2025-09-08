@@ -43,7 +43,7 @@ export function useExcursion() {
     
     fetchExcursionById(excursionId)
       .then(data => {
-        console.log("Excursion fetched:", data);
+        console.log("Excursion fetched successfully");
         if (data && data.id) {
           let parsedStops: string[] = [];
           const stopsRaw = data.stops;
@@ -106,7 +106,7 @@ export function useExcursion() {
     console.log("Loading passengers for excursion:", excursionId);
     fetchPassengers(excursionId)
       .then((data) => {
-        console.log("Passengers loaded:", data);
+        console.log(`${data?.length || 0} passengers loaded successfully`);
         setPassengers(data);
       })
       .catch((err) => {

@@ -27,7 +27,7 @@ export async function fetchExcursionById(excursionId: number) {
     console.error("Error fetching excursion:", error);
     throw error;
   }
-  console.log("Excursion data fetched:", data);
+  console.log("Excursion data fetched successfully");
   return data;
 }
 
@@ -42,13 +42,13 @@ export async function fetchPassengers(excursionId: number) {
     console.error("Error fetching passengers:", error);
     throw error;
   }
-  console.log("Passengers data fetched:", data);
+  console.log(`${data?.length || 0} passengers fetched successfully`);
   return data || [];
 }
 
 // Create new excursion - generate a unique ID using timestamp
 export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { association_id: string }) {
-  console.log("Creating new excursion:", excursion);
+  console.log("Creating new excursion:", excursion.name);
   
   // Generate a unique ID using timestamp
   const uniqueId = Date.now();
@@ -74,13 +74,13 @@ export async function createExcursion(excursion: Omit<ExcursionData, 'id'> & { a
     console.error("Error creating excursion:", error);
     throw error;
   }
-  console.log("Excursion created:", data);
+  console.log("Excursion created successfully");
   return data;
 }
 
 // Fix types for upsert - ahora solo para actualizar excursiones existentes
 export async function upsertExcursion(excursion: ExcursionData & { association_id: string }) {
-  console.log("Upserting excursion:", excursion);
+  console.log("Upserting excursion:", excursion.name);
   // Ensure stops is json
   const record = {
     ...excursion,
@@ -96,7 +96,7 @@ export async function upsertExcursion(excursion: ExcursionData & { association_i
     console.error("Error upserting excursion:", error);
     throw error;
   }
-  console.log("Excursion upserted:", data);
+  console.log("Excursion upserted successfully");
   return data?.[0];
 }
 
@@ -114,7 +114,7 @@ export async function deleteExcursion(excursionId: number) {
 }
 
 export async function upsertPassenger(excursion_id: number, passenger: Passenger) {
-  console.log("Upserting passenger:", passenger, "for excursion:", excursion_id);
+  console.log("Upserting passenger for seat:", passenger.seat, "in excursion:", excursion_id);
   // seat is unique for excursion_id - specify onConflict to handle updates properly
   const { data, error } = await supabase
     .from("passengers")
@@ -132,7 +132,7 @@ export async function upsertPassenger(excursion_id: number, passenger: Passenger
     console.error("Error upserting passenger:", error);
     throw error;
   }
-  console.log("Passenger upserted:", data);
+  console.log("Passenger upserted successfully");
   return data?.[0];
 }
 
