@@ -142,6 +142,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          association_id: string | null
           created_at: string | null
           full_name: string | null
           id: string
@@ -149,6 +150,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          association_id?: string | null
           created_at?: string | null
           full_name?: string | null
           id: string
@@ -156,13 +158,22 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          association_id?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
           role?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_association_id_fkey"
+            columns: ["association_id"]
+            isOneToOne: false
+            referencedRelation: "associations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
