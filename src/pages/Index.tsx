@@ -20,6 +20,7 @@ import {
   upsertExcursion // ADD THE IMPORT
 } from "@/utils/supabasePassengers";
 import { useExcursion } from "@/hooks/useExcursion";
+import { useAuth } from "@/hooks/useAuth";
 
 const PASSENGERS_KEY_PREFIX = "excursion_passengers_";
 const EXCURSIONS_KEY = "excursions";
@@ -37,6 +38,8 @@ export type ExcursionData = {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const {
     passengers,
     excursionInfo,
@@ -53,6 +56,27 @@ const Index = () => {
     handleEditExcursion,
     handleDeleteExcursion,
   } = useExcursion();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [authLoading, user, navigate]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen w-full bg-background items-center justify-center">
+        <div className="text-xl">Verificando acceso...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen w-full bg-background flex-col">

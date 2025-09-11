@@ -1,13 +1,17 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, LogOut, Settings, MapPin, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { NewExcursionDialog, NewExcursionData } from "@/components/NewExcursionDialog";
 import AssociationOptions from "@/components/AssociationOptions";
 import { fetchAssociation, createExcursion } from "@/utils/supabasePassengers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Excursion {
   id: number;
@@ -20,12 +24,20 @@ interface Excursion {
 
 export default function ExcursionSelector() {
   const navigate = useNavigate();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [excursions, setExcursions] = useState<Excursion[]>([]);
   const [showNew, setShowNew] = useState(false);
   const [showAssocOptions, setShowAssocOptions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [association, setAssociation] = useState<any>(null);
   const [needsAssociation, setNeedsAssociation] = useState(false);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [authLoading, user, navigate]);
 
   // Cargar asociación y excursiones al montar el componente
   useEffect(() => {
@@ -208,7 +220,18 @@ export default function ExcursionSelector() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-background">
       <div className="rounded-xl shadow-md py-10 px-4 w-full max-w-2xl bg-white">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-8 text-center">Excursiones</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl lg:text-4xl font-bold text-center flex-1">Excursiones</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={signOut}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Salir
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-2 mb-8">
           {/* Botón grande para añadir nueva excursión */}
