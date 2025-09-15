@@ -196,11 +196,39 @@ export type Database = {
         }
         Relationships: []
       }
+      usernames: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_email_from_username: {
+        Args: { input_username: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
