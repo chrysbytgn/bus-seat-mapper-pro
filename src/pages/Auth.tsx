@@ -7,9 +7,34 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
 
+// Utility functions for username/email mapping
+const getEmailFromUsername = async (username: string): Promise<string | null> => {
+  const { data, error } = await supabase.rpc('get_email_from_username', { 
+    input_username: username 
+  });
+  
+  if (error) {
+    console.error('Error getting email from username:', error);
+    return null;
+  }
+  
+  return data;
+};
+
+const createUsernameMapping = async (username: string, email: string, userId: string) => {
+  const { error } = await supabase
+    .from('usernames')
+    .insert({ username, email, user_id: userId });
+    
+  if (error) {
+    console.error('Error creating username mapping:', error);
+    throw error;
+  }
+};
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,6 +57,19 @@ export default function Auth() {
 
     try {
       if (isLogin) {
+        // For login, first get the email from username
+        const email = await getEmailFromUsername(username);
+        
+        if (!email) {
+          toast({
+            title: "Error de acceso",
+            description: "Usuario no encontrado",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -41,7 +79,7 @@ export default function Auth() {
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Error de acceso",
-              description: "Email o contraseña incorrectos",
+              description: "Usuario o contraseña incorrectos",
               variant: "destructive",
             });
           } else {
@@ -60,9 +98,11 @@ export default function Auth() {
         });
         navigate("/");
       } else {
+        // For registration, create email from username
+        const email = `${username}@sistema.local`;
         const redirectUrl = `${window.location.origin}/`;
         
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -74,7 +114,7 @@ export default function Auth() {
           if (error.message.includes("User already registered")) {
             toast({
               title: "Usuario ya registrado",
-              description: "Este email ya está registrado. Intenta iniciar sesión.",
+              description: "Este nombre de usuario ya está registrado. Intenta iniciar sesión.",
               variant: "destructive",
             });
           } else {
@@ -87,9 +127,18 @@ export default function Auth() {
           return;
         }
 
+        // Create username mapping after successful registration
+        if (data.user) {
+          try {
+            await createUsernameMapping(username, email, data.user.id);
+          } catch (mappingError) {
+            console.error('Error creating username mapping:', mappingError);
+          }
+        }
+
         toast({
           title: "¡Registro exitoso!",
-          description: "Revisa tu email para confirmar tu cuenta",
+          description: "Tu cuenta ha sido creada correctamente",
         });
       }
     } catch (error) {
@@ -120,17 +169,23 @@ export default function Auth() {
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
+              <label htmlFor="username" className="text-sm font-medium">
+                Nombre de Usuario
               </label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="tu@email.com"
+                placeholder="mi_usuario"
+                minLength={3}
               />
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Mínimo 3 caracteres, solo letras, números y guiones bajos
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className="text-sm font-medium">
