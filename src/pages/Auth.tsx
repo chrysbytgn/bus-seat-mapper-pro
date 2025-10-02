@@ -21,15 +21,32 @@ const getEmailFromUsername = async (username: string): Promise<string | null> =>
   return data;
 };
 
-const createUsernameMapping = async (username: string, email: string, userId: string) => {
-  const { error } = await supabase
+const isUsernameAvailable = async (username: string): Promise<boolean> => {
+  const { data, error } = await supabase
     .from('usernames')
-    .insert({ username, email, user_id: userId });
-    
+    .select('username')
+    .eq('username', username)
+    .maybeSingle();
+  
   if (error) {
-    console.error('Error creating username mapping:', error);
-    throw error;
+    console.error('Error checking username availability:', error);
+    return false;
   }
+  
+  return !data;
+};
+
+const validateUsername = (username: string): { valid: boolean; error?: string } => {
+  if (username.length < 3) {
+    return { valid: false, error: 'El usuario debe tener al menos 3 caracteres' };
+  }
+  if (username.length > 20) {
+    return { valid: false, error: 'El usuario no puede tener más de 20 caracteres' };
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return { valid: false, error: 'El usuario solo puede contener letras, números y guiones bajos' };
+  }
+  return { valid: true };
 };
 
 export default function Auth() {
@@ -98,6 +115,30 @@ export default function Auth() {
         });
         navigate("/");
       } else {
+        // Validate username format
+        const validation = validateUsername(username);
+        if (!validation.valid) {
+          toast({
+            title: "Usuario inválido",
+            description: validation.error,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Check if username is available
+        const available = await isUsernameAvailable(username);
+        if (!available) {
+          toast({
+            title: "Usuario no disponible",
+            description: "Este nombre de usuario ya está en uso. Por favor, elige otro.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
         // For registration, create email from username
         const email = `${username}@sistema.local`;
         const redirectUrl = `${window.location.origin}/`;
@@ -106,7 +147,10 @@ export default function Auth() {
           email,
           password,
           options: {
-            emailRedirectTo: redirectUrl
+            emailRedirectTo: redirectUrl,
+            data: {
+              username: username
+            }
           }
         });
 
@@ -127,19 +171,23 @@ export default function Auth() {
           return;
         }
 
-        // Create username mapping after successful registration
-        if (data.user) {
-          try {
-            await createUsernameMapping(username, email, data.user.id);
-          } catch (mappingError) {
-            console.error('Error creating username mapping:', mappingError);
-          }
-        }
-
+        // The username mapping is now created automatically by the database trigger
         toast({
           title: "¡Registro exitoso!",
-          description: "Tu cuenta ha sido creada correctamente",
+          description: "Tu cuenta ha sido creada correctamente. Iniciando sesión...",
         });
+
+        // Auto-login after successful registration
+        if (data.user) {
+          const { error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          
+          if (!loginError) {
+            navigate("/");
+          }
+        }
       }
     } catch (error) {
       toast({
