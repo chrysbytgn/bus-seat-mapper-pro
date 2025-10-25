@@ -7,51 +7,11 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
 
-// Utility functions for username/email mapping
-const getEmailFromUsername = async (username: string): Promise<string | null> => {
-  const { data, error } = await supabase.rpc('get_email_from_username', { 
-    input_username: username 
-  });
-  
-  if (error) {
-    console.error('Error getting email from username:', error);
-    return null;
-  }
-  
-  return data;
-};
-
-const isUsernameAvailable = async (username: string): Promise<boolean> => {
-  const { data, error } = await supabase
-    .from('usernames')
-    .select('username')
-    .eq('username', username)
-    .maybeSingle();
-  
-  if (error) {
-    console.error('Error checking username availability:', error);
-    return false;
-  }
-  
-  return !data;
-};
-
-const validateUsername = (username: string): { valid: boolean; error?: string } => {
-  if (username.length < 3) {
-    return { valid: false, error: 'El usuario debe tener al menos 3 caracteres' };
-  }
-  if (username.length > 20) {
-    return { valid: false, error: 'El usuario no puede tener más de 20 caracteres' };
-  }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    return { valid: false, error: 'El usuario solo puede contener letras, números y guiones bajos' };
-  }
-  return { valid: true };
-};
+// Authentication now uses email directly
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -74,19 +34,7 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        // For login, first get the email from username
-        const email = await getEmailFromUsername(username);
-        
-        if (!email) {
-          toast({
-            title: "Error de acceso",
-            description: "Usuario no encontrado",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-        
+        // Login with email
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -96,7 +44,7 @@ export default function Auth() {
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Error de acceso",
-              description: "Usuario o contraseña incorrectos",
+              description: "Correo o contraseña incorrectos",
               variant: "destructive",
             });
           } else {
@@ -115,42 +63,14 @@ export default function Auth() {
         });
         navigate("/");
       } else {
-        // Validate username format
-        const validation = validateUsername(username);
-        if (!validation.valid) {
-          toast({
-            title: "Usuario inválido",
-            description: validation.error,
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-
-        // Check if username is available
-        const available = await isUsernameAvailable(username);
-        if (!available) {
-          toast({
-            title: "Usuario no disponible",
-            description: "Este nombre de usuario ya está en uso. Por favor, elige otro.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-
-        // For registration, create email from username
-        const email = `${username}@sistema.local`;
+        // Registration with email
         const redirectUrl = `${window.location.origin}/`;
         
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: redirectUrl,
-            data: {
-              username: username
-            }
+            emailRedirectTo: redirectUrl
           }
         });
 
@@ -158,7 +78,7 @@ export default function Auth() {
           if (error.message.includes("User already registered")) {
             toast({
               title: "Usuario ya registrado",
-              description: "Este nombre de usuario ya está registrado. Intenta iniciar sesión.",
+              description: "Este correo ya está registrado. Intenta iniciar sesión.",
               variant: "destructive",
             });
           } else {
@@ -171,7 +91,6 @@ export default function Auth() {
           return;
         }
 
-        // The username mapping is now created automatically by the database trigger
         toast({
           title: "¡Registro exitoso!",
           description: "Tu cuenta ha sido creada correctamente. Iniciando sesión...",
@@ -217,23 +136,17 @@ export default function Auth() {
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label htmlFor="username" className="text-sm font-medium">
-                Nombre de Usuario
+              <label htmlFor="email" className="text-sm font-medium">
+                Correo Electrónico
               </label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="mi_usuario"
-                minLength={3}
+                placeholder="tu@correo.com"
               />
-              {!isLogin && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Mínimo 3 caracteres, solo letras, números y guiones bajos
-                </p>
-              )}
             </div>
             <div>
               <label htmlFor="password" className="text-sm font-medium">
