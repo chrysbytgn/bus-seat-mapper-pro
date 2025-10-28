@@ -11,6 +11,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +28,42 @@ export default function Auth() {
     };
     checkSession();
   }, [navigate]);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "¡Correo enviado!",
+        description: "Revisa tu correo para restablecer tu contraseña",
+      });
+      
+      setIsForgotPassword(false);
+      setIsLogin(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Ocurrió un error inesperado",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,17 +161,23 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            {isLogin ? "Iniciar Sesión" : "Registrarse"}
+            {isForgotPassword 
+              ? "Recuperar Contraseña" 
+              : (isLogin ? "Iniciar Sesión" : "Registrarse")
+            }
           </CardTitle>
           <CardDescription>
-            {isLogin 
-              ? "Ingresa tus credenciales para acceder" 
-              : "Crea una cuenta para comenzar"
+            {isForgotPassword
+              ? "Te enviaremos un correo para restablecer tu contraseña"
+              : (isLogin 
+                ? "Ingresa tus credenciales para acceder" 
+                : "Crea una cuenta para comenzar"
+              )
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={isForgotPassword ? handleForgotPassword : handleAuth} className="space-y-4">
             <div>
               <label htmlFor="email" className="text-sm font-medium">
                 Correo Electrónico
@@ -148,54 +191,78 @@ export default function Auth() {
                 placeholder="tu@correo.com"
               />
             </div>
-            <div>
-              <label htmlFor="password" className="text-sm font-medium">
-                Contraseña
-              </label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  minLength={6}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
+            {!isForgotPassword && (
+              <div>
+                <label htmlFor="password" className="text-sm font-medium">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    minLength={6}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Mínimo 6 caracteres
+                  </p>
+                )}
               </div>
-              {!isLogin && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Mínimo 6 caracteres
-                </p>
-              )}
-            </div>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Cargando..." : (isLogin ? "Iniciar Sesión" : "Registrarse")}
+              {loading 
+                ? "Cargando..." 
+                : (isForgotPassword 
+                  ? "Enviar correo de recuperación" 
+                  : (isLogin ? "Iniciar Sesión" : "Registrarse")
+                )
+              }
             </Button>
           </form>
           
-          <div className="text-center mt-4">
+          <div className="text-center mt-4 space-y-2">
+            {isLogin && !isForgotPassword && (
+              <Button
+                variant="link"
+                onClick={() => setIsForgotPassword(true)}
+                className="text-sm"
+              >
+                ¿Olvidaste tu contraseña?
+              </Button>
+            )}
+            
             <Button
               variant="link"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm"
+              onClick={() => {
+                setIsForgotPassword(false);
+                setIsLogin(!isLogin);
+              }}
+              className="text-sm block w-full"
             >
-              {isLogin 
-                ? "¿No tienes cuenta? Regístrate" 
-                : "¿Ya tienes cuenta? Inicia sesión"
+              {isForgotPassword
+                ? "Volver al inicio de sesión"
+                : (isLogin 
+                  ? "¿No tienes cuenta? Regístrate" 
+                  : "¿Ya tienes cuenta? Inicia sesión"
+                )
               }
             </Button>
           </div>
