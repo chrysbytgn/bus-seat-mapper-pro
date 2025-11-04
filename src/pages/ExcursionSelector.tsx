@@ -47,10 +47,8 @@ export default function ExcursionSelector() {
         
         // Cargar asociación
         const assoc = await fetchAssociation();
-        console.log("Association loaded successfully");
         
         if (!assoc) {
-          console.log("No association found, user needs to create one");
           setNeedsAssociation(true);
           setAssociation(null);
           setExcursions([]);
@@ -66,19 +64,16 @@ export default function ExcursionSelector() {
             .order("created_at", { ascending: false });
 
           if (error) {
-            console.error("Error loading excursions:", error);
             toast({
               title: "Error",
               description: "No se pudieron cargar las excursiones.",
               variant: "destructive"
             });
           } else {
-            console.log(`${excursionsData?.length || 0} excursions loaded successfully`);
             setExcursions(excursionsData || []);
           }
         }
       } catch (error) {
-        console.error("Error loading data:", error);
         toast({
           title: "Error",
           description: "Error al cargar los datos.",
@@ -117,7 +112,6 @@ export default function ExcursionSelector() {
         duration: 3000,
       });
     } catch (error) {
-      console.error("Error creating association:", error);
       toast({
         title: "Error",
         description: "No se pudo crear la asociación.",
@@ -131,7 +125,6 @@ export default function ExcursionSelector() {
   }
 
   const goToExcursion = (id: number) => {
-    console.log("Navigating to excursion:", id);
     navigate(`/excursion/${id}`);
   };
 
@@ -146,8 +139,6 @@ export default function ExcursionSelector() {
     }
 
     try {
-      console.log("Creating excursion:", data.name);
-      
       const excursionData = {
         name: data.name,
         date: data.date ? data.date.toISOString().split('T')[0] : "",
@@ -159,7 +150,6 @@ export default function ExcursionSelector() {
       };
 
       const newExcursion = await createExcursion(excursionData);
-      console.log("Excursion created successfully");
       
       // Actualizar la lista local
       setExcursions(prev => [newExcursion, ...prev]);
@@ -174,7 +164,6 @@ export default function ExcursionSelector() {
       // Navegar a la nueva excursión
       goToExcursion(newExcursion.id);
     } catch (error) {
-      console.error("Error creating excursion:", error);
       toast({
         title: "Error",
         description: "No se pudo crear la excursión.",
