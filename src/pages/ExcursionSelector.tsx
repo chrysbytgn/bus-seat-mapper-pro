@@ -103,6 +103,14 @@ export default function ExcursionSelector() {
 
       if (error) throw error;
 
+      // Vincular el perfil del usuario con la asociación creada
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ association_id: data.id })
+        .eq("id", user?.id);
+
+      if (profileError) throw profileError;
+
       setAssociation(data);
       setNeedsAssociation(false);
       
