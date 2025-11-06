@@ -13,8 +13,9 @@ export interface NewExcursionData {
   date: Date | null;
   time: string;
   place: string;
-  price?: string; // <--- Añadir precio
+  price?: string;
   stops?: string[];
+  availableSeats?: number;
 }
 
 interface NewExcursionDialogProps {
@@ -27,11 +28,12 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date | null>(null);
   const [place, setPlace] = useState("");
-  const [time, setTime] = useState(""); // Simple string: "HH:MM"
-  const [timePopoverOpen, setTimePopoverOpen] = useState(false);
+  const [time, setTime] = useState("");
   const [stops, setStops] = useState<string[]>([]);
-  const [newStop, setNewStop] = useState(""); // Para nuevo input de parada
-  const [price, setPrice] = useState(""); // <--- price
+  const [newStop, setNewStop] = useState("");
+  const [price, setPrice] = useState("");
+  const [availableSeats, setAvailableSeats] = useState(55);
+  const [seatsInput, setSeatsInput] = useState("55");
 
   // Reset form on open
   React.useEffect(() => {
@@ -42,19 +44,13 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
       setTime("");
       setStops([]);
       setNewStop("");
-      setTimePopoverOpen(false);
       setPrice("");
+      setAvailableSeats(55);
+      setSeatsInput("55");
     }
   }, [open]);
 
-  // Time picker: simple selector 06:00-23:00 de cada media hora
-  const timeOptions = Array.from({ length: 36 }, (_, i) => {
-    const hour = Math.floor(i / 2) + 6;
-    const minute = i % 2 === 0 ? "00" : "30";
-    return `${hour.toString().padStart(2, "0")}:${minute}`;
-  });
-
-  const canSave = name.trim() && date && time && place.trim() && price.trim();
+  const canSave = name.trim() && date && time && place.trim() && price.trim() && availableSeats >= 1 && availableSeats <= 55;
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onCancel()}>
@@ -93,33 +89,17 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
               />
             </PopoverContent>
           </Popover>
-          {/* Hora */}
-          <Popover open={timePopoverOpen} onOpenChange={setTimePopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                tabIndex={0}
-                type="button"
-              >
-                <ClockIcon className="mr-2" />
-                {time ? time : "Hora de salida"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-44 p-0">
-              <div className="max-h-56 overflow-y-auto">
-                {timeOptions.map(opt => (
-                  <button
-                    key={opt}
-                    className={`w-full text-left px-3 py-2 hover:bg-primary/10 ${time === opt ? 'font-bold text-primary' : ''}`}
-                    onClick={() => { setTime(opt); setTimePopoverOpen(false); }}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+          {/* Hora - Input manual */}
+          <div className="relative flex items-center">
+            <ClockIcon size={20} className="absolute left-3 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Hora de salida (ej: 09:30)"
+              value={time}
+              onChange={e => setTime(e.target.value)}
+              className="pl-10"
+              maxLength={5}
+            />
+          </div>
           <div className="relative flex items-center">
             <MapPin size={20} className="absolute left-3 text-muted-foreground pointer-events-none" />
             <Input
@@ -127,6 +107,34 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
               value={place}
               onChange={e => setPlace(e.target.value)}
               className="pl-10"
+            />
+          </div>
+          {/* Plazas disponibles */}
+          <div>
+            <label className="font-medium">Plazas disponibles</label>
+            <Input
+              placeholder="Número de asientos disponibles (máx. 55)"
+              type="text"
+              value={seatsInput}
+              onChange={e => {
+                const v = e.target.value;
+                if (/^\d*$/.test(v)) {
+                  setSeatsInput(v);
+                  if (v !== "" && Number(v) >= 1 && Number(v) <= 55) {
+                    setAvailableSeats(Number(v));
+                  }
+                }
+              }}
+              onBlur={() => {
+                const num = Number(seatsInput);
+                if (!seatsInput || isNaN(num) || num < 1 || num > 55) {
+                  setSeatsInput("55");
+                  setAvailableSeats(55);
+                } else {
+                  setSeatsInput(String(num));
+                  setAvailableSeats(num);
+                }
+              }}
             />
           </div>
           {/* Precio */}
@@ -188,7 +196,15 @@ export function NewExcursionDialog({ open, onCancel, onSave }: NewExcursionDialo
             disabled={!canSave}
             onClick={() => {
               if (canSave) {
-                onSave({ name: name.trim(), date, time, place: place.trim(), price: price.trim(), stops });
+                onSave({ 
+                  name: name.trim(), 
+                  date, 
+                  time, 
+                  place: place.trim(), 
+                  price: price.trim(), 
+                  stops,
+                  availableSeats 
+                });
               }
             }}
           >

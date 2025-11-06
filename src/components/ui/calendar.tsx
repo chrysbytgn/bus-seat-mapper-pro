@@ -21,7 +21,10 @@ function Calendar({
   const activeLocale = locale ?? esLocale;
 
   const defaultFormatters = {
-    formatWeekdayName: (day: Date) => format(day, "EEEE", { locale: activeLocale }),
+    formatWeekdayName: (day: Date) => {
+      const fullName = format(day, "EEEE", { locale: activeLocale });
+      return fullName.charAt(0).toUpperCase();
+    },
   };
 
   return (

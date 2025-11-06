@@ -144,9 +144,10 @@ export default function ExcursionSelector() {
         date: data.date ? data.date.toISOString().split('T')[0] : "",
         time: data.time || "",
         place: data.place || "",
-        price: "",
-        stops: [],
+        price: data.price || "",
+        stops: data.stops || [],
         association_id: association.id,
+        available_seats: data.availableSeats || 55,
       };
 
       const newExcursion = await createExcursion(excursionData);
