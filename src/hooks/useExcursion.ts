@@ -115,7 +115,7 @@ export function useExcursion() {
       });
   }, [id, excursionInfo?.id]);
 
-  const handleAddOrEditPassenger = useCallback(async (seat: number, name: string, surname: string, phone: string = "") => {
+  const handleAddOrEditPassenger = useCallback(async (seat: number, name: string, surname: string, phone: string = "", stopName?: string) => {
     if (!id || !excursionInfo?.id) {
       toast({
         title: "Excursión no encontrada",
@@ -126,7 +126,7 @@ export function useExcursion() {
     }
     try {
       const excursionId = Number(id);
-      await upsertPassenger(excursionId, { seat, name, surname, phone });
+      await upsertPassenger(excursionId, { seat, name, surname, phone, stop_name: stopName });
       fetchPassengers(excursionId).then(setPassengers);
     } catch (error: any) {
       if (error && typeof error.message === "string" && error.message.includes("foreign key constraint")) {

@@ -8,6 +8,7 @@ import type { ExcursionData } from "@/pages/Index";
 import { BusSeatMapPrint } from "./BusSeatMapPrint";
 import { getAssociationConfig } from "@/utils/associationConfig";
 import { ExcursionPrintReport } from "./ExcursionPrintReport";
+import { getStopColor } from "@/utils/stopColors";
 
 // Ayuda: asientos del 1 al 55
 const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
@@ -76,6 +77,7 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
           <table className="min-w-full text-sm">
             <thead>
               <tr>
+                <th className="text-left px-2 py-1 w-8">Parada</th>
                 <th className="text-left px-2 py-1"># Asiento</th>
                 <th className="text-left px-2 py-1">Nombre</th>
                 <th className="text-left px-2 py-1">Apellido</th>
@@ -85,13 +87,22 @@ export function PassengerList({ passengers, excursionInfo }: PassengerListProps)
             <tbody>
               {passengers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-4 text-center text-gray-400">Ningún pasajero ingresado</td>
+                  <td colSpan={5} className="py-4 text-center text-gray-400">Ningún pasajero ingresado</td>
                 </tr>
               ) : (
                 passengers
                   .sort((a, b) => a.seat - b.seat)
                   .map(p => (
                     <tr key={p.seat}>
+                      <td className="px-2 py-1">
+                        {p.stop_name && (
+                          <div 
+                            className="w-3 h-3 rounded-full inline-block"
+                            style={{ backgroundColor: getStopColor(p.stop_name) }}
+                            title={p.stop_name}
+                          />
+                        )}
+                      </td>
                       <td className="px-2 py-1 font-semibold">{p.seat}</td>
                       <td className="px-2 py-1">{p.name}</td>
                       <td className="px-2 py-1">{p.surname}</td>

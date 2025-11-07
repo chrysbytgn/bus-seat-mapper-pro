@@ -3,19 +3,23 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { PassengerModal } from "./PassengerModal";
 import { Book } from "lucide-react";
+import { getStopColor } from "@/utils/stopColors";
+import type { ExcursionData } from "@/pages/Index";
 
 export interface Passenger {
   seat: number;
   name: string;
   surname: string;
   phone?: string;
+  stop_name?: string;
 }
 
 interface BusSeatMapProps {
   passengers: Passenger[];
-  onSeatClick: (seat: number, name: string, surname: string, phone: string) => void;
+  onSeatClick: (seat: number, name: string, surname: string, phone: string, stopName?: string) => void;
   excursionName?: string;
-  availableSeats?: number; // New prop to limit available seats
+  availableSeats?: number;
+  excursionInfo?: ExcursionData | null;
 }
 
 /**
@@ -85,7 +89,7 @@ const buildSeatLayout = () => {
   return seatRows;
 };
 
-export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSeats = 55 }: BusSeatMapProps) {
+export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSeats = 55, excursionInfo }: BusSeatMapProps) {
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
@@ -163,7 +167,8 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSe
                   }
                   // Asientos normales clicables
                   const seatNum = Number(cell);
-                  const ocupado = !!getPassengerBySeat(seatNum);
+                  const passenger = getPassengerBySeat(seatNum);
+                  const ocupado = !!passenger;
                   const isDisabled = seatNum > availableSeats;
                   
                   return (
@@ -172,7 +177,7 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSe
                       type="button"
                       disabled={isDisabled}
                       className={cn(
-                        "w-12 h-12 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-lg border-2 select-none transition-all shadow",
+                        "w-12 h-12 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-lg border-2 select-none transition-all shadow relative",
                         isDisabled
                           ? "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
                           : ocupado
@@ -183,6 +188,13 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSe
                       onClick={() => handleSeatClick(seatNum)}
                     >
                       {seatNum.toString().padStart(2, '0')}
+                      {passenger?.stop_name && (
+                        <div 
+                          className="absolute top-0 right-0 w-2 h-2 rounded-full border border-white"
+                          style={{ backgroundColor: getStopColor(passenger.stop_name) }}
+                          title={passenger.stop_name}
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -236,9 +248,11 @@ export function BusSeatMap({ passengers, excursionName, onSeatClick, availableSe
           defaultName={selectedSeat ? (getPassengerBySeat(selectedSeat)?.name ?? "") : ""}
           defaultSurname={selectedSeat ? (getPassengerBySeat(selectedSeat)?.surname ?? "") : ""}
           defaultPhone={selectedSeat ? (getPassengerBySeat(selectedSeat)?.phone ?? "") : ""}
-          onSave={(name, surname, phone) => {
+          defaultStopName={selectedSeat ? (getPassengerBySeat(selectedSeat)?.stop_name ?? "") : ""}
+          availableStops={excursionInfo?.stops || []}
+          onSave={(name, surname, phone, stopName) => {
             if (selectedSeat) {
-              onSeatClick(selectedSeat, name, surname, phone);
+              onSeatClick(selectedSeat, name, surname, phone, stopName);
             }
           }}
         />

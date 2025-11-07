@@ -103,6 +103,7 @@ export type Database = {
           name: string
           phone: string | null
           seat: number
+          stop_name: string | null
           surname: string
         }
         Insert: {
@@ -112,6 +113,7 @@ export type Database = {
           name: string
           phone?: string | null
           seat: number
+          stop_name?: string | null
           surname: string
         }
         Update: {
@@ -121,6 +123,7 @@ export type Database = {
           name?: string
           phone?: string | null
           seat?: number
+          stop_name?: string | null
           surname?: string
         }
         Relationships: [

@@ -4,6 +4,7 @@ import { Passenger } from "./BusSeatMap";
 import { BusSeatMapPrint } from "./BusSeatMapPrint";
 import { getAssociationConfig } from "@/utils/associationConfig";
 import type { ExcursionData } from "@/pages/Index";
+import { getStopColor } from "@/utils/stopColors";
 
 const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
 
@@ -33,9 +34,17 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
                 <td className="px-2 py-1 font-bold text-center border-b border-gray-100 text-[14px] print:text-[14px]">{seatNum}</td>
                 <td className="px-2 py-1 border-b border-gray-100 text-[14px] print:text-[14px]">
                   {p ? (
-                    <div>
-                      <span className="font-medium">{`${p.name} ${p.surname}`.trim()}</span>
-                      {p.phone && <span className="text-gray-600 ml-2">({p.phone})</span>}
+                    <div className="flex items-center gap-1">
+                      {p.stop_name && (
+                        <div 
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: getStopColor(p.stop_name) }}
+                        />
+                      )}
+                      <div>
+                        <span className="font-medium">{`${p.name} ${p.surname}`.trim()}</span>
+                        {p.phone && <span className="text-gray-600 ml-2">({p.phone})</span>}
+                      </div>
                     </div>
                   ) : (
                     <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
@@ -63,9 +72,17 @@ function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
                 <td className="px-2 py-1 font-bold text-center border-b border-gray-100 text-[14px] print:text-[14px]">{seatNum}</td>
                 <td className="px-2 py-1 border-b border-gray-100 text-[14px] print:text-[14px]">
                   {p ? (
-                    <div>
-                      <span className="font-medium">{`${p.name} ${p.surname}`.trim()}</span>
-                      {p.phone && <span className="text-gray-600 ml-2">({p.phone})</span>}
+                    <div className="flex items-center gap-1">
+                      {p.stop_name && (
+                        <div 
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: getStopColor(p.stop_name) }}
+                        />
+                      )}
+                      <div>
+                        <span className="font-medium">{`${p.name} ${p.surname}`.trim()}</span>
+                        {p.phone && <span className="text-gray-600 ml-2">({p.phone})</span>}
+                      </div>
                     </div>
                   ) : (
                     <span className="italic text-gray-400 print:text-gray-600">(vacío)</span>
@@ -95,6 +112,11 @@ export function ExcursionPrintReport({
   const hora = excursionInfo?.time || "";
   const lugar = excursionInfo?.place || "";
   const paradas = excursionInfo?.stops || [];
+  
+  // Extraer paradas únicas de los pasajeros
+  const uniqueStops = Array.from(
+    new Set(passengers.filter(p => p.stop_name).map(p => p.stop_name!))
+  ).sort();
 
   return (
     <div className="print:w-full print:h-full print:p-0 print:m-0 bg-white print:text-black print:page-break-inside-avoid">
@@ -141,6 +163,24 @@ export function ExcursionPrintReport({
             <div className="mt-2">
               <div className="text-[14px] print:text-[13px] text-gray-700">
                 <strong>Paradas:</strong> {paradas.join(" → ")}
+              </div>
+            </div>
+          )}
+          
+          {/* Leyenda de colores de paradas */}
+          {uniqueStops.length > 0 && (
+            <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded">
+              <strong className="text-[13px] print:text-[12px]">Paradas seleccionadas por pasajeros:</strong>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {uniqueStops.map(stop => (
+                  <div key={stop} className="flex items-center gap-1">
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: getStopColor(stop) }}
+                    />
+                    <span className="text-[12px] print:text-[11px]">{stop}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

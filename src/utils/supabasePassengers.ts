@@ -105,7 +105,8 @@ export async function upsertPassenger(excursion_id: number, passenger: Passenger
       seat: passenger.seat,
       name: passenger.name,
       surname: passenger.surname,
-      phone: passenger.phone || null
+      phone: passenger.phone || null,
+      stop_name: passenger.stop_name || null
     }], {
       onConflict: 'excursion_id,seat'
     })

@@ -9,7 +9,7 @@ interface ExcursionMainProps {
   loadingExcursion: boolean;
   excursionError: string | null;
   onClearSeats: () => void;
-  onSeatClick: (seat: number, name: string, surname: string) => void;
+  onSeatClick: (seat: number, name: string, surname: string, phone: string, stopName?: string) => void;
   onBack: () => void;
 }
 
@@ -40,6 +40,7 @@ export function ExcursionMain({
             onSeatClick={onSeatClick}
             excursionName={excursionInfo?.name || "Excursión"}
             availableSeats={excursionInfo?.available_seats || 55}
+            excursionInfo={excursionInfo}
           />
         )}
       </section>
