@@ -69,7 +69,7 @@ export function renderReceiptStub(
   currentY += 8;
   
   // Passenger field
-  doc.setFontSize(FONTS.SMALL);
+  doc.setFontSize(FONTS.MEDIUM);
   doc.text("Pasajero:", x + 2, currentY);
   currentY += 3;
   // Cambiar rectángulo por línea continua
@@ -78,16 +78,18 @@ export function renderReceiptStub(
   if (passenger) {
     const fullName = `${passenger.name} ${passenger.surname}`;
     const shortName = truncateText(fullName, 12);
+    doc.setFontSize(FONTS.MEDIUM);
     doc.text(shortName, x + 3, currentY + 2);
   }
   currentY += 8;
   
   // Phone number
   if (passenger?.phone) {
-    doc.setFontSize(FONTS.SMALL);
+    doc.setFontSize(FONTS.MEDIUM);
     doc.text("Tel:", x + 2, currentY);
     currentY += 3;
     const shortPhone = truncateText(passenger.phone, 12);
+    doc.setFontSize(FONTS.MEDIUM);
     doc.text(shortPhone, x + 2, currentY);
     currentY += 5;
   }
@@ -95,31 +97,13 @@ export function renderReceiptStub(
   // Excursion name (shortened)
   if (excursionInfo?.name) {
     const shortExcursion = truncateText(excursionInfo.name, 10);
-    doc.setFontSize(FONTS.SMALL);
+    doc.setFontSize(FONTS.MEDIUM);
     doc.text(shortExcursion, x + 2, currentY);
     currentY += 4;
   }
   
-  // Additional stops
-  const stops = formatStops(excursionInfo);
-  if (stops) {
-    doc.setFontSize(FONTS.SMALL);
-    doc.text("Paradas:", x + 2, currentY);
-    currentY += 3;
-    const shortStops = truncateText(stops, 15);
-    doc.text(shortStops, x + 2, currentY);
-    currentY += 4;
-  }
-  
-  // Price
-  if (excursionInfo?.price) {
-    doc.setFontSize(FONTS.MEDIUM);
-    doc.text(`${excursionInfo.price} €`, x + 2, currentY);
-    currentY += 6;
-  }
-  
   // Date field at the bottom
-  doc.setFontSize(FONTS.SMALL);
+  doc.setFontSize(FONTS.MEDIUM);
   doc.text("Fecha:", x + 2, y + RECEIPT_HEIGHT - 8);
   doc.text("___________", x + 14, y + RECEIPT_HEIGHT - 8);
 }

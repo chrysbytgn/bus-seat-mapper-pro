@@ -108,14 +108,21 @@ export function renderMainReceipt(
   }
   
   if (excursionInfo) {
+    // Fecha/Hora y Salida en la misma línea
+    let dateTimeLine = "";
     const dateTime = getExcursionInfoLine(excursionInfo);
     if (dateTime) {
-      doc.text(`Fecha/Hora: ${dateTime}`, x + 5, currentY);
-      currentY += 6;
+      dateTimeLine = `Fecha/Hora: ${dateTime}`;
     }
-    
     if (excursionInfo.place) {
-      doc.text(`Salida: ${excursionInfo.place}`, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
+      if (dateTimeLine) {
+        dateTimeLine += ` - Salida: ${excursionInfo.place}`;
+      } else {
+        dateTimeLine = `Salida: ${excursionInfo.place}`;
+      }
+    }
+    if (dateTimeLine) {
+      doc.text(dateTimeLine, x + 5, currentY, { maxWidth: MAIN_RECEIPT_WIDTH - 10 });
       currentY += 6;
     }
     
@@ -128,11 +135,11 @@ export function renderMainReceipt(
     if (excursionInfo.price) {
       doc.setFontSize(FONTS.LARGE);
       doc.text(`Precio: ${excursionInfo.price} €`, x + 5, currentY);
-      currentY += 8;
+      currentY += 10;
     }
   }
   
-  // Emission date
+  // Emission date - aligned to the right
   doc.setFontSize(FONTS.MEDIUM);
-  doc.text("Fecha emisión: _______________", x + 5, y + RECEIPT_HEIGHT - 8);
+  doc.text("Fecha emisión: __________", x + MAIN_RECEIPT_WIDTH - 50, y + RECEIPT_HEIGHT - 8);
 }
