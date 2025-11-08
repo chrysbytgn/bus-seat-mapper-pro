@@ -100,8 +100,7 @@ export async function generateReceiptsPDF(
     doc.rect(marginLeft, yPosition, receiptWidth, receiptHeight);
   }
   
-  // Open the PDF in a new tab
-  const pdfBlob = doc.output('blob');
-  const pdfUrl = URL.createObjectURL(pdfBlob);
-  window.open(pdfUrl, '_blank');
+  // Download the PDF directly
+  const fileName = `recibos_${excursionInfo?.name || 'excursion'}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
 }
