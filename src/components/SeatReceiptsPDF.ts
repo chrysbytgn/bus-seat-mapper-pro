@@ -101,5 +101,7 @@ export async function generateReceiptsPDF(
   }
   
   // Open the PDF in a new tab
-  doc.output("pdfobjectnewwindow");
+  const pdfBlob = doc.output('blob');
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+  window.open(pdfUrl, '_blank');
 }
