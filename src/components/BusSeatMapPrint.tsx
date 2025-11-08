@@ -6,14 +6,14 @@ import { Book } from "lucide-react";
 
 /**
  * Layout unificado para impresión - IDÉNTICO al de BusSeatMap.tsx
- * Croquis de bus 55 plazas con layout mejorado:
+ * Croquis de bus con layout mejorado que se adapta según asientos disponibles
  * - Conductor (izquierda) + Guía/Líder (derecha) + Puerta principal al lado del guía
  * - Filas 1-7: Asientos 01-28 (4 por fila)
  * - Fila especial: Asientos 29-30 (izquierda) + Puerta trasera (derecha, detrás de 27-28)
  * - Filas intermedias: Asientos 31-50
  * - Fila final: Asientos 51-55 (todos en una sola fila)
  */
-const buildSeatLayout = () => {
+const buildSeatLayout = (availableSeats: number = 55) => {
   const seatRows: (number | string | null)[][] = [];
   
   // Fila 0: Conductor + Guía + Puerta principal al lado del guía
@@ -28,56 +28,69 @@ const buildSeatLayout = () => {
   // Filas 1-7: Asientos 01-28 (7 filas × 4 asientos = 28 asientos)
   let currentSeat = 1;
   for (let fila = 0; fila < 7; fila++) {
-    seatRows.push([
-      currentSeat,     // Izquierda 1
-      currentSeat + 1, // Izquierda 2
-      null,            // Pasillo
-      currentSeat + 2, // Derecha 1
-      currentSeat + 3, // Derecha 2
-    ]);
-    currentSeat += 4;
+    if (currentSeat > availableSeats) break;
+    const row: (number | null)[] = [];
+    for (let i = 0; i < 4; i++) {
+      if (currentSeat <= availableSeats) {
+        row.push(currentSeat);
+        currentSeat++;
+      } else {
+        row.push(null);
+      }
+    }
+    seatRows.push([row[0], row[1], null, row[2], row[3]]);
   }
   
-  // Fila especial: Asientos 29-30 (izquierda) + Puerta trasera (derecha, detrás de 27-28)
-  seatRows.push([
-    29,     // Asiento 29 (izquierda, detrás de 25)
-    30,     // Asiento 30 (izquierda, detrás de 26)
-    null,   // Pasillo
-    "PT",   // Puerta trasera (derecha, detrás de 27)
-    "PT",   // Puerta trasera (derecha, detrás de 28)
-  ]);
-  
-  // Filas intermedias: Asientos 31-50 (5 filas × 4 asientos = 20 asientos)
-  currentSeat = 31;
-  for (let fila = 0; fila < 5; fila++) {
+  // Si hay más de 28 asientos, añadir fila especial y resto
+  if (availableSeats > 28) {
+    // Fila especial: Asientos 29-30 (izquierda) + Puerta trasera (derecha, detrás de 27-28)
     seatRows.push([
-      currentSeat,     // Izquierda 1
-      currentSeat + 1, // Izquierda 2
-      null,            // Pasillo
-      currentSeat + 2, // Derecha 1
-      currentSeat + 3, // Derecha 2
+      availableSeats >= 29 ? 29 : null,
+      availableSeats >= 30 ? 30 : null,
+      null,   // Pasillo
+      "PT",   // Puerta trasera
+      "PT",   // Puerta trasera
     ]);
-    currentSeat += 4;
+    
+    // Filas intermedias: Asientos 31-50 (5 filas × 4 asientos = 20 asientos)
+    currentSeat = 31;
+    for (let fila = 0; fila < 5; fila++) {
+      if (currentSeat > availableSeats) break;
+      const row: (number | null)[] = [];
+      for (let i = 0; i < 4; i++) {
+        if (currentSeat <= availableSeats) {
+          row.push(currentSeat);
+          currentSeat++;
+        } else {
+          row.push(null);
+        }
+      }
+      seatRows.push([row[0], row[1], null, row[2], row[3]]);
+    }
+    
+    // Fila final: Asientos 51-55 (todos en una sola fila)
+    if (availableSeats > 50) {
+      const finalRow: (number | null)[] = [];
+      for (let i = 51; i <= Math.min(55, availableSeats); i++) {
+        finalRow.push(i);
+      }
+      // Rellenar con nulls si faltan asientos
+      while (finalRow.length < 5) {
+        finalRow.push(null);
+      }
+      seatRows.push(finalRow);
+    }
   }
-  
-  // Fila final: Asientos 51-55 (todos en una sola fila)
-  seatRows.push([
-    51,     // Asiento 51
-    52,     // Asiento 52
-    53,     // Asiento 53 (centro)
-    54,     // Asiento 54
-    55,     // Asiento 55
-  ]);
   
   return seatRows;
 };
 
 // Para impresión B/N: asientos ocupados = trama + texto blanco, libres = borde sólido solo
-export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
+export function BusSeatMapPrint({ passengers, availableSeats = 55 }: { passengers: Passenger[], availableSeats?: number }) {
   const getPassengerBySeat = (seat: number) =>
     passengers.find((p) => p.seat === seat);
 
-  const seatMap = buildSeatLayout();
+  const seatMap = buildSeatLayout(availableSeats);
 
   return (
     <div className="flex flex-col items-center bg-white p-1 print:bg-white print:p-0 rounded-xl w-fit max-w-full">
@@ -139,7 +152,7 @@ export function BusSeatMapPrint({ passengers }: { passengers: Passenger[] }) {
                     </div>
                   );
                 }
-                // Pasillo/espacio
+                // Pasillo/espacio o asiento no disponible
                 if (cell === null) {
                   return <div key={"espacio-" + colIdx + "-" + rowIdx} className="w-3 print:w-2" />;
                 }

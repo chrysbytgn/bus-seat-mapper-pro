@@ -6,15 +6,15 @@ import { getAssociationConfig } from "@/utils/associationConfig";
 import type { ExcursionData } from "@/pages/Index";
 import { getStopColor } from "@/utils/stopColors";
 
-const ALL_SEATS = Array.from({ length: 55 }, (_, i) => i + 1);
-
 /**
- * Tabla compacta optimizada para imprimir 55 asientos en una página
+ * Tabla compacta optimizada para imprimir asientos en una página
  */
-function PasajerosTableImprimir({ passengers }: { passengers: Passenger[] }) {
+function PasajerosTableImprimir({ passengers, availableSeats = 55 }: { passengers: Passenger[], availableSeats?: number }) {
+  const ALL_SEATS = Array.from({ length: availableSeats }, (_, i) => i + 1);
   // Agrupar asientos en filas para mejor presentación
-  const leftColumnSeats = ALL_SEATS.slice(0, 28); // 1-28
-  const rightColumnSeats = ALL_SEATS.slice(28); // 29-55
+  const midpoint = Math.ceil(availableSeats / 2);
+  const leftColumnSeats = ALL_SEATS.slice(0, midpoint);
+  const rightColumnSeats = ALL_SEATS.slice(midpoint);
 
   return (
     <div className="grid grid-cols-2 gap-4 w-full text-[14px] print:text-[14px]">
@@ -112,6 +112,7 @@ export function ExcursionPrintReport({
   const hora = excursionInfo?.time || "";
   const lugar = excursionInfo?.place || "";
   const paradas = excursionInfo?.stops || [];
+  const availableSeats = excursionInfo?.available_seats || 55;
   
   // Extraer paradas únicas de los pasajeros
   const uniqueStops = Array.from(
@@ -166,24 +167,6 @@ export function ExcursionPrintReport({
               </div>
             </div>
           )}
-          
-          {/* Leyenda de colores de paradas */}
-          {uniqueStops.length > 0 && (
-            <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded">
-              <strong className="text-[13px] print:text-[12px]">Paradas seleccionadas por pasajeros:</strong>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {uniqueStops.map(stop => (
-                  <div key={stop} className="flex items-center gap-1">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: getStopColor(stop) }}
-                    />
-                    <span className="text-[12px] print:text-[11px]">{stop}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
         
         {/* LAYOUT HORIZONTAL: CROQUIS IZQUIERDA + LISTA AL LADO */}
@@ -192,14 +175,32 @@ export function ExcursionPrintReport({
           {/* CROQUIS BUS - PARTE IZQUIERDA - MEJORADO */}
           <div className="flex-shrink-0">
             <div className="print:w-[220px] w-[220px]">
-              <BusSeatMapPrint passengers={passengers} />
+              <BusSeatMapPrint passengers={passengers} availableSeats={availableSeats} />
+              
+              {/* Leyenda de colores de paradas debajo del croquis */}
+              {uniqueStops.length > 0 && (
+                <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded">
+                  <strong className="text-[11px] print:text-[10px]">Paradas:</strong>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {uniqueStops.map(stop => (
+                      <div key={stop} className="flex items-center gap-1">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: getStopColor(stop) }}
+                        />
+                        <span className="text-[10px] print:text-[9px]">{stop}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
           {/* LISTA DE PASAJEROS - AL LADO DEL CROQUIS CON TELÉFONOS */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-[16px] print:text-[15px] font-bold mb-3 text-black">Lista de Pasajeros (55 asientos)</h3>
-            <PasajerosTableImprimir passengers={passengers} />
+            <h3 className="text-[16px] print:text-[15px] font-bold mb-3 text-black">Lista de Pasajeros ({availableSeats} asientos)</h3>
+            <PasajerosTableImprimir passengers={passengers} availableSeats={availableSeats} />
           </div>
           
         </div>

@@ -35,7 +35,7 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
       // Create passengers array for all seats
       const allSeatsPassengers = seatRange.map(seatNum => {
         const passenger = passengers.find(p => p.seat === seatNum);
-        return passenger || { seat: seatNum, name: '', surname: '', phone: '' } as Passenger;
+        return passenger || { seat: seatNum, name: '', surname: '', phone: '', stop_name: undefined } as Passenger;
       });
       
       await generateReceiptsPDF(allSeatsPassengers, excursionInfo);
