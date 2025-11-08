@@ -15,9 +15,6 @@ export function getExcursionInfoLine(excursionInfo: ExcursionData | null): strin
     out += (excursionInfo?.date ? formatFecha(excursionInfo.date) : "");
     out += (excursionInfo?.time ? " " + excursionInfo.time : "");
   }
-  if (excursionInfo?.place) {
-    out += " / " + excursionInfo.place;
-  }
   return out.trim();
 }
 

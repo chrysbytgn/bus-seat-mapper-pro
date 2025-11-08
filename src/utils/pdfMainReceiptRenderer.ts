@@ -128,7 +128,7 @@ export function renderMainReceipt(
     if (excursionInfo.price) {
       doc.setFontSize(FONTS.LARGE);
       doc.text(`Precio: ${excursionInfo.price} €`, x + 5, currentY);
-      currentY += 6;
+      currentY += 8;
     }
   }
   
