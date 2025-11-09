@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ReceiptPDFPreview from "@/components/ReceiptPDFPreview";
 
 const initialData = {
@@ -21,6 +22,7 @@ export default function Receipts() {
     const saved = window.localStorage.getItem("receipt_seq");
     return saved ? parseInt(saved) : 1;
   });
+  const [customReceiptNum, setCustomReceiptNum] = useState<string>("");
 
   function getNextReceiptNum() {
     const n = lastReceiptNum + 1;
@@ -50,9 +52,28 @@ export default function Receipts() {
   function handleReset() {
     setShowPreview(false);
     setFormData(initialData);
+    setCustomReceiptNum("");
   }
 
-  const nextReceiptNum = "REC-" + String(lastReceiptNum).padStart(3, "0");
+  function handleResetCounter() {
+    const newNum = 1;
+    setLastReceiptNum(newNum);
+    window.localStorage.setItem("receipt_seq", String(newNum));
+    setCustomReceiptNum("");
+    toast({
+      title: "Contador reiniciado",
+      description: "El contador de recibos se ha reiniciado a 1.",
+    });
+  }
+
+  function handleCustomReceiptChange(value: string) {
+    // Only allow numbers
+    const num = value.replace(/\D/g, "");
+    setCustomReceiptNum(num);
+  }
+
+  const displayReceiptNum = customReceiptNum || String(lastReceiptNum);
+  const nextReceiptNum = "REC-" + displayReceiptNum.padStart(3, "0");
 
   return (
     <div className="min-h-screen px-2 py-8 flex flex-col items-center bg-background">
@@ -60,6 +81,43 @@ export default function Receipts() {
         <h1 className="text-3xl font-bold mb-6 text-center">Generar Recibo de Excursión</h1>
         {!showPreview ? (
           <form className="space-y-4" onSubmit={handlePreview}>
+            <div className="bg-muted p-4 rounded-lg mb-4">
+              <label className="block mb-2 font-semibold">Número de recibo</label>
+              <div className="flex gap-2 items-center">
+                <div className="flex-1 flex items-center gap-2">
+                  <span className="text-sm font-mono">REC-</span>
+                  <Input 
+                    type="text" 
+                    value={customReceiptNum || String(lastReceiptNum)}
+                    onChange={(e) => handleCustomReceiptChange(e.target.value)}
+                    className="w-24 font-mono"
+                    placeholder="001"
+                  />
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="outline" size="sm">
+                      Reiniciar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Reiniciar el contador de recibos?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esto reiniciará el contador a 1. Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetCounter}>Reiniciar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Próximo recibo: <span className="font-mono font-semibold">{nextReceiptNum}</span>
+              </p>
+            </div>
             <div>
               <label className="block mb-1 font-semibold">Nombre del Cliente</label>
               <Input type="text" name="cliente" value={formData.cliente} onChange={handleChange} />
@@ -97,7 +155,14 @@ export default function Receipts() {
                 numero: nextReceiptNum,
                 fecha_emision: new Date().toLocaleDateString("es-ES"),
               }}
-              getNextReceiptNum={getNextReceiptNum}
+              getNextReceiptNum={() => {
+                const numToUse = customReceiptNum ? parseInt(customReceiptNum) : lastReceiptNum;
+                const next = numToUse + 1;
+                setLastReceiptNum(next);
+                window.localStorage.setItem("receipt_seq", String(next));
+                setCustomReceiptNum("");
+                return numToUse;
+              }}
             />
             <div className="flex justify-end mt-6">
               <Button onClick={handleReset} variant="outline">Nuevo recibo</Button>

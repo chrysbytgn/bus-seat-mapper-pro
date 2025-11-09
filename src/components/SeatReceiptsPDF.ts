@@ -11,7 +11,8 @@ import { getDataURL } from "@/utils/receiptsHelpers";
 
 export async function generateReceiptsPDF(
   passengers: Passenger[],
-  excursionInfo: ExcursionData | null
+  excursionInfo: ExcursionData | null,
+  startNumber: number = 1
 ): Promise<void> {
   const {
     RECEIPTS_PER_PAGE,
@@ -60,6 +61,8 @@ export async function generateReceiptsPDF(
     }
     
     const yPosition = marginTop + positionOnPage * (receiptHeight + verticalGap);
+    const receiptNum = startNumber + i;
+    const receiptNumber = generateReceiptNumber(receiptNum);
     
     // Main receipt (right side)
     renderMainReceipt(
@@ -68,7 +71,7 @@ export async function generateReceiptsPDF(
       yPosition,
       passenger.seat,
       passenger,
-      generateReceiptNumber(passenger.seat),
+      receiptNumber,
       excursionInfo,
       association,
       logoDataURL
@@ -81,7 +84,7 @@ export async function generateReceiptsPDF(
       yPosition,
       passenger.seat,
       passenger,
-      generateReceiptNumber(passenger.seat),
+      receiptNumber,
       excursionInfo,
       association,
       logoDataURL  // Add logoDataURL parameter

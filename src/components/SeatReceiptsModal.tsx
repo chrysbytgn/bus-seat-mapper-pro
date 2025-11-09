@@ -1,6 +1,8 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { generateReceiptsPDF } from "./SeatReceiptsPDF";
 import type { Passenger } from "./BusSeatMap";
@@ -18,6 +20,7 @@ interface Props {
  */
 export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: Props) {
   const [generating, setGenerating] = useState(false);
+  const [startNumber, setStartNumber] = useState<string>("1");
   const seatsCount = Math.max(1, Math.min(55, excursionInfo?.available_seats ?? 55));
   const seatRange = Array.from({ length: seatsCount }, (_, i) => i + 1);
 
@@ -38,7 +41,8 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
         return passenger || { seat: seatNum, name: '', surname: '', phone: '', stop_name: undefined } as Passenger;
       });
       
-      await generateReceiptsPDF(allSeatsPassengers, excursionInfo);
+      const start = parseInt(startNumber) || 1;
+      await generateReceiptsPDF(allSeatsPassengers, excursionInfo, start);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
@@ -56,6 +60,22 @@ export function SeatReceiptsModal({ open, onClose, passengers, excursionInfo }: 
           <div className="mb-4">
             <p className="text-sm text-muted-foreground">
               Se generarán recibos para <b>todos los asientos del bus</b>, ocupados o vacíos, con estilo "bloc antiguo". Cada recibo tiene mácula, zona perforada, línea de corte y espacio para escribir a mano.
+            </p>
+          </div>
+          <div className="mb-4 bg-muted p-3 rounded-lg">
+            <Label htmlFor="startNumber" className="text-sm font-semibold mb-2 block">
+              Número inicial de recibos
+            </Label>
+            <Input
+              id="startNumber"
+              type="number"
+              min="1"
+              value={startNumber}
+              onChange={(e) => setStartNumber(e.target.value)}
+              className="w-32"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Se generarán: REC-{String(parseInt(startNumber) || 1).padStart(3, "0")}, REC-{String((parseInt(startNumber) || 1) + 1).padStart(3, "0")}, ...
             </p>
           </div>
           <div className="max-h-36 overflow-auto mb-2 border rounded bg-muted px-3 py-2">
