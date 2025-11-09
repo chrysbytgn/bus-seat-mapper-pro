@@ -133,8 +133,10 @@ export function renderMainReceipt(
     }
     
     if (excursionInfo.price) {
-      doc.setFontSize(FONTS.LARGE);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(FONTS.TITLE);
       doc.text(`Precio: ${excursionInfo.price} €`, x + 5, currentY);
+      doc.setFont("helvetica", "normal");
       currentY += 10;
     }
   }

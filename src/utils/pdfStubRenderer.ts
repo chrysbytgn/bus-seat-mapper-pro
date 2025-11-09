@@ -102,6 +102,15 @@ export function renderReceiptStub(
     currentY += 4;
   }
   
+  // Price - larger and bold
+  if (excursionInfo?.price) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FONTS.TITLE);
+    doc.text(`${excursionInfo.price} €`, x + 2, currentY);
+    doc.setFont("helvetica", "normal");
+    currentY += 6;
+  }
+  
   // Date field at the bottom
   doc.setFontSize(FONTS.MEDIUM);
   doc.text("Fecha:", x + 2, y + RECEIPT_HEIGHT - 8);
