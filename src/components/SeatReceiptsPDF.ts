@@ -41,8 +41,8 @@ export async function generateReceiptsPDF(
     format: "a4",
   });
   
-  // Fetch association data
-  const association = getAssociationConfig();
+  // Fetch association data from database
+  const association = await getAssociationConfig();
   let logoDataURL: string | null = null;
   if (association?.logo) {
     logoDataURL = await getDataURL(association.logo);

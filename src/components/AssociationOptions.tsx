@@ -1,10 +1,10 @@
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAssociationConfig, setAssociationConfig, AssociationConfig } from "@/utils/associationConfig";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import AssociationDocumentPreview from "./AssociationDocumentPreview";
 
 interface Props {
@@ -12,10 +12,37 @@ interface Props {
 }
 
 export default function AssociationOptions({ onBack }: Props) {
-  const [config, setConfig] = useState<AssociationConfig>(getAssociationConfig());
-  const [logoPreview, setLogoPreview] = useState<string>(config.logo || "");
+  const [config, setConfig] = useState<AssociationConfig>({ name: "", logo: null, phone: null, address: null });
+  const [logoPreview, setLogoPreview] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  
+  // Load association config from database
+  useEffect(() => {
+    loadConfig();
+  }, []);
+  
+  const loadConfig = async () => {
+    try {
+      setLoading(true);
+      const data = await getAssociationConfig();
+      if (data) {
+        setConfig(data);
+        setLogoPreview(data.logo || "");
+      }
+    } catch (error) {
+      console.error("Error loading association config:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo cargar la configuración de la asociación.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConfig(c => ({ ...c, [e.target.name]: e.target.value }));
@@ -33,17 +60,29 @@ export default function AssociationOptions({ onBack }: Props) {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAssociationConfig(config);
-    toast({ 
-      title: "Guardado", 
-      description: "Los datos de la asociación han sido guardados.", 
-      duration: 1800 
-    });
-    
-    // Mostrar vista previa después de guardar
-    setShowPreview(true);
+    try {
+      setSaving(true);
+      await setAssociationConfig(config);
+      toast({ 
+        title: "Guardado", 
+        description: "Los datos de la asociación han sido guardados.", 
+        duration: 1800 
+      });
+      
+      // Mostrar vista previa después de guardar
+      setShowPreview(true);
+    } catch (error) {
+      console.error("Error saving association config:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo guardar la configuración. Por favor, intenta de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleModifyData = () => {
@@ -65,6 +104,18 @@ export default function AssociationOptions({ onBack }: Props) {
     );
   }
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center bg-background">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Cargando configuración...</span>
+        </div>
+      </div>
+    );
+  }
+
   // Formulario original
   return (
     <div className="flex min-h-screen justify-center items-center bg-background">
@@ -77,11 +128,11 @@ export default function AssociationOptions({ onBack }: Props) {
           </div>
           <div>
             <label className="font-medium">Teléfono</label>
-            <Input name="phone" value={config.phone} onChange={handleChange} required />
+            <Input name="phone" value={config.phone || ""} onChange={handleChange} required />
           </div>
           <div>
             <label className="font-medium">Dirección</label>
-            <Input name="address" value={config.address} onChange={handleChange} required />
+            <Input name="address" value={config.address || ""} onChange={handleChange} required />
           </div>
           <div>
             <label className="font-medium">Logo</label>
@@ -93,12 +144,16 @@ export default function AssociationOptions({ onBack }: Props) {
             )}
           </div>
           <div className="flex gap-2 justify-end mt-2">
-            <Button type="submit">Guardar</Button>
+            <Button type="submit" disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar
+            </Button>
             <Button
               variant="outline"
               size="sm"
               type="button"
               onClick={onBack}
+              disabled={saving}
             >
               <ArrowLeft className="mr-1" />
               Volver atrás

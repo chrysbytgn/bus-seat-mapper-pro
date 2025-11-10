@@ -4,14 +4,27 @@ import type { ExcursionData } from "@/pages/Index";
 
 // Since ExcursionData now uses id: number
 export async function fetchAssociation() {
+  // First get the user's profile to find their association_id
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("association_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  
+  if (profileError) throw profileError;
+  if (!profile?.association_id) return null;
+  
+  // Then fetch their specific association
   const { data, error } = await supabase
     .from("associations")
     .select("*")
-    .limit(1)
+    .eq("id", profile.association_id)
     .maybeSingle();
-  if (error) {
-    throw error;
-  }
+    
+  if (error) throw error;
   return data;
 }
 

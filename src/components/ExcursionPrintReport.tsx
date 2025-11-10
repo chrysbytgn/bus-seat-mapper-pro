@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Passenger } from "./BusSeatMap";
 import { BusSeatMapPrint } from "./BusSeatMapPrint";
-import { getAssociationConfig } from "@/utils/associationConfig";
+import { getAssociationConfig, AssociationConfig } from "@/utils/associationConfig";
 import type { ExcursionData } from "@/pages/Index";
 import { getStopColor } from "@/utils/stopColors";
 
@@ -104,7 +104,12 @@ export function ExcursionPrintReport({
   passengers: Passenger[];
   excursionInfo?: ExcursionData | null;
 }) {
-  const association = getAssociationConfig();
+  const [association, setAssociation] = useState<AssociationConfig | null>(null);
+  
+  useEffect(() => {
+    getAssociationConfig().then(config => setAssociation(config));
+  }, []);
+  
   const excursionTitle = excursionInfo?.name || "Excursión";
   const fecha = excursionInfo?.date
     ? new Date(excursionInfo.date).toLocaleDateString()
@@ -123,7 +128,7 @@ export function ExcursionPrintReport({
     <div className="print:w-full print:h-full print:p-0 print:m-0 bg-white print:text-black print:page-break-inside-avoid">
       {/* CABECERA MEJORADA CON LOGO Y NOMBRE COMPLETO */}
       <div className="flex items-start gap-3 mb-4 border-b-2 border-gray-400 print:pt-3 print:pb-3 print:px-4 print:w-full">
-        {association.logo && (
+        {association?.logo && (
           <img
             src={association.logo}
             alt="Logo Asociación"
@@ -133,12 +138,12 @@ export function ExcursionPrintReport({
         )}
         <div className="flex flex-col flex-1">
           <span className="text-[20px] print:text-[18px] font-bold text-black mb-2 leading-tight">
-            {association.name || "Asociación"}
+            {association?.name || "Asociación"}
           </span>
-          {association.address && (
+          {association?.address && (
             <span className="text-[15px] print:text-[14px] text-gray-700 mb-1">{association.address}</span>
           )}
-          {association.phone && (
+          {association?.phone && (
             <span className="text-[15px] print:text-[14px] text-gray-700">
               Tel: {association.phone}
             </span>
