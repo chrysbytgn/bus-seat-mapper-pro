@@ -65,11 +65,12 @@ export function PassengerModal({
             type="tel"
           />
           {availableStops.length > 0 && (
-            <Select value={stopName} onValueChange={setStopName}>
+            <Select value={stopName || ""} onValueChange={setStopName}>
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar parada (opcional)" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Sin parada</SelectItem>
                 {availableStops.map((stop) => (
                   <SelectItem key={stop} value={stop}>
                     {stop}
@@ -82,7 +83,8 @@ export function PassengerModal({
         <DialogFooter className="gap-2">
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           <Button disabled={!name.trim() || !surname.trim()} onClick={() => {
-            onSave(name.trim(), surname.trim(), phone.trim(), stopName || undefined);
+            const finalStopName = stopName && stopName.trim() !== "" ? stopName.trim() : undefined;
+            onSave(name.trim(), surname.trim(), phone.trim(), finalStopName);
             onClose();
           }}>Guardar</Button>
         </DialogFooter>
