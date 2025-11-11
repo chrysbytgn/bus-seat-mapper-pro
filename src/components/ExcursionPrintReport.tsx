@@ -184,16 +184,20 @@ export function ExcursionPrintReport({
               
               {/* Leyenda de colores de paradas debajo del croquis */}
               {uniqueStops.length > 0 && (
-                <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded">
-                  <strong className="text-[11px] print:text-[10px]">Paradas:</strong>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-2 p-2 bg-gray-50 border-2 border-gray-300 rounded print:border-black print:bg-white">
+                  <strong className="text-[12px] print:text-[11px] block mb-1.5">Paradas:</strong>
+                  <div className="flex flex-wrap gap-2.5 mt-1">
                     {uniqueStops.map(stop => (
-                      <div key={stop} className="flex items-center gap-1">
+                      <div key={stop} className="flex items-center gap-1.5">
                         <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: getStopColor(stop) }}
+                          className="w-4 h-4 rounded-full border-2 border-black flex-shrink-0 print:border-2 print:border-black"
+                          style={{ 
+                            backgroundColor: getStopColor(stop),
+                            WebkitPrintColorAdjust: 'exact',
+                            printColorAdjust: 'exact'
+                          }}
                         />
-                        <span className="text-[10px] print:text-[9px]">{stop}</span>
+                        <span className="text-[11px] print:text-[10px] font-medium">{stop}</span>
                       </div>
                     ))}
                   </div>
